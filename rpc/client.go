@@ -31,6 +31,9 @@ func (cl *Client) Get(path string, params map[string]string) ([]byte, error) {
 		return nil, err
 	}
 
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Accepts", "application/json")
+
 	if cl.headers != nil {
 		for k, v := range cl.headers {
 			req.Header.Set(k, v)
@@ -66,6 +69,9 @@ func (cl *Client) Post(path string, params map[string]string, body []byte) ([]by
 	if err != nil {
 		return nil, err
 	}
+
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Accepts", "application/json")
 
 	if cl.headers != nil {
 		for k, v := range cl.headers {

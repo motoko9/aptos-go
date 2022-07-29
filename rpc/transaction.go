@@ -2,6 +2,7 @@ package rpc
 
 import (
 	"context"
+	"encoding/hex"
 	"encoding/json"
 )
 
@@ -12,10 +13,10 @@ type Signature struct {
 }
 
 type Payload struct {
-	T             string   `json:"type"`
-	Function      string   `json:"function"`
-	TypeArguments []string `json:"type_arguments"`
-	Arguments     []string `json:"arguments"`
+	T             string        `json:"type"`
+	Function      string        `json:"function"`
+	TypeArguments []interface{} `json:"type_arguments"`
+	Arguments     []string      `json:"arguments"`
 }
 
 type TransactionResult struct {
@@ -40,5 +41,79 @@ func (cl *Client) Transaction(ctx context.Context, hash string) (*TransactionRes
 	if err = json.Unmarshal(result, &transaction); err != nil {
 		return nil, err
 	}
+	return &transaction, nil
+}
+
+type TransactionRequest struct {
+	Sender                  string     `json:"sender"`
+	SequenceNumber          uint64     `json:"sequence_number,string"`
+	MaxGasAmount            uint64     `json:"max_gas_amount,string"`
+	GasUnitPrice            uint64     `json:"gas_unit_price,string"`
+	ExpirationTimestampSecs uint64     `json:"expiration_timestamp_secs,string"`
+	Payload                 *Payload   `json:"payload"`
+	Signature               *Signature `json:"signature,omitempty"`
+}
+
+type SignMessageResult struct {
+	Message string `json:"message"`
+}
+
+func (cl *Client) SignMessage(ctx context.Context, from string, sequenceNumber uint64, maxGasAmount uint64,
+	gasUnitPrice uint64, expirationTimestampSecs uint64, payload Payload) ([]byte, error) {
+	request := TransactionRequest{
+		Sender:                  from,
+		SequenceNumber:          sequenceNumber,
+		MaxGasAmount:            maxGasAmount,
+		GasUnitPrice:            gasUnitPrice,
+		ExpirationTimestampSecs: expirationTimestampSecs,
+		Payload:                 &payload,
+	}
+	//
+	requestBody, err := json.Marshal(request)
+	if err != nil {
+		return nil, err
+	}
+	result, err := cl.Post("/transactions/signing_message", nil, requestBody)
+	if err != nil {
+		return nil, err
+	}
+	var signMessage SignMessageResult
+	if err = json.Unmarshal(result, &signMessage); err != nil {
+		return nil, err
+	}
+	//
+	hexMessage := signMessage.Message[2:]
+	message, err := hex.DecodeString(hexMessage)
+	if err != nil {
+		return nil, err
+	}
+	return message, nil
+}
+
+func (cl *Client) SubmitTransaction(ctx context.Context, from string, sequenceNumber uint64, maxGasAmount uint64,
+	gasUnitPrice uint64, expirationTimestampSecs uint64, payload Payload, signature Signature) (*TransactionResult, error) {
+	request := TransactionRequest{
+		Sender:                  from,
+		SequenceNumber:          sequenceNumber,
+		MaxGasAmount:            maxGasAmount,
+		GasUnitPrice:            gasUnitPrice,
+		ExpirationTimestampSecs: expirationTimestampSecs,
+		Payload:                 &payload,
+		Signature:               &signature,
+	}
+	//
+	requestBody, err := json.Marshal(request)
+	if err != nil {
+		return nil, err
+	}
+	result, err := cl.Post("/transactions", nil, requestBody)
+	if err != nil {
+		return nil, err
+	}
+	var transaction TransactionResult
+	if err = json.Unmarshal(result, &transaction); err != nil {
+		return nil, err
+	}
+	//
 	return &transaction, nil
 }
