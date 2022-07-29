@@ -1,97 +1,97 @@
 package rpc
 
 import (
-	"context"
-	"github.com/klauspost/compress/gzhttp"
-	"github.com/motoko9/aptos-go/rpc/jsonrpc"
-	"io"
-	"net"
+	"bytes"
+	"fmt"
+	"io/ioutil"
 	"net/http"
-	"time"
+	"net/url"
 )
 
-type JSONRPCClient interface {
-	CallForInto(ctx context.Context, out interface{}, method string, params []interface{}) error
-	CallWithCallback(ctx context.Context, method string, params []interface{}, callback func(*http.Request, *http.Response) error) error
-}
-
 type Client struct {
-	url    string
-	client JSONRPCClient
+	url     string
+	headers map[string]string
+	client  *http.Client
 }
 
 func New(endpoint string) *Client {
-	opts := &jsonrpc.RPCClientOpts{
-		HTTPClient: newHTTP(),
-	}
-	rpcClient := jsonrpc.NewClientWithOpts(endpoint, opts)
 	return &Client{
-		client: rpcClient,
+		url:    endpoint,
+		client: &http.Client{},
 	}
 }
 
-func NewWithHeaders(endpoint string, headers map[string]string) *Client {
-	opts := &jsonrpc.RPCClientOpts{
-		HTTPClient:    newHTTP(),
-		CustomHeaders: headers,
-	}
-	rpcClient := jsonrpc.NewClientWithOpts(endpoint, opts)
-	return &Client{
-		client: rpcClient,
-	}
+func (cl *Client) SetHeader(headers map[string]string) {
+	cl.headers = headers
 }
 
-func (cl *Client) Close() error {
-	if cl.client == nil {
-		return nil
+func (cl *Client) Get(path string, params map[string]string) ([]byte, error) {
+	req, err := http.NewRequest("GET", cl.url+path, nil)
+	if err != nil {
+		return nil, err
 	}
-	if c, ok := cl.client.(io.Closer); ok {
-		return c.Close()
+
+	if cl.headers != nil {
+		for k, v := range cl.headers {
+			req.Header.Set(k, v)
+		}
 	}
-	return nil
+
+	if params != nil {
+		q := url.Values{}
+		for k, v := range params {
+			q.Add(k, v)
+		}
+		req.URL.RawQuery = q.Encode()
+	}
+
+	resp, err := cl.client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != 200 {
+		return nil, fmt.Errorf("response status code: %d", resp.StatusCode)
+	}
+	respBody, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	return respBody, nil
 }
 
-func (cl *Client) RPCCallForInto(ctx context.Context, out interface{}, method string, params []interface{}) error {
-	return cl.client.CallForInto(ctx, out, method, params)
-}
-
-func (cl *Client) RPCCallWithCallback(
-	ctx context.Context,
-	method string,
-	params []interface{},
-	callback func(*http.Request, *http.Response) error) error {
-	return cl.client.CallWithCallback(ctx, method, params, callback)
-}
-
-var (
-	defaultMaxIdleConnsPerHost = 9
-	defaultTimeout             = 5 * time.Minute
-	defaultKeepAlive           = 180 * time.Second
-)
-
-func newHTTPTransport() *http.Transport {
-	return &http.Transport{
-		IdleConnTimeout:     defaultTimeout,
-		MaxConnsPerHost:     defaultMaxIdleConnsPerHost,
-		MaxIdleConnsPerHost: defaultMaxIdleConnsPerHost,
-		Proxy:               http.ProxyFromEnvironment,
-		DialContext: (&net.Dialer{
-			Timeout:   defaultTimeout,
-			KeepAlive: defaultKeepAlive,
-			DualStack: true,
-		}).DialContext,
-		ForceAttemptHTTP2: true,
-		// MaxIdleConns:          100,
-		TLSHandshakeTimeout: 10 * time.Second,
-		// ExpectContinueTimeout: 1 * time.Second,
+func (cl *Client) Post(path string, params map[string]string, body []byte) ([]byte, error) {
+	reqReader := bytes.NewReader(body)
+	req, err := http.NewRequest("POST", cl.url+path, reqReader)
+	if err != nil {
+		return nil, err
 	}
-}
 
-func newHTTP() *http.Client {
-	tr := newHTTPTransport()
-
-	return &http.Client{
-		Timeout:   defaultTimeout,
-		Transport: gzhttp.Transport(tr),
+	if cl.headers != nil {
+		for k, v := range cl.headers {
+			req.Header.Set(k, v)
+		}
 	}
+
+	if params != nil {
+		q := url.Values{}
+		for k, v := range params {
+			q.Add(k, v)
+		}
+		req.URL.RawQuery = q.Encode()
+	}
+
+	resp, err := cl.client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != 200 {
+		return nil, fmt.Errorf("response status code: %d", resp.StatusCode)
+	}
+	respBody, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	return respBody, nil
 }
