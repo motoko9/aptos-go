@@ -89,7 +89,8 @@ func TestTransfer(t *testing.T) {
 	// submit
 	tx, err := client.SubmitTransaction(ctx, addressFrom, fromAccount.SequenceNumber, maxGasAmount, gasUnitPrice, expirationTimestampSecs, transferPayload, rpc.Signature{
 		T:         "ed25519_signature",
-		PublicKey: fromAccount.AuthenticationKey,
+		//PublicKey: fromAccount.AuthenticationKey,
+		PublicKey: "0x" + walletFrom.PublicKey().String(),
 		Signature: "0x" + hex.EncodeToString(signature),
 	})
 	if err != nil {

@@ -92,7 +92,8 @@ func (cl *Client) Post(path string, params map[string]string, body []byte) ([]by
 		return nil, err
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode != 200 {
+	// 202 - Transaction is accepted and submitted to mempool.
+	if resp.StatusCode != 200 && resp.StatusCode != 202 {
 		return nil, fmt.Errorf("response status code: %d", resp.StatusCode)
 	}
 	respBody, err := ioutil.ReadAll(resp.Body)
