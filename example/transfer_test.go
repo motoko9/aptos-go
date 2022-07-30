@@ -115,7 +115,7 @@ func TestTransfer(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf("transfer confired: %v\n", confirmed)
+	fmt.Printf("transfer confirmed: %v\n", confirmed)
 
 	// check account balance after transfer
 	// transfer has confirmed, but balance is not update
