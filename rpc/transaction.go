@@ -20,25 +20,25 @@ type Payload struct {
 	Arguments     []string      `json:"arguments"`
 }
 
-type TransactionResult struct {
-	T                       string    `json:"type"`
-	Hash                    string    `json:"hash"`
-	Sender                  string    `json:"sender"`
-	SequenceNumber          uint64    `json:"sequence_number,string"`
-	MaxGasAmount            uint64    `json:"max_gas_amount,string"`
-	GasUnitPrice            uint64    `json:"gas_unit_price,string"`
-	GasCurrencyCode         string    `json:"gas_currency_code"`
-	ExpirationTimestampSecs uint64    `json:"expiration_timestamp_secs,string"`
-	Payload                 Payload   `json:"payload"`
-	Signature               Signature `json:"signature"`
+type Transaction struct {
+	T                       string     `json:"type,omitempty"`
+	Hash                    string     `json:"hash,omitempty"`
+	Sender                  string     `json:"sender"`
+	SequenceNumber          uint64     `json:"sequence_number,string"`
+	MaxGasAmount            uint64     `json:"max_gas_amount,string"`
+	GasUnitPrice            uint64     `json:"gas_unit_price,string"`
+	GasCurrencyCode         string     `json:"gas_currency_code,omitempty"`
+	ExpirationTimestampSecs uint64     `json:"expiration_timestamp_secs,string"`
+	Payload                 *Payload   `json:"payload"`
+	Signature               *Signature `json:"signature,omitempty"`
 }
 
-func (cl *Client) Transaction(ctx context.Context, hash string) (*TransactionResult, error) {
+func (cl *Client) Transaction(ctx context.Context, hash string) (*Transaction, error) {
 	result, code, err := cl.Get("/transactions/"+hash, nil)
 	if err != nil || code != 200 {
 		return nil, err
 	}
-	var transaction TransactionResult
+	var transaction Transaction
 	if err = json.Unmarshal(result, &transaction); err != nil {
 		return nil, err
 	}
@@ -54,7 +54,7 @@ func (cl *Client) TransactionPending(ctx context.Context, hash string) (bool, er
 		return true, nil
 	}
 	if code == 200 {
-		var transaction TransactionResult
+		var transaction Transaction
 		if err = json.Unmarshal(result, &transaction); err != nil {
 			return false, err
 		}
@@ -77,38 +77,18 @@ func (cl *Client) ConfirmTransaction(ctx context.Context, hash string) (bool, er
 		if !pending {
 			return true, nil
 		}
-		counter ++
+		counter++
 		time.Sleep(time.Second * 1)
 	}
 	return false, nil
-}
-
-type TransactionRequest struct {
-	Sender                  string     `json:"sender"`
-	SequenceNumber          uint64     `json:"sequence_number,string"`
-	MaxGasAmount            uint64     `json:"max_gas_amount,string"`
-	GasUnitPrice            uint64     `json:"gas_unit_price,string"`
-	ExpirationTimestampSecs uint64     `json:"expiration_timestamp_secs,string"`
-	Payload                 *Payload   `json:"payload"`
-	Signature               *Signature `json:"signature,omitempty"`
 }
 
 type SignMessageResult struct {
 	Message string `json:"message"`
 }
 
-func (cl *Client) SignMessage(ctx context.Context, from string, sequenceNumber uint64, maxGasAmount uint64,
-	gasUnitPrice uint64, expirationTimestampSecs uint64, payload Payload) ([]byte, error) {
-	request := TransactionRequest{
-		Sender:                  from,
-		SequenceNumber:          sequenceNumber,
-		MaxGasAmount:            maxGasAmount,
-		GasUnitPrice:            gasUnitPrice,
-		ExpirationTimestampSecs: expirationTimestampSecs,
-		Payload:                 &payload,
-	}
-	//
-	requestBody, err := json.Marshal(request)
+func (cl *Client) SignMessage(ctx context.Context, tx *Transaction) ([]byte, error) {
+	requestBody, err := json.Marshal(tx)
 	if err != nil {
 		return nil, err
 	}
@@ -129,19 +109,8 @@ func (cl *Client) SignMessage(ctx context.Context, from string, sequenceNumber u
 	return message, nil
 }
 
-func (cl *Client) SubmitTransaction(ctx context.Context, from string, sequenceNumber uint64, maxGasAmount uint64,
-	gasUnitPrice uint64, expirationTimestampSecs uint64, payload Payload, signature Signature) (*TransactionResult, error) {
-	request := TransactionRequest{
-		Sender:                  from,
-		SequenceNumber:          sequenceNumber,
-		MaxGasAmount:            maxGasAmount,
-		GasUnitPrice:            gasUnitPrice,
-		ExpirationTimestampSecs: expirationTimestampSecs,
-		Payload:                 &payload,
-		Signature:               &signature,
-	}
-	//
-	requestBody, err := json.Marshal(request)
+func (cl *Client) SubmitTransaction(ctx context.Context, tx *Transaction) (*Transaction, error) {
+	requestBody, err := json.Marshal(tx)
 	if err != nil {
 		return nil, err
 	}
@@ -149,7 +118,7 @@ func (cl *Client) SubmitTransaction(ctx context.Context, from string, sequenceNu
 	if err != nil || (code != 200 && code != 202) {
 		return nil, err
 	}
-	var transaction TransactionResult
+	var transaction Transaction
 	if err = json.Unmarshal(result, &transaction); err != nil {
 		return nil, err
 	}

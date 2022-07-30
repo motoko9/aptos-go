@@ -5,7 +5,7 @@ import (
 	"golang.org/x/crypto/sha3"
 )
 
-func Pubkey2Address(pk PublicKey) string {
+func PublicKey2Address(pk PublicKey) string {
 	hash := sha3.New256()
 	hash.Write(pk[:])
 	hash.Write([]byte{0})

@@ -49,3 +49,11 @@ func (a *Wallet) Save(file string) error {
 	keyJson, _ := json.Marshal(a.PrivateKey)
 	return ioutil.WriteFile(file, keyJson, 0666)
 }
+
+func (a *Wallet) Sign(data []byte) ([]byte, error) {
+	return a.PrivateKey.Sign(data)
+}
+
+func (a *Wallet) Address() string {
+	return utils.PublicKey2Address(a.PublicKey())
+}

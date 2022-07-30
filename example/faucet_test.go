@@ -16,7 +16,7 @@ func TestFaucet(t *testing.T) {
 
 	// new account
 	wallet := wallet.New()
-	address := utils.Pubkey2Address(wallet.PublicKey())
+	address := utils.PublicKey2Address(wallet.PublicKey())
 	fmt.Printf("address: %s\n", address)
 
 	// fund (max: 20000)

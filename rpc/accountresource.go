@@ -19,16 +19,16 @@ type AccountResource struct {
 	Data AccountData `json:"data"`
 }
 
-type AccountResourcesResult []AccountResource
+type AccountResources []AccountResource
 
-func (cl *Client) AccountResources(ctx context.Context, address string, version uint64) (*AccountResourcesResult, error) {
+func (cl *Client) AccountResources(ctx context.Context, address string, version uint64) (*AccountResources, error) {
 	result, code, err := cl.Get("/accounts/"+address+"/resources", map[string]string{
 		"version": fmt.Sprintf("%d", version),
 	})
 	if err != nil || code != 200 {
 		return nil, err
 	}
-	var accountResources AccountResourcesResult
+	var accountResources AccountResources
 	if err = json.Unmarshal(result, &accountResources); err != nil {
 		return nil, err
 	}

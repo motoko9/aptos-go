@@ -5,7 +5,6 @@ import (
 	"encoding/hex"
 	"fmt"
 	"github.com/motoko9/aptos-go/rpc"
-	"github.com/motoko9/aptos-go/utils"
 	"github.com/motoko9/aptos-go/wallet"
 	"testing"
 	"time"
@@ -19,14 +18,14 @@ func TestTransfer(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	addressFrom := utils.Pubkey2Address(walletFrom.PublicKey())
+	addressFrom := walletFrom.Address()
 	fmt.Printf("from address: %s\n", addressFrom)
 
 	walletTo, err := wallet.NewFromKeygenFile("account_to")
 	if err != nil {
 		panic(err)
 	}
-	addressTo := utils.Pubkey2Address(walletTo.PublicKey())
+	addressTo := walletTo.Address()
 	fmt.Printf("to address: %s\n", addressTo)
 
 	// new rpc
@@ -57,7 +56,7 @@ func TestTransfer(t *testing.T) {
 	}
 
 	// from account
-	fromAccount, err := client.Account(ctx, addressFrom)
+	accountFrom, err := client.Account(ctx, addressFrom)
 	if err != nil {
 		panic(err)
 	}
@@ -70,29 +69,41 @@ func TestTransfer(t *testing.T) {
 		T:             "script_function_payload",
 		TypeArguments: []interface{}{"0x1::aptos_coin::AptosCoin"},
 	}
-	// now + 10 minutes
-	maxGasAmount := uint64(2000)
-	gasUnitPrice := uint64(1)
-	expirationTimestampSecs := uint64(time.Now().Unix() + 600)
+	transaction := rpc.Transaction{
+		T:                       "",
+		Hash:                    "",
+		Sender:                  addressFrom,
+		SequenceNumber:          accountFrom.SequenceNumber,
+		MaxGasAmount:            uint64(2000),
+		GasUnitPrice:            uint64(1),
+		GasCurrencyCode:         "",
+		ExpirationTimestampSecs: uint64(time.Now().Unix() + 600), // now + 10 minutes
+		Payload:                 &transferPayload,
+		Signature:               nil,
+	}
 
-	signData, err := client.SignMessage(ctx, addressFrom, fromAccount.SequenceNumber, maxGasAmount, gasUnitPrice, expirationTimestampSecs, transferPayload)
+	// sign message
+	signData, err := client.SignMessage(ctx, &transaction)
 	if err != nil {
 		panic(err)
 	}
 
 	// sign
-	signature, err := walletFrom.PrivateKey.Sign(signData)
+	signature, err := walletFrom.Sign(signData)
 	if err != nil {
 		panic(err)
 	}
 
-	// submit
-	tx, err := client.SubmitTransaction(ctx, addressFrom, fromAccount.SequenceNumber, maxGasAmount, gasUnitPrice, expirationTimestampSecs, transferPayload, rpc.Signature{
-		T:         "ed25519_signature",
+	// add signature
+	transaction.Signature = &rpc.Signature{
+		T: "ed25519_signature",
 		//PublicKey: fromAccount.AuthenticationKey,
 		PublicKey: "0x" + walletFrom.PublicKey().String(),
 		Signature: "0x" + hex.EncodeToString(signature),
-	})
+	}
+
+	// submit
+	tx, err := client.SubmitTransaction(ctx, &transaction)
 	if err != nil {
 		panic(err)
 	}

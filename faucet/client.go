@@ -18,9 +18,9 @@ func FundAccount(address string, amount uint64) ([]string, error) {
 	if err != nil || code != 200 {
 		return nil, err
 	}
-	var hashs []string
-	if err = json.Unmarshal(result, &hashs); err != nil {
+	var hashes []string
+	if err = json.Unmarshal(result, &hashes); err != nil {
 		return nil, err
 	}
-	return hashs, nil
+	return hashes, nil
 }

@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 )
 
-type LedgerResult struct {
+type Ledger struct {
 	ChainId             uint64 `json:"chain_id"`
 	Epoch               uint64 `json:"epoch"`
 	LedgerVersion       uint64 `json:"ledger_version,string"`
@@ -14,12 +14,12 @@ type LedgerResult struct {
 	NodeRole            string `json:"node_role"`
 }
 
-func (cl *Client) Ledger(ctx context.Context) (*LedgerResult, error) {
+func (cl *Client) Ledger(ctx context.Context) (*Ledger, error) {
 	result, code, err := cl.Get("", nil)
 	if err != nil || code != 200 {
 		return nil, err
 	}
-	var ledger LedgerResult
+	var ledger Ledger
 	if err = json.Unmarshal(result, &ledger); err != nil {
 		return nil, err
 	}
