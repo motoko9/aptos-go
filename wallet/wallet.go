@@ -1,8 +1,10 @@
 package wallet
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/motoko9/aptos-go/utils"
+	"io/ioutil"
 )
 
 type Wallet struct {
@@ -41,4 +43,9 @@ func NewFromKeygenFile(file string) (*Wallet, error) {
 
 func (a *Wallet) PublicKey() utils.PublicKey {
 	return a.PrivateKey.PublicKey()
+}
+
+func (a *Wallet) Save(file string) error {
+	keyJson, _ := json.Marshal(a.PrivateKey)
+	return ioutil.WriteFile(file, keyJson, 0666)
 }
