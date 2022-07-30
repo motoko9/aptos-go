@@ -15,8 +15,8 @@ type LedgerResult struct {
 }
 
 func (cl *Client) Ledger(ctx context.Context) (*LedgerResult, error) {
-	result, err := cl.Get("", nil)
-	if err != nil {
+	result, code, err := cl.Get("", nil)
+	if err != nil || code != 200 {
 		return nil, err
 	}
 	var ledger LedgerResult

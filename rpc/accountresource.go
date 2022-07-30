@@ -22,10 +22,10 @@ type AccountResource struct {
 type AccountResourcesResult []AccountResource
 
 func (cl *Client) AccountResources(ctx context.Context, address string, version uint64) (*AccountResourcesResult, error) {
-	result, err := cl.Get("/accounts/"+address+"/resources", map[string]string{
+	result, code, err := cl.Get("/accounts/"+address+"/resources", map[string]string{
 		"version": fmt.Sprintf("%d", version),
 	})
-	if err != nil {
+	if err != nil || code != 200 {
 		return nil, err
 	}
 	var accountResources AccountResourcesResult
@@ -36,10 +36,10 @@ func (cl *Client) AccountResources(ctx context.Context, address string, version 
 }
 
 func (cl *Client) AccountResourceByAddressAndType(ctx context.Context, address string, t string, version uint64) (*AccountResource, error) {
-	result, err := cl.Get("/accounts/"+address+"/resource/"+t, map[string]string{
+	result, code, err := cl.Get("/accounts/"+address+"/resource/"+t, map[string]string{
 		"version": fmt.Sprintf("%d", version),
 	})
-	if err != nil {
+	if err != nil || code != 200 {
 		return nil, err
 	}
 	var accountResource AccountResource
@@ -53,10 +53,10 @@ func (cl *Client) AccountBalance(ctx context.Context, address string, coin strin
 	// how to get other coin balance
 	// todo
 	resouceType := fmt.Sprintf("0x1::coin::CoinStore<0x1::aptos_coin::AptosCoin>")
-	result, err := cl.Get("/accounts/"+address+"/resource/"+resouceType, map[string]string{
+	result, code, err := cl.Get("/accounts/"+address+"/resource/"+resouceType, map[string]string{
 		"version": fmt.Sprintf("%d", version),
 	})
-	if err != nil {
+	if err != nil || code != 200 {
 		return 0, err
 	}
 	var accountResource AccountResource

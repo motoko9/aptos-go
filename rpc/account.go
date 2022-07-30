@@ -11,8 +11,8 @@ type AccountResult struct {
 }
 
 func (cl *Client) Account(ctx context.Context, address string) (*AccountResult, error) {
-	result, err := cl.Get("/accounts/"+address, nil)
-	if err != nil {
+	result, code, err := cl.Get("/accounts/"+address, nil)
+	if err != nil || code != 200 {
 		return nil, err
 	}
 	var account AccountResult

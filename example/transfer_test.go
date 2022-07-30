@@ -99,9 +99,16 @@ func TestTransfer(t *testing.T) {
 	//
 	fmt.Printf("transfer hash: %s\n", tx.Hash)
 
-	time.Sleep(time.Second * 5)
+	//
+	confirmed, err := client.ConfirmTransaction(ctx, tx.Hash)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("transfer confired: %v\n", confirmed)
 
 	// check account balance after transfer
+	// transfer has confirmed, but balance is not update
+	// todo
 	{
 		balance, err := client.AccountBalance(ctx, addressFrom, "AptosCoin", ledger.LedgerVersion)
 		if err != nil {

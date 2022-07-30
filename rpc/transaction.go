@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/hex"
 	"encoding/json"
+	"time"
 )
 
 type Signature struct {
@@ -33,8 +34,8 @@ type TransactionResult struct {
 }
 
 func (cl *Client) Transaction(ctx context.Context, hash string) (*TransactionResult, error) {
-	result, err := cl.Get("/transactions/"+hash, nil)
-	if err != nil {
+	result, code, err := cl.Get("/transactions/"+hash, nil)
+	if err != nil || code != 200 {
 		return nil, err
 	}
 	var transaction TransactionResult
@@ -42,6 +43,44 @@ func (cl *Client) Transaction(ctx context.Context, hash string) (*TransactionRes
 		return nil, err
 	}
 	return &transaction, nil
+}
+
+func (cl *Client) TransactionPending(ctx context.Context, hash string) (bool, error) {
+	result, code, err := cl.Get("/transactions/"+hash, nil)
+	if code == -1 {
+		return false, err
+	}
+	if code == 404 {
+		return true, nil
+	}
+	if code == 200 {
+		var transaction TransactionResult
+		if err = json.Unmarshal(result, &transaction); err != nil {
+			return false, err
+		}
+		if transaction.T == "pending_transaction" {
+			return true, nil
+		} else {
+			return false, nil
+		}
+	}
+	return false, err
+}
+
+func (cl *Client) ConfirmTransaction(ctx context.Context, hash string) (bool, error) {
+	counter := 0
+	for counter < 100 {
+		pending, err := cl.TransactionPending(ctx, hash)
+		if err != nil {
+			return false, err
+		}
+		if !pending {
+			return true, nil
+		}
+		counter ++
+		time.Sleep(time.Second * 1)
+	}
+	return false, nil
 }
 
 type TransactionRequest struct {
@@ -73,8 +112,8 @@ func (cl *Client) SignMessage(ctx context.Context, from string, sequenceNumber u
 	if err != nil {
 		return nil, err
 	}
-	result, err := cl.Post("/transactions/signing_message", nil, requestBody)
-	if err != nil {
+	result, code, err := cl.Post("/transactions/signing_message", nil, requestBody)
+	if err != nil || code != 200 {
 		return nil, err
 	}
 	var signMessage SignMessageResult
@@ -106,8 +145,8 @@ func (cl *Client) SubmitTransaction(ctx context.Context, from string, sequenceNu
 	if err != nil {
 		return nil, err
 	}
-	result, err := cl.Post("/transactions", nil, requestBody)
-	if err != nil {
+	result, code, err := cl.Post("/transactions", nil, requestBody)
+	if err != nil || (code != 200 && code != 202) {
 		return nil, err
 	}
 	var transaction TransactionResult

@@ -11,11 +11,11 @@ type FundAccountResult struct {
 
 func FundAccount(address string, amount uint64) ([]string, error) {
 	client := rpc.New("https://faucet.devnet.aptoslabs.com")
-	result, err := client.Post("/mint", map[string]string{
+	result, code, err := client.Post("/mint", map[string]string{
 		"amount":  fmt.Sprintf("%d", amount),
 		"address": address,
 	}, nil)
-	if err != nil {
+	if err != nil || code != 200 {
 		return nil, err
 	}
 	var hashs []string

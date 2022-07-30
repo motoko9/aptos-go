@@ -25,10 +25,10 @@ func (cl *Client) SetHeader(headers map[string]string) {
 	cl.headers = headers
 }
 
-func (cl *Client) Get(path string, params map[string]string) ([]byte, error) {
+func (cl *Client) Get(path string, params map[string]string) ([]byte, int, error) {
 	req, err := http.NewRequest("GET", cl.url+path, nil)
 	if err != nil {
-		return nil, err
+		return nil, -1, err
 	}
 
 	req.Header.Set("Content-Type", "application/json")
@@ -50,24 +50,24 @@ func (cl *Client) Get(path string, params map[string]string) ([]byte, error) {
 
 	resp, err := cl.client.Do(req)
 	if err != nil {
-		return nil, err
+		return nil, -1, err
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != 200 {
-		return nil, fmt.Errorf("response status code: %d", resp.StatusCode)
+		return nil, resp.StatusCode, fmt.Errorf("response status code: %d", resp.StatusCode)
 	}
 	respBody, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return nil, err
+		return nil, resp.StatusCode, err
 	}
-	return respBody, nil
+	return respBody, resp.StatusCode, nil
 }
 
-func (cl *Client) Post(path string, params map[string]string, body []byte) ([]byte, error) {
+func (cl *Client) Post(path string, params map[string]string, body []byte) ([]byte, int, error) {
 	reqReader := bytes.NewReader(body)
 	req, err := http.NewRequest("POST", cl.url+path, reqReader)
 	if err != nil {
-		return nil, err
+		return nil, -1, err
 	}
 
 	req.Header.Set("Content-Type", "application/json")
@@ -89,16 +89,16 @@ func (cl *Client) Post(path string, params map[string]string, body []byte) ([]by
 
 	resp, err := cl.client.Do(req)
 	if err != nil {
-		return nil, err
+		return nil, -1, err
 	}
 	defer resp.Body.Close()
 	// 202 - Transaction is accepted and submitted to mempool.
 	if resp.StatusCode != 200 && resp.StatusCode != 202 {
-		return nil, fmt.Errorf("response status code: %d", resp.StatusCode)
+		return nil, resp.StatusCode, fmt.Errorf("response status code: %d", resp.StatusCode)
 	}
 	respBody, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return nil, err
+		return nil, resp.StatusCode, err
 	}
-	return respBody, nil
+	return respBody, resp.StatusCode, nil
 }
