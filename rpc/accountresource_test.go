@@ -9,7 +9,12 @@ import (
 
 func TestClient_AccountResources(t *testing.T) {
 	client := New(DevNet_RPC)
-	accountResources, err := client.AccountResources(context.Background(), "0xdb8e31e499902c188ecd9786862a98f00a09fd1d7257ac9a5a154341318d0aa9", 352973)
+	ledger, err := client.Ledger(context.Background())
+	if err != nil {
+		panic(err)
+	}
+	accountResources, err := client.AccountResources(context.Background(),
+		"0xdb8e31e499902c188ecd9786862a98f00a09fd1d7257ac9a5a154341318d0aa9", ledger.LedgerVersion)
 	if err != nil {
 		panic(err)
 	}
@@ -19,11 +24,15 @@ func TestClient_AccountResources(t *testing.T) {
 
 func TestClient_AccountResourceByAddressAndType(t *testing.T) {
 	client := New(DevNet_RPC)
+	ledger, err := client.Ledger(context.Background())
+	if err != nil {
+		panic(err)
+	}
 	accountResource, err := client.AccountResourceByAddressAndType(
 		context.Background(),
 		"0xdb8e31e499902c188ecd9786862a98f00a09fd1d7257ac9a5a154341318d0aa9",
 		"0x1::coin::CoinStore<0x1::aptos_coin::AptosCoin>",
-		352973)
+		ledger.LedgerVersion)
 	if err != nil {
 		panic(err)
 	}
@@ -33,13 +42,41 @@ func TestClient_AccountResourceByAddressAndType(t *testing.T) {
 
 func TestClient_AccountBalance(t *testing.T) {
 	client := New(DevNet_RPC)
-	balance, err := client.AccountBalance(
-		context.Background(),
-		"0xdb8e31e499902c188ecd9786862a98f00a09fd1d7257ac9a5a154341318d0aa9",
-		"USDT",
-		352973)
+	ledger, err := client.Ledger(context.Background())
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf("account balance: %d\n", balance)
+	{
+		balance, err := client.AccountBalance(
+			context.Background(),
+			"0xdb8e31e499902c188ecd9786862a98f00a09fd1d7257ac9a5a154341318d0aa9",
+			AptosCoin,
+			ledger.LedgerVersion)
+		if err != nil {
+			panic(err)
+		}
+		fmt.Printf("account Aptos balance: %d\n", balance)
+	}
+	{
+		balance, err := client.AccountBalance(
+			context.Background(),
+			"0xdb8e31e499902c188ecd9786862a98f00a09fd1d7257ac9a5a154341318d0aa9",
+			USDTCoin,
+			ledger.LedgerVersion)
+		if err != nil {
+			panic(err)
+		}
+		fmt.Printf("account USDT balance: %d\n", balance)
+	}
+	{
+		balance, err := client.AccountBalance(
+			context.Background(),
+			"0xdb8e31e499902c188ecd9786862a98f00a09fd1d7257ac9a5a154341318d0aa9",
+			BTCCoin,
+			ledger.LedgerVersion)
+		if err != nil {
+			panic(err)
+		}
+		fmt.Printf("account BTC balance: %d\n", balance)
+	}
 }

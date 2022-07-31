@@ -68,8 +68,12 @@ func (cl *Client) AccountResourceByAddressAndType(ctx context.Context, address s
 func (cl *Client) AccountBalance(ctx context.Context, address string, coin string, version uint64) (uint64, error) {
 	// how to get other coin balance
 	// todo
-	resouceType := fmt.Sprintf("0x1::coin::CoinStore<0x1::aptos_coin::AptosCoin>")
-	result, code, err := cl.Get("/accounts/"+address+"/resource/"+resouceType, map[string]string{
+	coin, ok := CoinType[coin]
+	if !ok {
+		return 0, fmt.Errorf("coin %s is not supported", coin)
+	}
+	resourceType := fmt.Sprintf("0x1::coin::CoinStore<%s>", coin)
+	result, code, err := cl.Get("/accounts/"+address+"/resource/"+resourceType, map[string]string{
 		"version": fmt.Sprintf("%d", version),
 	})
 	if err != nil || code != 200 {
