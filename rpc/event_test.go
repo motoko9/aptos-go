@@ -16,3 +16,17 @@ func TestClient_EventsByKey(t *testing.T) {
 	eventsJson, _ := json.MarshalIndent(events, "", "    ")
 	fmt.Printf("events: %s\n", string(eventsJson))
 }
+
+func TestClient_EventsByHandle(t *testing.T) {
+	client := New(DevNet_RPC)
+	events, err := client.EventsByHandle(context.Background(),
+		"0xb4dd6392c96cee32802cce841a99c4fd381ff9818d086b80d801657a240ba588",
+		"0x1::coin::CoinStore<0x1::aptos_coin::AptosCoin>",
+		"withdraw_events")
+	if err != nil {
+		panic(err)
+	}
+	eventsJson, _ := json.MarshalIndent(events, "", "    ")
+	fmt.Printf("events: %s\n", string(eventsJson))
+}
+

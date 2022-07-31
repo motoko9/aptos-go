@@ -32,3 +32,15 @@ func (cl *Client) EventsByKey(ctx context.Context, key string) (*Events, error) 
 	}
 	return &events, nil
 }
+
+func (cl *Client) EventsByHandle(ctx context.Context, address string, handle string, field string) (*Events, error) {
+	result, code, err := cl.Get("/accounts/"+address+"/events/"+handle+"/"+field, nil)
+	if err != nil || code != 200 {
+		return nil, err
+	}
+	var events Events
+	if err = json.Unmarshal(result, &events); err != nil {
+		return nil, err
+	}
+	return &events, nil
+}
