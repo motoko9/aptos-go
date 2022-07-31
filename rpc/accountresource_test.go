@@ -13,7 +13,7 @@ func TestClient_AccountResources(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	accountResourcesJson, _ := json.Marshal(accountResources)
+	accountResourcesJson, _ := json.MarshalIndent(accountResources, "", "    ")
 	fmt.Printf("account resources: %s\n", string(accountResourcesJson))
 }
 
@@ -27,7 +27,7 @@ func TestClient_AccountResourceByAddressAndType(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	accountResourceJson, _ := json.Marshal(accountResource)
+	accountResourceJson, _ := json.MarshalIndent(accountResource, "", "    ")
 	fmt.Printf("account resource: %s\n", string(accountResourceJson))
 }
 

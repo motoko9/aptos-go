@@ -13,6 +13,6 @@ func TestClient_Ledger(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	ledgerJson, _ := json.Marshal(ledger)
+	ledgerJson, _ := json.MarshalIndent(ledger, "", "    ")
 	fmt.Printf("ledger: %s\n", string(ledgerJson))
 }

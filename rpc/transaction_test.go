@@ -13,6 +13,6 @@ func TestClient_Transaction(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	transactionJson, _ := json.Marshal(transaction)
+	transactionJson, _ := json.MarshalIndent(transaction, "", "    ")
 	fmt.Printf("transaction: %s\n", string(transactionJson))
 }

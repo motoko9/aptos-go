@@ -13,6 +13,6 @@ func TestClient_Account(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	accountJson, _ := json.Marshal(account)
+	accountJson, _ := json.MarshalIndent(account, "", "    ")
 	fmt.Printf("account: %s\n", string(accountJson))
 }
