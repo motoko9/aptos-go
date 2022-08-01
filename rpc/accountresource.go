@@ -38,9 +38,12 @@ type AccountResource struct {
 type AccountResources []AccountResource
 
 func (cl *Client) AccountResources(ctx context.Context, address string, version uint64) (*AccountResources, error) {
-	result, code, err := cl.Get("/accounts/"+address+"/resources", map[string]string{
-		"version": fmt.Sprintf("%d", version),
-	})
+	var params map[string]string
+	if version != 0 {
+		params = make(map[string]string)
+		params["version"] = fmt.Sprintf("%d", version)
+	}
+	result, code, err := cl.Get("/accounts/"+address+"/resources", params)
 	if err != nil || code != 200 {
 		return nil, err
 	}
@@ -52,9 +55,12 @@ func (cl *Client) AccountResources(ctx context.Context, address string, version 
 }
 
 func (cl *Client) AccountResourceByAddressAndType(ctx context.Context, address string, t string, version uint64) (*AccountResource, error) {
-	result, code, err := cl.Get("/accounts/"+address+"/resource/"+t, map[string]string{
-		"version": fmt.Sprintf("%d", version),
-	})
+	var params map[string]string
+	if version != 0 {
+		params = make(map[string]string)
+		params["version"] = fmt.Sprintf("%d", version)
+	}
+	result, code, err := cl.Get("/accounts/"+address+"/resource/"+t, params)
 	if err != nil || code != 200 {
 		return nil, err
 	}
@@ -73,9 +79,13 @@ func (cl *Client) AccountBalance(ctx context.Context, address string, coin strin
 		return 0, fmt.Errorf("coin %s is not supported", coin)
 	}
 	resourceType := fmt.Sprintf("0x1::coin::CoinStore<%s>", coin)
-	result, code, err := cl.Get("/accounts/"+address+"/resource/"+resourceType, map[string]string{
-		"version": fmt.Sprintf("%d", version),
-	})
+	//
+	var params map[string]string
+	if version != 0 {
+		params = make(map[string]string)
+		params["version"] = fmt.Sprintf("%d", version)
+	}
+	result, code, err := cl.Get("/accounts/"+address+"/resource/"+resourceType, params)
 	if err != nil || code != 200 {
 		return 0, err
 	}

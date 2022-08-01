@@ -21,9 +21,9 @@ type Module struct {
 type Payload struct {
 	T             string        `json:"type"`
 	Function      string        `json:"function,omitempty"`
-	TypeArguments []interface{} `json:"type_arguments,omitempty"`
+	TypeArguments []interface{} `json:"type_arguments"` //todo maybe need to omitempty, but move function call is needed event if empty
 	Arguments     []string      `json:"arguments,omitempty"`
-	Modules       []Module      `json:"modules"`
+	Modules       []Module      `json:"modules,omitempty"`
 }
 
 type Transaction struct {

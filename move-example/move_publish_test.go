@@ -15,7 +15,7 @@ import (
 func TestMovePublish(t *testing.T) {
 	ctx := context.Background()
 
-	// new account
+	// move Module account
 	wallet, err := wallet.NewFromKeygenFile("account_move_publish")
 	if err != nil {
 		panic(err)

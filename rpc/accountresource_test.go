@@ -22,6 +22,17 @@ func TestClient_AccountResources(t *testing.T) {
 	fmt.Printf("account resources: %s\n", string(accountResourcesJson))
 }
 
+func TestClient_AccountResources_Latest(t *testing.T) {
+	client := New(DevNet_RPC)
+	accountResources, err := client.AccountResources(context.Background(),
+		"0xdb8e31e499902c188ecd9786862a98f00a09fd1d7257ac9a5a154341318d0aa9", 0)
+	if err != nil {
+		panic(err)
+	}
+	accountResourcesJson, _ := json.MarshalIndent(accountResources, "", "    ")
+	fmt.Printf("account resources: %s\n", string(accountResourcesJson))
+}
+
 func TestClient_AccountResourceByAddressAndType(t *testing.T) {
 	client := New(DevNet_RPC)
 	ledger, err := client.Ledger(context.Background())
