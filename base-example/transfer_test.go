@@ -1,4 +1,4 @@
-package example
+package base_example
 
 import (
 	"context"
@@ -7,7 +7,6 @@ import (
 	"github.com/motoko9/aptos-go/rpc"
 	"github.com/motoko9/aptos-go/wallet"
 	"testing"
-	"time"
 )
 
 func TestTransfer(t *testing.T) {
@@ -39,7 +38,7 @@ func TestTransfer(t *testing.T) {
 
 	// check from account
 	{
-		balance, err := client.AccountBalance(ctx, addressFrom, "AptosCoin", ledger.LedgerVersion)
+		balance, err := client.AccountBalance(ctx, addressFrom, rpc.AptosCoin, ledger.LedgerVersion)
 		if err != nil {
 			panic(err)
 		}
@@ -48,7 +47,7 @@ func TestTransfer(t *testing.T) {
 
 	// check to account
 	{
-		balance, err := client.AccountBalance(ctx, addressTo, "AptosCoin", ledger.LedgerVersion)
+		balance, err := client.AccountBalance(ctx, addressTo, rpc.AptosCoin, ledger.LedgerVersion)
 		if err != nil {
 			panic(err)
 		}
@@ -61,29 +60,35 @@ func TestTransfer(t *testing.T) {
 		panic(err)
 	}
 
-	// transfer
-	transferAmount := uint64(1000)
-	transferPayload := rpc.Payload{
-		Function:      "0x1::coin::transfer",
-		Arguments:     []string{addressTo, fmt.Sprintf("%d", transferAmount)},
-		T:             "script_function_payload",
-		TypeArguments: []interface{}{"0x1::aptos_coin::AptosCoin"},
-	}
-	transaction := rpc.Transaction{
-		T:                       "",
-		Hash:                    "",
-		Sender:                  addressFrom,
-		SequenceNumber:          accountFrom.SequenceNumber,
-		MaxGasAmount:            uint64(2000),
-		GasUnitPrice:            uint64(1),
-		GasCurrencyCode:         "",
-		ExpirationTimestampSecs: uint64(time.Now().Unix() + 600), // now + 10 minutes
-		Payload:                 &transferPayload,
-		Signature:               nil,
+	/*
+		// transfer
+		transferAmount := uint64(1000)
+		transferPayload := rpc.Payload{
+			Function:      "0x1::coin::transfer",
+			Arguments:     []string{addressTo, fmt.Sprintf("%d", transferAmount)},
+			T:             "script_function_payload",
+			TypeArguments: []interface{}{"0x1::aptos_coin::AptosCoin"},
+		}
+		transaction := rpc.Transaction{
+			T:                       "",
+			Hash:                    "",
+			Sender:                  addressFrom,
+			SequenceNumber:          accountFrom.SequenceNumber,
+			MaxGasAmount:            uint64(2000),
+			GasUnitPrice:            uint64(1),
+			GasCurrencyCode:         "",
+			ExpirationTimestampSecs: uint64(time.Now().Unix() + 600), // now + 10 minutes
+			Payload:                 &transferPayload,
+			Signature:               nil,
+		}
+	*/
+	transaction, err := client.TransferCoin(ctx, addressFrom, accountFrom.SequenceNumber, rpc.AptosCoin, uint64(1000), addressTo)
+	if err != nil {
+		panic(err)
 	}
 
 	// sign message
-	signData, err := client.SignMessage(ctx, &transaction)
+	signData, err := client.SignMessage(ctx, transaction)
 	if err != nil {
 		panic(err)
 	}
@@ -103,7 +108,7 @@ func TestTransfer(t *testing.T) {
 	}
 
 	// submit
-	tx, err := client.SubmitTransaction(ctx, &transaction)
+	tx, err := client.SubmitTransaction(ctx, transaction)
 	if err != nil {
 		panic(err)
 	}
@@ -121,14 +126,14 @@ func TestTransfer(t *testing.T) {
 	// transfer has confirmed, but balance is not update
 	// todo
 	{
-		balance, err := client.AccountBalance(ctx, addressFrom, "AptosCoin", ledger.LedgerVersion)
+		balance, err := client.AccountBalance(ctx, addressFrom, rpc.AptosCoin, ledger.LedgerVersion)
 		if err != nil {
 			panic(err)
 		}
 		fmt.Printf("from account balance: %d\n", balance)
 	}
 	{
-		balance, err := client.AccountBalance(ctx, addressTo, "AptosCoin", ledger.LedgerVersion)
+		balance, err := client.AccountBalance(ctx, addressTo, rpc.AptosCoin, ledger.LedgerVersion)
 		if err != nil {
 			panic(err)
 		}

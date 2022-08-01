@@ -1,4 +1,4 @@
-package example
+package base_example
 
 import (
 	"context"

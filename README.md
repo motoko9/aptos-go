@@ -10,7 +10,11 @@ $ go get github.com/motoko9/aptos-go
 
 ## Example
 
-* [create account](./example/account_test.go)
-* [fund account with faucet](./example/faucet_test.go)
-* [token transfer](./example/transfer_test.go)
+### base example
+* [create account](base-example/account_test.go)
+* [fund account with faucet](base-example/faucet_test.go)
+* [token transfer](base-example/transfer_test.go)
+
+### move module example
+* [Move example on Aptos](move-example/README.md)
 
