@@ -57,6 +57,7 @@ func (cl *Client) TransactionPending(ctx context.Context, hash string) (bool, er
 		return false, err
 	}
 	if code == 404 {
+		// resource not found, maybe transaction is not on chain
 		return true, nil
 	}
 	if code == 200 {
