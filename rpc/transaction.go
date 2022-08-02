@@ -22,7 +22,7 @@ type Payload struct {
 	T             string        `json:"type"`
 	Function      string        `json:"function,omitempty"`
 	TypeArguments []string      `json:"type_arguments"` //todo maybe need to omitempty, but move function call is needed event if empty
-	Arguments     []interface{} `json:"arguments,omitempty"`
+	Arguments     []interface{} `json:"arguments"`      //todo maybe need to omitempty, but move function call is needed event if empty
 	Modules       []Module      `json:"modules,omitempty"`
 }
 

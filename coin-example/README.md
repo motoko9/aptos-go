@@ -17,7 +17,7 @@ Second, you need to config Aptos command line tool, reference [Use Aptos CLI](ht
 tangaoyuan@tangaoyuandeMacBook-Pro aptos-core % aptos move compile --package-dir ./aptos-move/move-examples/moon_coin --named-addresses MoonCoinType=0xa0db31e3cc6f597ec084d7fbcf4cb562522ab83d2fe7f3567af79f85627fcd9c
 {
   "Result": [
-    "A0DB31E3CC6F597EC084D7FBCF4CB562522AB83D2FE7F3567AF79F85627FCD9C::MoonCoin"
+    "A0DB31E3CC6F597EC084D7FBCF4CB562522AB83D2FE7F3567AF79F85627FCD9C::moon_coin"
   ]
 }
 ```

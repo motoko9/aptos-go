@@ -14,37 +14,37 @@ func TestCoinInitialize(t *testing.T) {
 	ctx := context.Background()
 
 	// coin account
-	coinModule, err := wallet.NewFromKeygenFile("account_coin_publish")
+	coinWallet, err := wallet.NewFromKeygenFile("account_coin_publish")
 	if err != nil {
 		panic(err)
 	}
-	coinAddress := coinModule.Address()
+	coinAddress := coinWallet.Address()
 	fmt.Printf("coin address: %s\n", coinAddress)
 
 	/*
-	// user account
-	wallet := wallet.New()
-	wallet.Save("account_initializer")
-	address := wallet.Address()
-	fmt.Printf("user address: %s\n", address)
+		// user account
+		wallet := wallet.New()
+		wallet.Save("account_initializer")
+		address := wallet.Address()
+		fmt.Printf("user address: %s\n", address)
 
-	// fund (max: 20000)
-	amount := uint64(20000)
-	hashes, err := faucet.FundAccount(address, amount)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Printf("fund txs: %v\n", hashes)
+		// fund (max: 20000)
+		amount := uint64(20000)
+		hashes, err := faucet.FundAccount(address, amount)
+		if err != nil {
+			panic(err)
+		}
+		fmt.Printf("fund txs: %v\n", hashes)
 
-	//
-	time.Sleep(time.Second * 5)
-	 */
+		//
+		time.Sleep(time.Second * 5)
+	*/
 
 	// new rpc
 	client := rpc.New(rpc.DevNet_RPC)
 
 	// from account
-	account, err := client.Account(ctx, coinAddress)
+	coinAccount, err := client.Account(ctx, coinAddress)
 	if err != nil {
 		panic(err)
 	}
@@ -54,7 +54,7 @@ func TestCoinInitialize(t *testing.T) {
 		T:             "script_function_payload",
 		Function:      "0x1::managed_coin::initialize",
 		TypeArguments: []string{fmt.Sprintf("%s::moon_coin::MoonCoin", coinAddress)},
-		Arguments:     []interface{}{
+		Arguments: []interface{}{
 			hex.EncodeToString([]byte("Moon Coin")),
 			hex.EncodeToString([]byte("MOON")),
 			"6",
@@ -65,7 +65,7 @@ func TestCoinInitialize(t *testing.T) {
 		T:                       "",
 		Hash:                    "",
 		Sender:                  coinAddress,
-		SequenceNumber:          account.SequenceNumber,
+		SequenceNumber:          coinAccount.SequenceNumber,
 		MaxGasAmount:            uint64(2000),
 		GasUnitPrice:            uint64(1),
 		GasCurrencyCode:         "",
@@ -81,7 +81,7 @@ func TestCoinInitialize(t *testing.T) {
 	}
 
 	// sign
-	signature, err := coinModule.Sign(signData)
+	signature, err := coinWallet.Sign(signData)
 	if err != nil {
 		panic(err)
 	}
@@ -90,7 +90,7 @@ func TestCoinInitialize(t *testing.T) {
 	transaction.Signature = &rpc.Signature{
 		T: "ed25519_signature",
 		//PublicKey: fromAccount.AuthenticationKey,
-		PublicKey: "0x" + coinModule.PublicKey().String(),
+		PublicKey: "0x" + coinWallet.PublicKey().String(),
 		Signature: "0x" + hex.EncodeToString(signature),
 	}
 

@@ -43,7 +43,7 @@ func TestCoinPublish(t *testing.T) {
 	}
 
 	// read move byte code
-	content, err := ioutil.ReadFile("./MoonCoin.mv")
+	content, err := ioutil.ReadFile("./moon_coin.mv")
 	if err != nil {
 		panic(err)
 	}
