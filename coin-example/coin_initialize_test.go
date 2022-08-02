@@ -4,27 +4,27 @@ import (
 	"context"
 	"encoding/hex"
 	"fmt"
-	"github.com/motoko9/aptos-go/faucet"
 	"github.com/motoko9/aptos-go/rpc"
 	"github.com/motoko9/aptos-go/wallet"
 	"testing"
 	"time"
 )
 
-func TestMoveWrite(t *testing.T) {
+func TestCoinInitialize(t *testing.T) {
 	ctx := context.Background()
 
-	// move Module account
-	moveModule, err := wallet.NewFromKeygenFile("account_move_publish")
+	// coin account
+	coinModule, err := wallet.NewFromKeygenFile("account_coin_publish")
 	if err != nil {
 		panic(err)
 	}
-	moduleAddress := moveModule.Address()
-	fmt.Printf("move module address: %s\n", moduleAddress)
+	coinAddress := coinModule.Address()
+	fmt.Printf("coin address: %s\n", coinAddress)
 
+	/*
 	// user account
 	wallet := wallet.New()
-	wallet.Save("account_user")
+	wallet.Save("account_initializer")
 	address := wallet.Address()
 	fmt.Printf("user address: %s\n", address)
 
@@ -38,28 +38,33 @@ func TestMoveWrite(t *testing.T) {
 
 	//
 	time.Sleep(time.Second * 5)
+	 */
 
 	// new rpc
 	client := rpc.New(rpc.DevNet_RPC)
 
 	// from account
-	account, err := client.Account(ctx, address)
+	account, err := client.Account(ctx, coinAddress)
 	if err != nil {
 		panic(err)
 	}
 
 	//
-	message := []byte("hello world!")
 	payload := rpc.Payload{
 		T:             "script_function_payload",
-		Function:      fmt.Sprintf("%s::Message::set_message", moduleAddress),
-		TypeArguments: []string{},
-		Arguments:     []interface{}{hex.EncodeToString(message)},
+		Function:      "0x1::managed_coin::initialize",
+		TypeArguments: []string{fmt.Sprintf("%s::moon_coin::MoonCoin", coinAddress)},
+		Arguments:     []interface{}{
+			hex.EncodeToString([]byte("Moon Coin")),
+			hex.EncodeToString([]byte("MOON")),
+			"6",
+			false,
+		},
 	}
 	transaction := rpc.Transaction{
 		T:                       "",
 		Hash:                    "",
-		Sender:                  address,
+		Sender:                  coinAddress,
 		SequenceNumber:          account.SequenceNumber,
 		MaxGasAmount:            uint64(2000),
 		GasUnitPrice:            uint64(1),
@@ -76,7 +81,7 @@ func TestMoveWrite(t *testing.T) {
 	}
 
 	// sign
-	signature, err := wallet.Sign(signData)
+	signature, err := coinModule.Sign(signData)
 	if err != nil {
 		panic(err)
 	}
@@ -85,7 +90,7 @@ func TestMoveWrite(t *testing.T) {
 	transaction.Signature = &rpc.Signature{
 		T: "ed25519_signature",
 		//PublicKey: fromAccount.AuthenticationKey,
-		PublicKey: "0x" + wallet.PublicKey().String(),
+		PublicKey: "0x" + coinModule.PublicKey().String(),
 		Signature: "0x" + hex.EncodeToString(signature),
 	}
 

@@ -21,6 +21,17 @@ You can create account, query account, build & publish & running Move function w
 
 ### Bytecode
 
+[source code](https://github.com/aptos-labs/aptos-core/tree/main/aptos-move/move-examples/hello_blockchain)
+
+```bash
+tangaoyuan@tangaoyuandeMacBook-Pro aptos-core % aptos move compile --package-dir ./aptos-move/move-examples/hello_blockchain/ --named-addresses HelloBlockchain=0x7c535d32b186e114c69dc201eca92dcb36c37e3dd0b9b527c78e59581db80eca
+{
+  "Result": [
+    "7C535D32B186E114C69DC201ECA92DCB36C37E3DD0B9B527C78E59581DB80ECA::Message"
+  ]
+}
+```
+
 After compile, there is a build output in package directory. You can get codes in package_dir/build/Examples/bytecode_modules.
 
 ### Move RPC

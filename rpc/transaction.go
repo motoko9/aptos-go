@@ -21,8 +21,8 @@ type Module struct {
 type Payload struct {
 	T             string        `json:"type"`
 	Function      string        `json:"function,omitempty"`
-	TypeArguments []interface{} `json:"type_arguments"` //todo maybe need to omitempty, but move function call is needed event if empty
-	Arguments     []string      `json:"arguments,omitempty"`
+	TypeArguments []string      `json:"type_arguments"` //todo maybe need to omitempty, but move function call is needed event if empty
+	Arguments     []interface{} `json:"arguments,omitempty"`
 	Modules       []Module      `json:"modules,omitempty"`
 }
 
@@ -165,9 +165,9 @@ func (cl *Client) TransferCoin(ctx context.Context, from string, sequenceNumber 
 	}
 	transferPayload := Payload{
 		Function:      "0x1::coin::transfer",
-		Arguments:     []string{receipt, fmt.Sprintf("%d", amount)},
+		Arguments:     []interface{}{receipt, fmt.Sprintf("%d", amount)},
 		T:             "script_function_payload",
-		TypeArguments: []interface{}{coin},
+		TypeArguments: []string{coin},
 	}
 	transaction := Transaction{
 		T:                       "",
