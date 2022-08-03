@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/motoko9/aptos-go/faucet"
 	"github.com/motoko9/aptos-go/rpc"
-	"github.com/motoko9/aptos-go/utils"
 	"github.com/motoko9/aptos-go/wallet"
 	"testing"
 	"time"
@@ -16,7 +15,7 @@ func TestFaucet(t *testing.T) {
 
 	// new account
 	wallet := wallet.New()
-	address := utils.PublicKey2Address(wallet.PublicKey())
+	address := wallet.Address()
 	fmt.Printf("address: %s\n", address)
 
 	// fund (max: 20000)

@@ -18,3 +18,6 @@ $ go get github.com/motoko9/aptos-go
 ### move module example
 * [Move example on Aptos](move-example/README.md)
 
+### coin module example
+* [Coin Module example on Aptos](coin-example/README.md)
+
