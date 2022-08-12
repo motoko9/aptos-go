@@ -4,13 +4,14 @@ import (
 	"context"
 	"encoding/hex"
 	"fmt"
+	"github.com/motoko9/aptos-go/faucet"
 	"github.com/motoko9/aptos-go/rpc"
 	"github.com/motoko9/aptos-go/wallet"
 	"testing"
 	"time"
 )
 
-func TestCoinInitialize(t *testing.T) {
+func TestTransfer(t *testing.T) {
 	ctx := context.Background()
 
 	// coin account
@@ -21,32 +22,68 @@ func TestCoinInitialize(t *testing.T) {
 	coinAddress := coinWallet.Address()
 	fmt.Printf("coin address: %s\n", coinAddress)
 
+	// recipient account
+	fromWallet, err := wallet.NewFromKeygenFile("account_recipient")
+	if err != nil {
+		panic(err)
+	}
+	fromAddress := fromWallet.Address()
+	fmt.Printf("from address: %s\n", fromAddress)
+
+	// fund (max: 20000)
+	fundAmount := uint64(20000)
+	{
+		hashes, err := faucet.FundAccount(fromAddress, fundAmount)
+		if err != nil {
+			panic(err)
+		}
+		fmt.Printf("fund txs: %v\n", hashes)
+	}
+
+	// to account
+	toWallet, err := wallet.NewFromKeygenFile("account_to")
+	if err != nil {
+		panic(err)
+	}
+	toAddress := toWallet.Address()
+	fmt.Printf("to address: %s\n", toAddress)
+
+	// fund (max: 20000)
+	{
+		hashes, err := faucet.FundAccount(toAddress, fundAmount)
+		if err != nil {
+			panic(err)
+		}
+		fmt.Printf("fund txs: %v\n", hashes)
+	}
+
+	time.Sleep(time.Second * 5)
+
 	// new rpc
 	client := rpc.New(rpc.DevNet_RPC)
 
-	// from account
-	coinAccount, err := client.Account(ctx, coinAddress)
+	// coin account
+	fromAccount, err := client.Account(ctx, fromAddress)
 	if err != nil {
 		panic(err)
 	}
 
 	//
+	transferAmount := uint64(50000000)
 	payload := rpc.Payload{
 		T:             "script_function_payload",
-		Function:      "0x1::managed_coin::initialize",
+		Function:      "0x1::coin::transfer",
 		TypeArguments: []string{fmt.Sprintf("%s::usdt::USDTCoin", coinAddress)},
 		Arguments: []interface{}{
-			hex.EncodeToString([]byte("usdt")),
-			hex.EncodeToString([]byte("USDT")),
-			"6",
-			false,
+			toAddress,
+			fmt.Sprintf("%d", transferAmount),
 		},
 	}
 	transaction := rpc.Transaction{
 		T:                       "",
 		Hash:                    "",
-		Sender:                  coinAddress,
-		SequenceNumber:          coinAccount.SequenceNumber,
+		Sender:                  fromAddress,
+		SequenceNumber:          fromAccount.SequenceNumber,
 		MaxGasAmount:            uint64(2000),
 		GasUnitPrice:            uint64(1),
 		GasCurrencyCode:         "",
@@ -62,7 +99,7 @@ func TestCoinInitialize(t *testing.T) {
 	}
 
 	// sign
-	signature, err := coinWallet.Sign(signData)
+	signature, err := fromWallet.Sign(signData)
 	if err != nil {
 		panic(err)
 	}
@@ -71,7 +108,7 @@ func TestCoinInitialize(t *testing.T) {
 	transaction.Signature = &rpc.Signature{
 		T: "ed25519_signature",
 		//PublicKey: fromAccount.AuthenticationKey,
-		PublicKey: "0x" + coinWallet.PublicKey().String(),
+		PublicKey: "0x" + fromWallet.PublicKey().String(),
 		Signature: "0x" + hex.EncodeToString(signature),
 	}
 

@@ -16,7 +16,7 @@ func TestCoinPublish(t *testing.T) {
 	ctx := context.Background()
 
 	// coin account
-	wallet, err := wallet.NewFromKeygenFile("account_coin_publish")
+	wallet, err := wallet.NewFromKeygenFile("account_example")
 	if err != nil {
 		panic(err)
 	}
@@ -43,7 +43,7 @@ func TestCoinPublish(t *testing.T) {
 	}
 
 	// read move byte code
-	content, err := ioutil.ReadFile("./moon_coin.mv")
+	content, err := ioutil.ReadFile("./usdt.mv")
 	if err != nil {
 		panic(err)
 	}

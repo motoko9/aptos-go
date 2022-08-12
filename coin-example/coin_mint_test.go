@@ -15,7 +15,7 @@ func TestMint(t *testing.T) {
 	ctx := context.Background()
 
 	// coin account
-	coinWallet, err := wallet.NewFromKeygenFile("account_coin_publish")
+	coinWallet, err := wallet.NewFromKeygenFile("account_example")
 	if err != nil {
 		panic(err)
 	}
@@ -23,7 +23,7 @@ func TestMint(t *testing.T) {
 	fmt.Printf("coin address: %s\n", coinAddress)
 
 	// recipient account
-	wallet, err := wallet.NewFromKeygenFile("account_coin_recipient")
+	wallet, err := wallet.NewFromKeygenFile("account_recipient")
 	if err != nil {
 		panic(err)
 	}
@@ -54,7 +54,7 @@ func TestMint(t *testing.T) {
 	payload := rpc.Payload{
 		T:             "script_function_payload",
 		Function:      "0x1::managed_coin::mint",
-		TypeArguments: []string{fmt.Sprintf("%s::moon_coin::MoonCoin", coinAddress)},
+		TypeArguments: []string{fmt.Sprintf("%s::usdt::USDTCoin", coinAddress)},
 		Arguments: []interface{}{
 			address,
 			fmt.Sprintf("%d", mintAmount),

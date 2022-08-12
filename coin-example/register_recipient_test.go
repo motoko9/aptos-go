@@ -15,7 +15,7 @@ func TestRegisterRecipient(t *testing.T) {
 	ctx := context.Background()
 
 	// coin account
-	coinWallet, err := wallet.NewFromKeygenFile("account_coin_publish")
+	coinWallet, err := wallet.NewFromKeygenFile("account_example")
 	if err != nil {
 		panic(err)
 	}
@@ -24,7 +24,7 @@ func TestRegisterRecipient(t *testing.T) {
 
 	// new account
 	wallet := wallet.New()
-	wallet.Save("account_coin_recipient")
+	wallet.Save("account_recipient")
 	address := wallet.Address()
 	fmt.Printf("recipient address: %s\n", address)
 
@@ -50,8 +50,8 @@ func TestRegisterRecipient(t *testing.T) {
 	//
 	payload := rpc.Payload{
 		T:             "script_function_payload",
-		Function:      "0x1::coin::register",
-		TypeArguments: []string{fmt.Sprintf("%s::moon_coin::MoonCoin", coinAddress)},
+		Function:      "0x1::coins::register",
+		TypeArguments: []string{fmt.Sprintf("%s::usdt::USDTCoin", coinAddress)},
 		Arguments:     []interface{}{},
 	}
 	transaction := rpc.Transaction{

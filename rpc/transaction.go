@@ -183,3 +183,30 @@ func (cl *Client) TransferCoin(ctx context.Context, from string, sequenceNumber 
 	}
 	return &transaction, nil
 }
+
+func (cl *Client) RegisterRecipient(ctx context.Context, from string, sequenceNumber uint64, coin string) (*Transaction, error) {
+	// transfer
+	coin, ok := CoinType[coin]
+	if !ok {
+		return nil, fmt.Errorf("coin %s is not supported", coin)
+	}
+	transferPayload := Payload{
+		Function:      "0x1::coins::register",
+		Arguments:     []interface{}{},
+		T:             "script_function_payload",
+		TypeArguments: []string{coin},
+	}
+	transaction := Transaction{
+		T:                       "",
+		Hash:                    "",
+		Sender:                  from,
+		SequenceNumber:          sequenceNumber,
+		MaxGasAmount:            uint64(2000),
+		GasUnitPrice:            uint64(1),
+		GasCurrencyCode:         "",
+		ExpirationTimestampSecs: uint64(time.Now().Unix() + 600), // now + 10 minutes
+		Payload:                 &transferPayload,
+		Signature:               nil,
+	}
+	return &transaction, nil
+}
