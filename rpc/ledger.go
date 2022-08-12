@@ -7,7 +7,7 @@ import (
 
 type Ledger struct {
 	ChainId             uint64 `json:"chain_id"`
-	Epoch               uint64 `json:"epoch"`
+	Epoch               uint64 `json:"epoch,string"`
 	LedgerVersion       uint64 `json:"ledger_version,string"`
 	OldestLedgerVersion string `json:"oldest_ledger_version"`
 	LedgerTimestamp     uint64 `json:"ledger_timestamp,string"`

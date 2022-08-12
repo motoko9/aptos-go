@@ -14,17 +14,20 @@ func TestFaucet(t *testing.T) {
 	ctx := context.Background()
 
 	// new account
-	wallet := wallet.New()
+	wallet, err := wallet.NewFromKeygenFile("account_example")
+	if err != nil {
+		panic(err)
+	}
 	address := wallet.Address()
 	fmt.Printf("address: %s\n", address)
 
 	// fund (max: 20000)
 	amount := uint64(20000)
-	hashs, err := faucet.FundAccount(address, amount)
+	hashes, err := faucet.FundAccount(address, amount)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf("fund txs: %v\n", hashs)
+	fmt.Printf("fund txs: %v\n", hashes)
 
 	//
 	time.Sleep(time.Second * 5)
@@ -39,7 +42,7 @@ func TestFaucet(t *testing.T) {
 	}
 
 	// check account
-	balance, err := client.AccountBalance(ctx, address, "AptosCoin", ledger.LedgerVersion)
+	balance, err := client.AccountBalance(ctx, address, rpc.AptosCoin, ledger.LedgerVersion)
 	if err != nil {
 		panic(err)
 	}

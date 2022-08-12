@@ -13,7 +13,7 @@ func TestTransfer(t *testing.T) {
 	ctx := context.Background()
 
 	// account
-	walletFrom, err := wallet.NewFromKeygenFile("account_from")
+	walletFrom, err := wallet.NewFromKeygenFile("account_example")
 	if err != nil {
 		panic(err)
 	}
