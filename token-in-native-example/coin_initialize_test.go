@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/hex"
 	"fmt"
+	"github.com/motoko9/aptos-go/aptos"
 	"github.com/motoko9/aptos-go/rpc"
 	"github.com/motoko9/aptos-go/wallet"
 	"testing"
@@ -22,7 +23,7 @@ func TestCoinInitialize(t *testing.T) {
 	fmt.Printf("coin address: %s\n", coinAddress)
 
 	// new rpc
-	client := rpc.New(rpc.DevNet_RPC)
+	client := aptos.New(rpc.DevNet_RPC)
 
 	// from account
 	coinAccount, err := client.Account(ctx, coinAddress)

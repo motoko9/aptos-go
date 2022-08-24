@@ -2,7 +2,6 @@ package rpc
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 )
 
@@ -22,12 +21,9 @@ func (cl *Client) Block(ctx context.Context, height uint64, withTransactions boo
 		params["with_transactions"] = "true"
 	}
 
-	result, code, err := cl.Get("/blocks/by_height/"+fmt.Sprintf("%d", height), params)
-	if err != nil || code != 200 {
-		return nil, err
-	}
 	var block Block
-	if err = json.Unmarshal(result, &block); err != nil {
+	code, err := cl.Get(ctx, "/blocks/by_height/"+fmt.Sprintf("%d", height), params, &block)
+	if err != nil || code != 200 {
 		return nil, err
 	}
 	return &block, nil

@@ -4,8 +4,6 @@ import (
 	"context"
 	"encoding/hex"
 	"encoding/json"
-	"fmt"
-	"time"
 )
 
 type Signature struct {
@@ -40,54 +38,12 @@ type Transaction struct {
 }
 
 func (cl *Client) Transaction(ctx context.Context, hash string) (*Transaction, error) {
-	result, code, err := cl.Get("/transactions/"+hash, nil)
+	var transaction Transaction
+	code, err := cl.Get(ctx, "/transactions/"+hash, nil, &transaction)
 	if err != nil || code != 200 {
 		return nil, err
 	}
-	var transaction Transaction
-	if err = json.Unmarshal(result, &transaction); err != nil {
-		return nil, err
-	}
 	return &transaction, nil
-}
-
-func (cl *Client) TransactionPending(ctx context.Context, hash string) (bool, error) {
-	result, code, err := cl.Get("/transactions/"+hash, nil)
-	if code == -1 {
-		return false, err
-	}
-	if code == 404 {
-		// resource not found, maybe transaction is not on chain
-		return true, nil
-	}
-	if code == 200 {
-		var transaction Transaction
-		if err = json.Unmarshal(result, &transaction); err != nil {
-			return false, err
-		}
-		if transaction.T == "pending_transaction" {
-			return true, nil
-		} else {
-			return false, nil
-		}
-	}
-	return false, err
-}
-
-func (cl *Client) ConfirmTransaction(ctx context.Context, hash string) (bool, error) {
-	counter := 0
-	for counter < 100 {
-		pending, err := cl.TransactionPending(ctx, hash)
-		if err != nil {
-			return false, err
-		}
-		if !pending {
-			return true, nil
-		}
-		counter++
-		time.Sleep(time.Second * 1)
-	}
-	return false, nil
 }
 
 type SignMessageResult struct {
@@ -99,12 +55,9 @@ func (cl *Client) SignMessage(ctx context.Context, tx *Transaction) ([]byte, err
 	if err != nil {
 		return nil, err
 	}
-	result, code, err := cl.Post("/transactions/signing_message", nil, requestBody)
-	if err != nil || code != 200 {
-		return nil, err
-	}
 	var signMessage SignMessageResult
-	if err = json.Unmarshal(result, &signMessage); err != nil {
+	code, err := cl.Post(ctx, "/transactions/signing_message", nil, requestBody, &signMessage)
+	if err != nil || code != 200 {
 		return nil, err
 	}
 	//
@@ -121,92 +74,11 @@ func (cl *Client) SubmitTransaction(ctx context.Context, tx *Transaction) (*Tran
 	if err != nil {
 		return nil, err
 	}
-	result, code, err := cl.Post("/transactions", nil, requestBody)
+	var transaction Transaction
+	code, err := cl.Post(ctx, "/transactions", nil, requestBody, &transaction)
 	if err != nil || (code != 200 && code != 202) {
 		return nil, err
 	}
-	var transaction Transaction
-	if err = json.Unmarshal(result, &transaction); err != nil {
-		return nil, err
-	}
 	//
-	return &transaction, nil
-}
-
-func (cl *Client) PublishMoveModule(ctx context.Context, account string, sequenceNumber uint64, module []byte) (*Transaction, error) {
-	publishPayload := Payload{
-		T: "module_bundle_payload",
-		Modules: []Module{
-			{
-				ByteCode: "0x" + hex.EncodeToString(module),
-			},
-		},
-	}
-	publish := Transaction{
-		T:                       "",
-		Hash:                    "",
-		Sender:                  account,
-		SequenceNumber:          sequenceNumber,
-		MaxGasAmount:            uint64(2000),
-		GasUnitPrice:            uint64(1),
-		GasCurrencyCode:         "",
-		ExpirationTimestampSecs: uint64(time.Now().Unix() + 600), // now + 10 minutes
-		Payload:                 &publishPayload,
-		Signature:               nil,
-	}
-	return &publish, nil
-}
-
-func (cl *Client) TransferCoin(ctx context.Context, from string, sequenceNumber uint64, coin string, amount uint64, receipt string) (*Transaction, error) {
-	// transfer
-	coin, ok := CoinType[coin]
-	if !ok {
-		return nil, fmt.Errorf("coin %s is not supported", coin)
-	}
-	transferPayload := Payload{
-		Function:      "0x1::coin::transfer",
-		Arguments:     []interface{}{receipt, fmt.Sprintf("%d", amount)},
-		T:             "script_function_payload",
-		TypeArguments: []string{coin},
-	}
-	transaction := Transaction{
-		T:                       "",
-		Hash:                    "",
-		Sender:                  from,
-		SequenceNumber:          sequenceNumber,
-		MaxGasAmount:            uint64(2000),
-		GasUnitPrice:            uint64(1),
-		GasCurrencyCode:         "",
-		ExpirationTimestampSecs: uint64(time.Now().Unix() + 600), // now + 10 minutes
-		Payload:                 &transferPayload,
-		Signature:               nil,
-	}
-	return &transaction, nil
-}
-
-func (cl *Client) RegisterRecipient(ctx context.Context, from string, sequenceNumber uint64, coin string) (*Transaction, error) {
-	// transfer
-	coin, ok := CoinType[coin]
-	if !ok {
-		return nil, fmt.Errorf("coin %s is not supported", coin)
-	}
-	transferPayload := Payload{
-		Function:      "0x1::coins::register",
-		Arguments:     []interface{}{},
-		T:             "script_function_payload",
-		TypeArguments: []string{coin},
-	}
-	transaction := Transaction{
-		T:                       "",
-		Hash:                    "",
-		Sender:                  from,
-		SequenceNumber:          sequenceNumber,
-		MaxGasAmount:            uint64(2000),
-		GasUnitPrice:            uint64(1),
-		GasCurrencyCode:         "",
-		ExpirationTimestampSecs: uint64(time.Now().Unix() + 600), // now + 10 minutes
-		Payload:                 &transferPayload,
-		Signature:               nil,
-	}
 	return &transaction, nil
 }

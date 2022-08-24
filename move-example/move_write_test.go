@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/hex"
 	"fmt"
+	"github.com/motoko9/aptos-go/aptos"
 	"github.com/motoko9/aptos-go/faucet"
 	"github.com/motoko9/aptos-go/rpc"
 	"github.com/motoko9/aptos-go/wallet"
@@ -40,7 +41,7 @@ func TestMoveWrite(t *testing.T) {
 	time.Sleep(time.Second * 5)
 
 	// new rpc
-	client := rpc.New(rpc.DevNet_RPC)
+	client := aptos.New(rpc.DevNet_RPC)
 
 	// from account
 	account, err := client.Account(ctx, address)

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/hex"
 	"fmt"
+	"github.com/motoko9/aptos-go/aptos"
 	"github.com/motoko9/aptos-go/rpc"
 	"github.com/motoko9/aptos-go/wallet"
 	"testing"
@@ -28,7 +29,7 @@ func TestTransfer(t *testing.T) {
 	fmt.Printf("to address: %s\n", addressTo)
 
 	// new rpc
-	client := rpc.New(rpc.DevNet_RPC)
+	client := aptos.New(rpc.DevNet_RPC)
 
 	// latest ledger
 	ledger, err := client.Ledger(ctx)

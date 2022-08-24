@@ -2,7 +2,6 @@ package rpc
 
 import (
 	"context"
-	"encoding/json"
 )
 
 type Account struct {
@@ -11,12 +10,9 @@ type Account struct {
 }
 
 func (cl *Client) Account(ctx context.Context, address string) (*Account, error) {
-	result, code, err := cl.Get("/accounts/"+address, nil)
-	if err != nil || code != 200 {
-		return nil, err
-	}
 	var account Account
-	if err = json.Unmarshal(result, &account); err != nil {
+	code, err := cl.Get(ctx, "/accounts/"+address, nil, &account)
+	if err != nil || code != 200 {
 		return nil, err
 	}
 	return &account, nil

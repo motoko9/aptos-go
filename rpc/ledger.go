@@ -2,7 +2,6 @@ package rpc
 
 import (
 	"context"
-	"encoding/json"
 )
 
 type Ledger struct {
@@ -17,12 +16,9 @@ type Ledger struct {
 }
 
 func (cl *Client) Ledger(ctx context.Context) (*Ledger, error) {
-	result, code, err := cl.Get("", nil)
-	if err != nil || code != 200 {
-		return nil, err
-	}
 	var ledger Ledger
-	if err = json.Unmarshal(result, &ledger); err != nil {
+	code, err := cl.Get(ctx, "", nil, &ledger)
+	if err != nil || code != 200 {
 		return nil, err
 	}
 	return &ledger, nil

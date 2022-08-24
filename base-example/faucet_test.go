@@ -3,6 +3,7 @@ package base_example
 import (
 	"context"
 	"fmt"
+	"github.com/motoko9/aptos-go/aptos"
 	"github.com/motoko9/aptos-go/faucet"
 	"github.com/motoko9/aptos-go/rpc"
 	"github.com/motoko9/aptos-go/wallet"
@@ -33,7 +34,7 @@ func TestFaucet(t *testing.T) {
 	time.Sleep(time.Second * 5)
 
 	// new rpc
-	client := rpc.New(rpc.DevNet_RPC)
+	client := aptos.New(rpc.DevNet_RPC)
 
 	// latest ledger
 	ledger, err := client.Ledger(ctx)

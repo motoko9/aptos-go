@@ -2,10 +2,11 @@ package rpc
 
 import (
 	"bytes"
+	"context"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"net/url"
 )
 
 type Client struct {
@@ -21,14 +22,14 @@ func New(endpoint string) *Client {
 	}
 }
 
-func (cl *Client) SetHeader(headers map[string]string) {
+func (cl *Client) SetHeaders(headers map[string]string) {
 	cl.headers = headers
 }
 
-func (cl *Client) Get(path string, params map[string]string) ([]byte, int, error) {
+func (cl *Client) Get(ctx context.Context, path string, params map[string]string, result interface{}) (int, error) {
 	req, err := http.NewRequest("GET", cl.url+path, nil)
 	if err != nil {
-		return nil, -1, err
+		return -1, err
 	}
 
 	req.Header.Set("Content-Type", "application/json")
@@ -41,33 +42,42 @@ func (cl *Client) Get(path string, params map[string]string) ([]byte, int, error
 	}
 
 	if params != nil {
-		q := url.Values{}
+		q := req.URL.Query()
 		for k, v := range params {
 			q.Add(k, v)
 		}
 		req.URL.RawQuery = q.Encode()
 	}
 
+	req = req.WithContext(ctx)
 	resp, err := cl.client.Do(req)
 	if err != nil {
-		return nil, -1, err
+		return -1, err
 	}
-	defer resp.Body.Close()
 	if resp.StatusCode != 200 {
-		return nil, resp.StatusCode, fmt.Errorf("response status code: %d", resp.StatusCode)
+		return resp.StatusCode, fmt.Errorf("response status code: %d", resp.StatusCode)
 	}
 	respBody, err := ioutil.ReadAll(resp.Body)
+	defer resp.Body.Close()
 	if err != nil {
-		return nil, resp.StatusCode, err
+		return resp.StatusCode, err
 	}
-	return respBody, resp.StatusCode, nil
+	err = json.Unmarshal(respBody, result)
+	if err != nil {
+		return -1, err
+	}
+	return resp.StatusCode, nil
 }
 
-func (cl *Client) Post(path string, params map[string]string, body []byte) ([]byte, int, error) {
-	reqReader := bytes.NewReader(body)
+func (cl *Client) Post(ctx context.Context, path string, params map[string]string, body interface{}, result interface{}) (int, error) {
+	reqBody, err := json.Marshal(body)
+	if err != nil {
+		return -1, err
+	}
+	reqReader := bytes.NewReader(reqBody)
 	req, err := http.NewRequest("POST", cl.url+path, reqReader)
 	if err != nil {
-		return nil, -1, err
+		return -1, err
 	}
 
 	req.Header.Set("Content-Type", "application/json")
@@ -80,25 +90,30 @@ func (cl *Client) Post(path string, params map[string]string, body []byte) ([]by
 	}
 
 	if params != nil {
-		q := url.Values{}
+		q := req.URL.Query()
 		for k, v := range params {
 			q.Add(k, v)
 		}
 		req.URL.RawQuery = q.Encode()
 	}
 
+	req = req.WithContext(ctx)
 	resp, err := cl.client.Do(req)
 	if err != nil {
-		return nil, -1, err
+		return -1, err
 	}
-	defer resp.Body.Close()
 	// 202 - Transaction is accepted and submitted to mempool.
 	if resp.StatusCode != 200 && resp.StatusCode != 202 {
-		return nil, resp.StatusCode, fmt.Errorf("response status code: %d", resp.StatusCode)
+		return resp.StatusCode, fmt.Errorf("response status code: %d", resp.StatusCode)
 	}
 	respBody, err := ioutil.ReadAll(resp.Body)
+	defer resp.Body.Close()
 	if err != nil {
-		return nil, resp.StatusCode, err
+		return resp.StatusCode, err
 	}
-	return respBody, resp.StatusCode, nil
+	err = json.Unmarshal(respBody, result)
+	if err != nil {
+		return -1, err
+	}
+	return resp.StatusCode, nil
 }
