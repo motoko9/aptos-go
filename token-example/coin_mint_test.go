@@ -45,7 +45,7 @@ func TestMint(t *testing.T) {
 	client := aptos.New(rpc.DevNet_RPC)
 
 	// coin account
-	coinAccount, err := client.Account(ctx, coinAddress)
+	coinAccount, err := client.Account(ctx, coinAddress, 0)
 	if err != nil {
 		panic(err)
 	}

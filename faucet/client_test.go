@@ -6,7 +6,7 @@ import (
 )
 
 func TestClient_Account(t *testing.T) {
-	hashes, err := FundAccount("0xb0e4f55ea10ba1604f943ceb665c698ebc72c19fef44173572ab11107c1d6b30", 1000000)
+	hashes, err := FundAccount("0x697c173eeb917c95a382b60f546eb73a4c6a2a7b2d79e6c56c87104f9c04345f", 1000000)
 	if err != nil {
 		panic(err)
 	}

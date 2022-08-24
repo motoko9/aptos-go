@@ -18,5 +18,3 @@ func New(endpoint string) *Client {
 func (cl *Client) SetHeaders(headers map[string]string) {
 	cl.Client.SetHeaders(headers)
 }
-
-

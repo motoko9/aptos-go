@@ -64,7 +64,7 @@ func TestTransfer(t *testing.T) {
 	client := aptos.New(rpc.DevNet_RPC)
 
 	// coin account
-	fromAccount, err := client.Account(ctx, fromAddress)
+	fromAccount, err := client.Account(ctx, fromAddress, 0)
 	if err != nil {
 		panic(err)
 	}

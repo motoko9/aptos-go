@@ -43,7 +43,7 @@ func TestFaucet(t *testing.T) {
 	}
 
 	// check account
-	balance, err := client.AccountBalance(ctx, address, rpc.AptosCoin, ledger.LedgerVersion)
+	balance, err := client.AccountBalance(ctx, address, aptos.AptosCoin, ledger.LedgerVersion)
 	if err != nil {
 		panic(err)
 	}

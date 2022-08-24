@@ -11,9 +11,14 @@ type Account struct {
 	AuthenticationKey string `json:"authentication_key"`
 }
 
-func (cl *Client) Account(ctx context.Context, address string) (*Account, error) {
+func (cl *Client) Account(ctx context.Context, address string, version uint64) (*Account, error) {
+	var params map[string]string
+	if version != 0 {
+		params = make(map[string]string)
+		params["version"] = fmt.Sprintf("%d", version)
+	}
 	var account Account
-	code, err := cl.Get(ctx, "/accounts/"+address, nil, &account)
+	code, err := cl.Get(ctx, "/accounts/"+address, params, &account)
 	if err != nil || code != 200 {
 		return nil, err
 	}
@@ -21,10 +26,7 @@ func (cl *Client) Account(ctx context.Context, address string) (*Account, error)
 }
 
 type AccountResource struct {
-	// only support CoinStore type
-	// todo
-	T    string    `json:"type"`
-	//Data interface{} `json:"data"`
+	T    string          `json:"type"`
 	Data json.RawMessage `json:"data"`
 }
 
@@ -56,4 +58,68 @@ func (cl *Client) AccountResourceByAddressAndType(ctx context.Context, address s
 		return nil, err
 	}
 	return &accountResource, nil
+}
+
+type Param struct {
+	Constraints []string `json:"constraints"`
+}
+
+type Function struct {
+	Name              string   `json:"name"`
+	Visibility        string   `json:"visibility"`
+	IsEntry           bool     `json:"is_entry"`
+	GenericTypeParams []*Param `json:"generic_type_params"`
+	Params            []string `json:"params"`
+	Return            []string `json:"return"`
+}
+
+type Struct struct {
+	Name              string              `json:"name"`
+	IsNative          bool                `json:"is_native"`
+	Abilities         []string            `json:"abilities"`
+	GenericTypeParams []*Param            `json:"generic_type_params"`
+	Fields            []map[string]string `json:"fields"`
+}
+
+type Abi struct {
+	Address          string        `json:"address"`
+	Name             string        `json:"name"`
+	Friends          []interface{} `json:"friends"`
+	ExposedFunctions []*Function   `json:"exposed_functions"`
+	Structs          []*Struct     `json:"structs"`
+}
+
+type AccountModule struct {
+	ByteCode string `json:"bytecode"`
+	Abi      Abi    `json:"abi"`
+}
+
+type AccountModules []AccountModule
+
+func (cl *Client) AccountModules(ctx context.Context, address string, version uint64) (*AccountModules, error) {
+	var params map[string]string
+	if version != 0 {
+		params = make(map[string]string)
+		params["version"] = fmt.Sprintf("%d", version)
+	}
+	var accountModules AccountModules
+	code, err := cl.Get(ctx, "/accounts/"+address+"/modules", params, &accountModules)
+	if err != nil || code != 200 {
+		return nil, err
+	}
+	return &accountModules, nil
+}
+
+func (cl *Client) AccountModuleByAddressAndName(ctx context.Context, address string, name string, version uint64) (*AccountModule, error) {
+	var params map[string]string
+	if version != 0 {
+		params = make(map[string]string)
+		params["version"] = fmt.Sprintf("%d", version)
+	}
+	var accountModule AccountModule
+	code, err := cl.Get(ctx, "/accounts/"+address+"/module/"+name, params, &accountModule)
+	if err != nil || code != 200 {
+		return nil, err
+	}
+	return &accountModule, nil
 }

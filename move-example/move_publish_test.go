@@ -38,7 +38,7 @@ func TestMovePublish(t *testing.T) {
 	client := aptos.New(rpc.DevNet_RPC)
 
 	// from account
-	account, err := client.Account(ctx, address)
+	account, err := client.Account(ctx, address, 0)
 	if err != nil {
 		panic(err)
 	}

@@ -6,13 +6,10 @@ import (
 )
 
 type Event struct {
-	Key            string `json:"key"`
-	SequenceNumber uint64 `json:"sequence_number,string"`
-	// only support TransferEvent type
-	// todo
-	T    string          `json:"type"`
-	//Data interface{}   `json:"data"`
-	Data json.RawMessage `json:"data"`
+	Key            string          `json:"key"`
+	SequenceNumber uint64          `json:"sequence_number,string"`
+	T              string          `json:"type"`
+	Data           json.RawMessage `json:"data"`
 }
 
 type Events []Event
