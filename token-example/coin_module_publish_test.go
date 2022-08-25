@@ -2,7 +2,6 @@ package move_example
 
 import (
 	"context"
-	"encoding/hex"
 	"fmt"
 	"github.com/motoko9/aptos-go/aptos"
 	"github.com/motoko9/aptos-go/faucet"
@@ -37,12 +36,6 @@ func TestCoinPublish(t *testing.T) {
 	// new rpc
 	client := aptos.New(rpc.DevNet_RPC)
 
-	// from account
-	account, err := client.Account(ctx, address, 0)
-	if err != nil {
-		panic(err)
-	}
-
 	// read move byte code
 	content, err := ioutil.ReadFile("./usdc.mv")
 	if err != nil {
@@ -50,33 +43,7 @@ func TestCoinPublish(t *testing.T) {
 	}
 
 	// publish message
-	transaction, err := client.PublishMoveModule(ctx, address, account.SequenceNumber, content)
-	if err != nil {
-		panic(err)
-	}
-
-	// sign message
-	signData, err := client.SignMessage(ctx, transaction)
-	if err != nil {
-		panic(err)
-	}
-
-	// sign
-	signature, err := wallet.Sign(signData)
-	if err != nil {
-		panic(err)
-	}
-
-	// add signature
-	transaction.Signature = &rpc.Signature{
-		T: "ed25519_signature",
-		//PublicKey: fromAccount.AuthenticationKey,
-		PublicKey: "0x" + wallet.PublicKey().String(),
-		Signature: "0x" + hex.EncodeToString(signature),
-	}
-
-	// submit
-	tx, err := client.SubmitTransaction(ctx, transaction)
+	tx, err := client.PublishMoveModule(ctx, address, content, wallet)
 	if err != nil {
 		panic(err)
 	}

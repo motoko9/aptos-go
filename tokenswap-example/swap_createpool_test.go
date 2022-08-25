@@ -1,44 +1,26 @@
-package move_example
+package tokenswap_example
 
 import (
 	"context"
 	"encoding/hex"
 	"fmt"
 	"github.com/motoko9/aptos-go/aptos"
-	"github.com/motoko9/aptos-go/faucet"
 	"github.com/motoko9/aptos-go/rpc"
 	"github.com/motoko9/aptos-go/wallet"
 	"testing"
 	"time"
 )
 
-func TestMoveWrite(t *testing.T) {
+func TestCreatePool(t *testing.T) {
 	ctx := context.Background()
 
 	// move Module account
-	moveModule, err := wallet.NewFromKeygenFile("account_move_publish")
+	swapWallet, err := wallet.NewFromKeygenFile("account_swap")
 	if err != nil {
 		panic(err)
 	}
-	moduleAddress := moveModule.Address()
-	fmt.Printf("move module address: %s\n", moduleAddress)
-
-	// user account
-	wallet := wallet.New()
-	wallet.Save("account_user")
-	address := wallet.Address()
-	fmt.Printf("user address: %s\n", address)
-
-	// fund (max: 20000)
-	amount := uint64(20000)
-	hashes, err := faucet.FundAccount(address, amount)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Printf("fund txs: %v\n", hashes)
-
-	//
-	time.Sleep(time.Second * 5)
+	address := swapWallet.Address()
+	fmt.Printf("move module address: %s\n", address)
 
 	// new rpc
 	client := aptos.New(rpc.DevNet_RPC)
@@ -49,13 +31,12 @@ func TestMoveWrite(t *testing.T) {
 		panic(err)
 	}
 
-	//
-	message := []byte("hello world!")
+	// create pool
 	payload := rpc.EntryFunctionPayload{
 		T:             "entry_function_payload",
-		Function:      fmt.Sprintf("%s::Message::set_message", moduleAddress),
+		Function:      fmt.Sprintf("%s::Message::set_message", address),
 		TypeArguments: []string{},
-		Arguments:     []interface{}{hex.EncodeToString(message)},
+		Arguments:     []interface{}{},
 	}
 	transaction := rpc.Transaction{
 		T:                       "",
@@ -77,7 +58,7 @@ func TestMoveWrite(t *testing.T) {
 	}
 
 	// sign
-	signature, err := wallet.Sign(signData)
+	signature, err := swapWallet.Sign(signData)
 	if err != nil {
 		panic(err)
 	}
@@ -86,7 +67,7 @@ func TestMoveWrite(t *testing.T) {
 	transaction.Signature = &rpc.Signature{
 		T: "ed25519_signature",
 		//PublicKey: fromAccount.AuthenticationKey,
-		PublicKey: "0x" + wallet.PublicKey().String(),
+		PublicKey: "0x" + swapWallet.PublicKey().String(),
 		Signature: "0x" + hex.EncodeToString(signature),
 	}
 

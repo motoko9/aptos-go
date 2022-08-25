@@ -49,8 +49,8 @@ func TestRegisterRecipient(t *testing.T) {
 	}
 
 	//
-	payload := rpc.Payload{
-		T:             "script_function_payload",
+	payload := rpc.EntryFunctionPayload{
+		T:             "entry_function_payload",
 		Function:      "0x1::coins::register",
 		TypeArguments: []string{fmt.Sprintf("%s::usdt::USDTCoin", coinAddress)},
 		Arguments:     []interface{}{},
@@ -69,7 +69,7 @@ func TestRegisterRecipient(t *testing.T) {
 	}
 
 	// sign message
-	signData, err := client.SignMessage(ctx, &transaction)
+	signData, err := client.EncodeSubmission(ctx, &transaction)
 	if err != nil {
 		panic(err)
 	}

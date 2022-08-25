@@ -71,8 +71,8 @@ func TestTransfer(t *testing.T) {
 
 	//
 	transferAmount := uint64(50000000)
-	payload := rpc.Payload{
-		T:             "script_function_payload",
+	payload := rpc.EntryFunctionPayload{
+		T:             "entry_function_payload",
 		Function:      "0x1::coin::transfer",
 		TypeArguments: []string{fmt.Sprintf("%s::usdt::USDTCoin", coinAddress)},
 		Arguments: []interface{}{
@@ -94,7 +94,7 @@ func TestTransfer(t *testing.T) {
 	}
 
 	// sign message
-	signData, err := client.SignMessage(ctx, &transaction)
+	signData, err := client.EncodeSubmission(ctx, &transaction)
 	if err != nil {
 		panic(err)
 	}

@@ -74,8 +74,7 @@ func (cl *Client) Post(ctx context.Context, path string, params map[string]strin
 	if err != nil {
 		return -1, err
 	}
-	reqReader := bytes.NewReader(reqBody)
-	req, err := http.NewRequest("POST", cl.url+path, reqReader)
+	req, err := http.NewRequest("POST", cl.url+path, bytes.NewBuffer(reqBody))
 	if err != nil {
 		return -1, err
 	}
@@ -102,14 +101,11 @@ func (cl *Client) Post(ctx context.Context, path string, params map[string]strin
 	if err != nil {
 		return -1, err
 	}
-	// 202 - Transaction is accepted and submitted to mempool.
-	if resp.StatusCode != 200 && resp.StatusCode != 202 {
-		return resp.StatusCode, fmt.Errorf("response status code: %d", resp.StatusCode)
-	}
 	respBody, err := ioutil.ReadAll(resp.Body)
 	defer resp.Body.Close()
-	if err != nil {
-		return resp.StatusCode, err
+	// 202 - Transaction is accepted and submitted to mempool.
+	if resp.StatusCode != 200 && resp.StatusCode != 202 {
+		return resp.StatusCode, fmt.Errorf("%s", string(respBody))
 	}
 	err = json.Unmarshal(respBody, result)
 	if err != nil {

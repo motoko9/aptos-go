@@ -52,8 +52,8 @@ func TestMint(t *testing.T) {
 
 	//
 	mintAmount := uint64(1000000000)
-	payload := rpc.Payload{
-		T:             "script_function_payload",
+	payload := rpc.EntryFunctionPayload{
+		T:             "entry_function_payload",
 		Function:      "0x1::managed_coin::mint",
 		TypeArguments: []string{fmt.Sprintf("%s::usdt::USDTCoin", coinAddress)},
 		Arguments: []interface{}{
@@ -75,7 +75,7 @@ func TestMint(t *testing.T) {
 	}
 
 	// sign message
-	signData, err := client.SignMessage(ctx, &transaction)
+	signData, err := client.EncodeSubmission(ctx, &transaction)
 	if err != nil {
 		panic(err)
 	}

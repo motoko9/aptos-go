@@ -32,8 +32,8 @@ func TestCoinInitialize(t *testing.T) {
 	}
 
 	//
-	payload := rpc.Payload{
-		T:             "script_function_payload",
+	payload := rpc.EntryFunctionPayload{
+		T:             "entry_function_payload",
 		Function:      "0x1::managed_coin::initialize",
 		TypeArguments: []string{fmt.Sprintf("%s::usdt::USDTCoin", coinAddress)},
 		Arguments: []interface{}{
@@ -57,7 +57,7 @@ func TestCoinInitialize(t *testing.T) {
 	}
 
 	// sign message
-	signData, err := client.SignMessage(ctx, &transaction)
+	signData, err := client.EncodeSubmission(ctx, &transaction)
 	if err != nil {
 		panic(err)
 	}

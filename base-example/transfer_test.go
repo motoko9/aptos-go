@@ -61,13 +61,13 @@ func TestTransfer_raw(t *testing.T) {
 		panic(err)
 	}
 
-	transaction, err := client.TransferCoinMsg(ctx, addressFrom, accountFrom.SequenceNumber, aptos.AptosCoin, uint64(1000), addressTo)
+	transaction, err := client.TransferCoinMsg(addressFrom, accountFrom.SequenceNumber, aptos.AptosCoin, uint64(1000), addressTo)
 	if err != nil {
 		panic(err)
 	}
 
 	// sign message
-	signData, err := client.SignMessage(ctx, transaction)
+	signData, err := client.EncodeSubmission(ctx, transaction)
 	if err != nil {
 		panic(err)
 	}

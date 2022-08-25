@@ -15,7 +15,7 @@ func TestClient_AccountBalance(t *testing.T) {
 	{
 		balance, err := client.AccountBalance(
 			context.Background(),
-			"0xdb8e31e499902c188ecd9786862a98f00a09fd1d7257ac9a5a154341318d0aa9",
+			"0x697c173eeb917c95a382b60f546eb73a4c6a2a7b2d79e6c56c87104f9c04345f",
 			AptosCoin,
 			ledger.LedgerVersion)
 		if err != nil {
@@ -26,7 +26,7 @@ func TestClient_AccountBalance(t *testing.T) {
 	{
 		balance, err := client.AccountBalance(
 			context.Background(),
-			"0xdb8e31e499902c188ecd9786862a98f00a09fd1d7257ac9a5a154341318d0aa9",
+			"0x697c173eeb917c95a382b60f546eb73a4c6a2a7b2d79e6c56c87104f9c04345f",
 			USDTCoin,
 			ledger.LedgerVersion)
 		if err != nil {
@@ -37,7 +37,7 @@ func TestClient_AccountBalance(t *testing.T) {
 	{
 		balance, err := client.AccountBalance(
 			context.Background(),
-			"0xdb8e31e499902c188ecd9786862a98f00a09fd1d7257ac9a5a154341318d0aa9",
+			"0x697c173eeb917c95a382b60f546eb73a4c6a2a7b2d79e6c56c87104f9c04345f",
 			BTCCoin,
 			ledger.LedgerVersion)
 		if err != nil {
