@@ -29,4 +29,3 @@ func TestClient_EventsByHandle(t *testing.T) {
 	eventsJson, _ := json.MarshalIndent(events, "", "    ")
 	fmt.Printf("events: %s\n", string(eventsJson))
 }
-

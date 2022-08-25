@@ -29,17 +29,17 @@ type ModuleBundlePayload struct {
 }
 
 type Transaction struct {
-	T                       string      `json:"type,omitempty"`
-	Hash                    string      `json:"hash,omitempty"`
-	Sender                  string      `json:"sender"`
-	SequenceNumber          uint64      `json:"sequence_number,string"`
-	MaxGasAmount            uint64      `json:"max_gas_amount,string"`
-	GasUnitPrice            uint64      `json:"gas_unit_price,string"`
-	GasCurrencyCode         string      `json:"gas_currency_code,omitempty"`
-	ExpirationTimestampSecs uint64      `json:"expiration_timestamp_secs,string"`
+	T                       string `json:"type,omitempty"`
+	Hash                    string `json:"hash,omitempty"`
+	Sender                  string `json:"sender"`
+	SequenceNumber          uint64 `json:"sequence_number,string"`
+	MaxGasAmount            uint64 `json:"max_gas_amount,string"`
+	GasUnitPrice            uint64 `json:"gas_unit_price,string"`
+	GasCurrencyCode         string `json:"gas_currency_code,omitempty"`
+	ExpirationTimestampSecs uint64 `json:"expiration_timestamp_secs,string"`
 	//SecondarySigners        []string    `json:"secondary_signers,omitempty"`
-	Payload                 interface{} `json:"payload"`
-	Signature               *Signature  `json:"signature,omitempty"`
+	Payload   interface{} `json:"payload"`
+	Signature *Signature  `json:"signature,omitempty"`
 }
 
 type Transactions []Transaction

@@ -14,35 +14,43 @@ import (
 func TestSwap(t *testing.T) {
 	ctx := context.Background()
 
-	// move Module account
-	wallet, err := wallet.NewFromKeygenFile("account_user")
+	// swap account
+	swapWallet, err := wallet.NewFromKeygenFile("account_swap")
 	if err != nil {
 		panic(err)
 	}
-	address := wallet.Address()
-	fmt.Printf("user address: %s\n", address)
+	swapAddress := swapWallet.Address()
+	fmt.Printf("swap module publish address: %s\n", swapAddress)
 
+	userWallet, err := wallet.NewFromKeygenFile("account_user")
+	if err != nil {
+		panic(err)
+	}
+	userAddress := userWallet.Address()
+	fmt.Printf("user address: %s\n", userAddress)
 	// new rpc
 	client := aptos.New(rpc.DevNet_RPC)
 
 	// from account
-	account, err := client.Account(ctx, address, 0)
+	account, err := client.Account(ctx, userAddress, 0)
 	if err != nil {
 		panic(err)
 	}
 
 	// swap
 	// todo
+	coin1 := aptos.CoinType[aptos.AptosCoin]
+	coin2 := aptos.CoinType[aptos.USDTCoin]
 	payload := rpc.EntryFunctionPayload{
 		T:             "entry_function_payload",
-		Function:      fmt.Sprintf("%s::Message::set_message", address),
-		TypeArguments: []string{},
-		Arguments:     []interface{}{},
+		Function:      fmt.Sprintf("%s::swap::swap", swapAddress),
+		TypeArguments: []string{coin1, coin2},
+		Arguments:     []interface{}{0, 0},
 	}
 	transaction := rpc.Transaction{
 		T:                       "",
 		Hash:                    "",
-		Sender:                  address,
+		Sender:                  userAddress,
 		SequenceNumber:          account.SequenceNumber,
 		MaxGasAmount:            uint64(2000),
 		GasUnitPrice:            uint64(1),
@@ -59,7 +67,7 @@ func TestSwap(t *testing.T) {
 	}
 
 	// sign
-	signature, err := wallet.Sign(signData)
+	signature, err := userWallet.Sign(signData)
 	if err != nil {
 		panic(err)
 	}
@@ -68,7 +76,7 @@ func TestSwap(t *testing.T) {
 	transaction.Signature = &rpc.Signature{
 		T: "ed25519_signature",
 		//PublicKey: fromAccount.AuthenticationKey,
-		PublicKey: "0x" + wallet.PublicKey().String(),
+		PublicKey: "0x" + userWallet.PublicKey().String(),
 		Signature: "0x" + hex.EncodeToString(signature),
 	}
 

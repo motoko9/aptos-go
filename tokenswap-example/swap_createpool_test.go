@@ -14,7 +14,7 @@ import (
 func TestCreatePool(t *testing.T) {
 	ctx := context.Background()
 
-	// move Module account
+	// swap Module account
 	swapWallet, err := wallet.NewFromKeygenFile("account_swap")
 	if err != nil {
 		panic(err)
@@ -32,10 +32,12 @@ func TestCreatePool(t *testing.T) {
 	}
 
 	// create pool
+	coin1 := aptos.CoinType[aptos.AptosCoin]
+	coin2 := aptos.CoinType[aptos.USDTCoin]
 	payload := rpc.EntryFunctionPayload{
 		T:             "entry_function_payload",
-		Function:      fmt.Sprintf("%s::Message::set_message", address),
-		TypeArguments: []string{},
+		Function:      fmt.Sprintf("%s::swap::create_pool", address),
+		TypeArguments: []string{coin1, coin2},
 		Arguments:     []interface{}{},
 	}
 	transaction := rpc.Transaction{
