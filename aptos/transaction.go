@@ -65,7 +65,7 @@ func (cl *Client) PublishMoveModuleMsg(addr string, sequenceNumber uint64, modul
 		Sender:                  addr,
 		SequenceNumber:          sequenceNumber,
 		MaxGasAmount:            uint64(2000),
-		GasUnitPrice:            uint64(1),
+		GasUnitPrice:            uint64(2),
 		GasCurrencyCode:         "",
 		ExpirationTimestampSecs: uint64(time.Now().Unix() + 600), // now + 10 minutes
 		Payload:                 &publishPayload,

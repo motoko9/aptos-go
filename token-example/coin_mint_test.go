@@ -16,7 +16,7 @@ func TestMint(t *testing.T) {
 	ctx := context.Background()
 
 	// coin account
-	coinWallet, err := wallet.NewFromKeygenFile("account_example")
+	coinWallet, err := wallet.NewFromKeygenFile("account_usdt")
 	if err != nil {
 		panic(err)
 	}

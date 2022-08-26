@@ -8,3 +8,8 @@ The parameter of type_arguments in transaction payload is wrong. Please check ad
 
 Coin only can be initialized by the account published this coin module. This account is the owner of this coin and can mint coin.
 
+3. publish move module to chain, but transaction can not be included into ledger.
+
+
+4. VM STATUS is "Transaction Executed and Committed with Error LOOKUP_FAILED", when publish move module
+

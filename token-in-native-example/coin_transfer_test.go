@@ -12,11 +12,87 @@ import (
 	"time"
 )
 
+func TestNewToAccount(t *testing.T) {
+	ctx := context.Background()
+
+	// new account
+	wallet := wallet.New()
+	wallet.Save("account_to")
+	address := wallet.Address()
+	fmt.Printf("address: %s\n", address)
+
+	// fund (max: 20000)
+	amount := uint64(20000)
+	hashes, err := faucet.FundAccount(address, amount)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("fund txs: %v\n", hashes)
+
+	//
+	time.Sleep(time.Second * 5)
+
+	// new rpc
+	client := aptos.New(rpc.DevNet_RPC)
+
+	// latest ledger
+	ledger, err := client.Ledger(ctx)
+	if err != nil {
+		panic(err)
+	}
+
+	// check account
+	balance, err := client.AccountBalance(ctx, address, aptos.AptosCoin, ledger.LedgerVersion)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("account balance: %d\n", balance)
+}
+
+func TestReadToAccount(t *testing.T) {
+	ctx := context.Background()
+
+	// new account
+	wallet, err := wallet.NewFromKeygenFile("account_to")
+	if err != nil {
+		panic(err)
+	}
+	address := wallet.Address()
+	fmt.Printf("address: %s\n", address)
+
+	// fund (max: 20000)
+	amount := uint64(20000)
+	hashes, err := faucet.FundAccount(address, amount)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("fund txs: %v\n", hashes)
+
+	//
+	time.Sleep(time.Second * 5)
+
+	// new rpc
+	client := aptos.New(rpc.DevNet_RPC)
+
+	// latest ledger
+	ledger, err := client.Ledger(ctx)
+	if err != nil {
+		panic(err)
+	}
+
+	// check account
+	balance, err := client.AccountBalance(ctx, address, aptos.AptosCoin, ledger.LedgerVersion)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("account balance: %d\n", balance)
+}
+
 func TestTransfer(t *testing.T) {
 	ctx := context.Background()
 
 	// coin account
-	coinWallet, err := wallet.NewFromKeygenFile("account_example")
+	coinWallet, err := wallet.NewFromKeygenFile("account_usdt")
 	if err != nil {
 		panic(err)
 	}

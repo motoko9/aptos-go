@@ -16,7 +16,7 @@ func TestNewAccount(t *testing.T) {
 	fmt.Printf("key: %s\n", key)
 }
 
-func TestAccount(t *testing.T) {
+func TestReadAccount(t *testing.T) {
 	// read account
 	wallet, err := wallet.NewFromKeygenFile("account_example")
 	if err != nil {

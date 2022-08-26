@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-func TestNewAccount(t *testing.T) {
+func TestNewSwapAccount(t *testing.T) {
 	ctx := context.Background()
 
 	// new account
@@ -49,7 +49,7 @@ func TestNewAccount(t *testing.T) {
 	fmt.Printf("account balance: %d\n", balance)
 }
 
-func TestReadAccount(t *testing.T) {
+func TestReadSwapAccount(t *testing.T) {
 	ctx := context.Background()
 
 	// new account
