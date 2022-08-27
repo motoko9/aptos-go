@@ -52,11 +52,11 @@ type MoveResource struct {
 type MoveModules []MoveModule
 
 type MoveModule struct {
-	ByteCode string  `json:"bytecode"`
+	ByteCode string   `json:"bytecode"`
 	Abi      *MoveAbi `json:"abi,omitempty"`
 }
 
 type MoveCode struct {
-	ByteCode string  `json:"bytecode"`
+	ByteCode string   `json:"bytecode"`
 	Abi      *MoveAbi `json:"abi,omitempty"`
 }

@@ -68,10 +68,10 @@ func (cl *Client) PublishMoveModuleLegacyReq(addr string, sequenceNumber uint64,
 
 func (cl *Client) PublishMoveModuleReq(addr string, sequenceNumber uint64, content []byte, meta []byte) (*rpcmodule.EncodeSubmissionRequest, error) {
 	publishPayload := rpcmodule.TransactionPayloadEntryFunctionPayload{
-		Function:      "0x1::code::publish_package_txn",
-		Arguments:     []interface{}{
+		Function: "0x1::code::publish_package_txn",
+		Arguments: []interface{}{
 			"0x" + hex.EncodeToString(meta),
-			[]interface{} {
+			[]interface{}{
 				"0x" + hex.EncodeToString(content),
 			},
 		},
@@ -171,7 +171,7 @@ func (cl *Client) TransferCoin(ctx context.Context, from string, coin string, am
 
 // PublishMoveModuleLegacy
 // can publish move module with batch
-//
+// do not working
 func (cl *Client) PublishMoveModuleLegacy(ctx context.Context, addr string, content []byte, signer Signer) (string, error) {
 	// from account
 	account, err := cl.Account(ctx, addr, 0)
@@ -219,7 +219,9 @@ func (cl *Client) PublishMoveModuleLegacy(ctx context.Context, addr string, cont
 	return txHash, nil
 }
 
+// PublishMoveModule
 // todo
+// do not working
 func (cl *Client) PublishMoveModule(ctx context.Context, addr string, content []byte, signer Signer) (string, error) {
 	// from account
 	account, err := cl.Account(ctx, addr, 0)
