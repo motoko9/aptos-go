@@ -258,3 +258,7 @@ func SubmitTransactionReq(encodeSubmissionReq *EncodeSubmissionRequest, signatur
 	}
 	return &req, nil
 }
+
+type GasEstimate struct {
+	GasEstimate uint64 `json:"gas_estimate"`
+}

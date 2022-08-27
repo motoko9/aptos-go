@@ -50,7 +50,7 @@ func (cl *Client) ConfirmTransaction(ctx context.Context, hash string) (bool, er
 	return false, nil
 }
 
-func (cl *Client) PublishMoveModuleReq(addr string, sequenceNumber uint64, content []byte) (*rpcmodule.EncodeSubmissionRequest, error) {
+func (cl *Client) PublishMoveModuleLegacyReq(addr string, sequenceNumber uint64, content []byte) (*rpcmodule.EncodeSubmissionRequest, error) {
 	publishPayload := rpcmodule.TransactionPayloadModuleBundlePayload{
 		Type: "module_bundle_payload",
 		Modules: []rpcmodule.MoveModule{
@@ -62,6 +62,25 @@ func (cl *Client) PublishMoveModuleReq(addr string, sequenceNumber uint64, conte
 	return rpcmodule.EncodeSubmissionReq(addr, sequenceNumber,
 		rpcmodule.TransactionPayload{
 			Type:   "module_bundle_payload",
+			Object: publishPayload,
+		})
+}
+
+func (cl *Client) PublishMoveModuleReq(addr string, sequenceNumber uint64, content []byte, meta []byte) (*rpcmodule.EncodeSubmissionRequest, error) {
+	publishPayload := rpcmodule.TransactionPayloadEntryFunctionPayload{
+		Function:      "0x1::code::publish_package_txn",
+		Arguments:     []interface{}{
+			"0x" + hex.EncodeToString(meta),
+			[]interface{} {
+				"0x" + hex.EncodeToString(content),
+			},
+		},
+		Type:          "entry_function_payload",
+		TypeArguments: []string{},
+	}
+	return rpcmodule.EncodeSubmissionReq(addr, sequenceNumber,
+		rpcmodule.TransactionPayload{
+			Type:   "entry_function_payload",
 			Object: publishPayload,
 		})
 }
@@ -150,6 +169,57 @@ func (cl *Client) TransferCoin(ctx context.Context, from string, coin string, am
 	return txHash, nil
 }
 
+// PublishMoveModuleLegacy
+// can publish move module with batch
+//
+func (cl *Client) PublishMoveModuleLegacy(ctx context.Context, addr string, content []byte, signer Signer) (string, error) {
+	// from account
+	account, err := cl.Account(ctx, addr, 0)
+	if err != nil {
+		return "", err
+	}
+
+	// publish message
+	encodeSubmissionReq, err := cl.PublishMoveModuleLegacyReq(addr, account.SequenceNumber, content)
+	if err != nil {
+		return "", err
+	}
+
+	// sign message
+	signData, err := cl.EncodeSubmission(ctx, encodeSubmissionReq)
+	if err != nil {
+		return "", err
+	}
+
+	// sign
+	signature, err := signer.Sign(signData)
+	if err != nil {
+		return "", err
+	}
+
+	// add signature
+	submitReq, err := rpcmodule.SubmitTransactionReq(encodeSubmissionReq, rpcmodule.AccountSignature{
+		Type: "ed25519_signature",
+		Object: rpcmodule.AccountSignatureEd25519Signature{
+			Type:      "ed25519_signature",
+			PublicKey: "0x" + signer.PublicKey().String(),
+			Signature: "0x" + hex.EncodeToString(signature),
+		},
+	})
+	if err != nil {
+		return "", err
+	}
+
+	// submit
+	txHash, err := cl.SubmitTransaction(ctx, submitReq)
+	if err != nil {
+		return "", err
+	}
+	//
+	return txHash, nil
+}
+
+// todo
 func (cl *Client) PublishMoveModule(ctx context.Context, addr string, content []byte, signer Signer) (string, error) {
 	// from account
 	account, err := cl.Account(ctx, addr, 0)
@@ -158,7 +228,9 @@ func (cl *Client) PublishMoveModule(ctx context.Context, addr string, content []
 	}
 
 	// publish message
-	encodeSubmissionReq, err := cl.PublishMoveModuleReq(addr, account.SequenceNumber, content)
+	// todo
+	// how to get meta ?
+	encodeSubmissionReq, err := cl.PublishMoveModuleReq(addr, account.SequenceNumber, content, content)
 	if err != nil {
 		return "", err
 	}

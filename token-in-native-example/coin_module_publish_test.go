@@ -109,7 +109,7 @@ func TestCoinPublish(t *testing.T) {
 	}
 
 	// publish message
-	txHash, err := client.PublishMoveModule(ctx, address, content, wallet)
+	txHash, err := client.PublishMoveModuleLegacy(ctx, address, content, wallet)
 	if err != nil {
 		panic(err)
 	}

@@ -36,3 +36,12 @@ func TestClient_TransactionByVersion(t *testing.T) {
 	transactionJson, _ := json.MarshalIndent(transaction, "", "    ")
 	fmt.Printf("transaction: %s\n", string(transactionJson))
 }
+
+func TestClient_EstimateGasPrice(t *testing.T) {
+	client := New(DevNet_RPC)
+	gasEstimate, err := client.EstimateGasPrice(context.Background())
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("estimate gas price: %d\n", gasEstimate)
+}

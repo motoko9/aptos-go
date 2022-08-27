@@ -63,3 +63,12 @@ func (cl *Client) SubmitTransaction(ctx context.Context, tx *rpcmodule.SubmitTra
 	}
 	return transaction.Hash, nil
 }
+
+func (cl *Client) EstimateGasPrice(ctx context.Context) (uint64, error) {
+	var gasEstimate rpcmodule.GasEstimate
+	code, err := cl.Get(ctx, "/estimate_gas_price", nil, &gasEstimate)
+	if err != nil || code != 200 {
+		return 0, err
+	}
+	return gasEstimate.GasEstimate, nil
+}
