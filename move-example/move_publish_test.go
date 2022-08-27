@@ -103,7 +103,7 @@ func TestMovePublish(t *testing.T) {
 	client := aptos.New(rpc.DevNet_RPC)
 
 	// read move byte code
-	content, err := ioutil.ReadFile("./message.mv")
+	content, err := ioutil.ReadFile("./helloworld.mv")
 	if err != nil {
 		panic(err)
 	}
