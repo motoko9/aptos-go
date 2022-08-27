@@ -24,7 +24,7 @@ func PrivateKeyFromKeygenFile(file string) (PrivateKey, error) {
 		return nil, fmt.Errorf("decode keygen file: %w", err)
 	}
 
-	return PrivateKey([]byte(values)), nil
+	return values, nil
 }
 
 func PrivateKeyFromHex(key string) (PrivateKey, error) {
@@ -32,7 +32,7 @@ func PrivateKeyFromHex(key string) (PrivateKey, error) {
 	if err != nil {
 		panic(err)
 	}
-	return PrivateKey(k), nil
+	return k, nil
 }
 
 func NewRandomPrivateKey() (PrivateKey, error) {
@@ -100,7 +100,7 @@ func (p PublicKey) ToPointer() *PublicKey {
 }
 
 func (p PublicKey) Bytes() []byte {
-	return []byte(p[:])
+	return p[:]
 }
 
 var zeroPublicKey = PublicKey{}
