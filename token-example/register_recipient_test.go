@@ -7,10 +7,87 @@ import (
 	"github.com/motoko9/aptos-go/aptos"
 	"github.com/motoko9/aptos-go/faucet"
 	"github.com/motoko9/aptos-go/rpc"
+	"github.com/motoko9/aptos-go/rpcmodule"
 	"github.com/motoko9/aptos-go/wallet"
 	"testing"
 	"time"
 )
+
+func TestNewRecipientAccount(t *testing.T) {
+	ctx := context.Background()
+
+	// new account
+	wallet := wallet.New()
+	wallet.Save("account_recipient")
+	address := wallet.Address()
+	fmt.Printf("address: %s\n", address)
+
+	// fund (max: 20000)
+	amount := uint64(20000)
+	hashes, err := faucet.FundAccount(address, amount)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("fund txs: %v\n", hashes)
+
+	//
+	time.Sleep(time.Second * 5)
+
+	// new rpc
+	client := aptos.New(rpc.DevNet_RPC)
+
+	// latest ledger
+	ledger, err := client.Ledger(ctx)
+	if err != nil {
+		panic(err)
+	}
+
+	// check account
+	balance, err := client.AccountBalance(ctx, address, aptos.AptosCoin, ledger.LedgerVersion)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("account balance: %d\n", balance)
+}
+
+func TestReadRecipientAccount(t *testing.T) {
+	ctx := context.Background()
+
+	// new account
+	wallet, err := wallet.NewFromKeygenFile("account_recipient")
+	if err != nil {
+		panic(err)
+	}
+	address := wallet.Address()
+	fmt.Printf("address: %s\n", address)
+
+	// fund (max: 20000)
+	amount := uint64(20000)
+	hashes, err := faucet.FundAccount(address, amount)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("fund txs: %v\n", hashes)
+
+	//
+	time.Sleep(time.Second * 5)
+
+	// new rpc
+	client := aptos.New(rpc.DevNet_RPC)
+
+	// latest ledger
+	ledger, err := client.Ledger(ctx)
+	if err != nil {
+		panic(err)
+	}
+
+	// check account
+	balance, err := client.AccountBalance(ctx, address, aptos.AptosCoin, ledger.LedgerVersion)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("account balance: %d\n", balance)
+}
 
 func TestRegisterRecipient(t *testing.T) {
 	ctx := context.Background()
@@ -29,16 +106,6 @@ func TestRegisterRecipient(t *testing.T) {
 	address := wallet.Address()
 	fmt.Printf("recipient address: %s\n", address)
 
-	// fund (max: 20000)
-	amount := uint64(20000)
-	hashes, err := faucet.FundAccount(address, amount)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Printf("fund txs: %v\n", hashes)
-
-	time.Sleep(time.Second * 5)
-
 	// new rpc
 	client := aptos.New(rpc.DevNet_RPC)
 
@@ -49,27 +116,22 @@ func TestRegisterRecipient(t *testing.T) {
 	}
 
 	//
-	payload := rpc.EntryFunctionPayload{
-		T:             "entry_function_payload",
+	payload := rpcmodule.TransactionPayloadEntryFunctionPayload{
+		Type:          "entry_function_payload",
 		Function:      "0x1::coins::register",
 		TypeArguments: []string{fmt.Sprintf("%s::usdt::USDTCoin", coinAddress)},
 		Arguments:     []interface{}{},
 	}
-	transaction := rpc.Transaction{
-		T:                       "",
-		Hash:                    "",
-		Sender:                  address,
-		SequenceNumber:          account.SequenceNumber,
-		MaxGasAmount:            uint64(2000),
-		GasUnitPrice:            uint64(1),
-		GasCurrencyCode:         "",
-		ExpirationTimestampSecs: uint64(time.Now().Unix() + 600), // now + 10 minutes
-		Payload:                 &payload,
-		Signature:               nil,
+	encodeSubmissionReq, err := rpcmodule.EncodeSubmissionReq(address, account.SequenceNumber, rpcmodule.TransactionPayload{
+		Type:   "entry_function_payload",
+		Object: payload,
+	})
+	if err != nil {
+		panic(err)
 	}
 
 	// sign message
-	signData, err := client.EncodeSubmission(ctx, &transaction)
+	signData, err := client.EncodeSubmission(ctx, encodeSubmissionReq)
 	if err != nil {
 		panic(err)
 	}
@@ -81,23 +143,28 @@ func TestRegisterRecipient(t *testing.T) {
 	}
 
 	// add signature
-	transaction.Signature = &rpc.Signature{
-		T: "ed25519_signature",
-		//PublicKey: fromAccount.AuthenticationKey,
-		PublicKey: "0x" + wallet.PublicKey().String(),
-		Signature: "0x" + hex.EncodeToString(signature),
+	submitReq, err := rpcmodule.SubmitTransactionReq(encodeSubmissionReq, rpcmodule.AccountSignature{
+		Type: "ed25519_signature",
+		Object: rpcmodule.AccountSignatureEd25519Signature{
+			Type:      "ed25519_signature",
+			PublicKey: "0x" + wallet.PublicKey().String(),
+			Signature: "0x" + hex.EncodeToString(signature),
+		},
+	})
+	if err != nil {
+		panic(err)
 	}
 
 	// submit
-	tx, err := client.SubmitTransaction(ctx, &transaction)
+	txHash, err := client.SubmitTransaction(ctx, submitReq)
 	if err != nil {
 		panic(err)
 	}
 	//
-	fmt.Printf("transaction hash: %s\n", tx.Hash)
+	fmt.Printf("transaction hash: %s\n", txHash)
 
 	//
-	confirmed, err := client.ConfirmTransaction(ctx, tx.Hash)
+	confirmed, err := client.ConfirmTransaction(ctx, txHash)
 	if err != nil {
 		panic(err)
 	}

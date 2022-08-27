@@ -9,7 +9,7 @@ import (
 
 func TestClient_Transactions(t *testing.T) {
 	client := New(DevNet_RPC)
-	transaction, err := client.Transactions(context.Background(), 1000, 1)
+	transaction, err := client.Transactions(context.Background(), 1000, 10)
 	if err != nil {
 		panic(err)
 	}
@@ -19,7 +19,7 @@ func TestClient_Transactions(t *testing.T) {
 
 func TestClient_TransactionByHash(t *testing.T) {
 	client := New(DevNet_RPC)
-	transaction, err := client.TransactionByHash(context.Background(), "0xfd20a0e92e10470ed582d8d3bc562a628c412f67116eee37182bdee4df9dbcdf")
+	transaction, err := client.TransactionByHash(context.Background(), "0x5e57d7a9c9c82b91ebb1ccfaeef748bb2cf159a5cb665b34c95fc0673c693eed")
 	if err != nil {
 		panic(err)
 	}

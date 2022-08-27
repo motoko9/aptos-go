@@ -99,16 +99,6 @@ func TestCoinPublish(t *testing.T) {
 	address := wallet.Address()
 	fmt.Printf("coin publish address: %s\n", wallet.Address())
 
-	// fund (max: 20000)
-	amount := uint64(20000)
-	hashes, err := faucet.FundAccount(address, amount)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Printf("fund txs: %v\n", hashes)
-
-	time.Sleep(time.Second * 5)
-
 	// new rpc
 	client := aptos.New(rpc.DevNet_RPC)
 
@@ -119,17 +109,17 @@ func TestCoinPublish(t *testing.T) {
 	}
 
 	// publish message
-	tx, err := client.PublishMoveModule(ctx, address, content, wallet)
+	txHash, err := client.PublishMoveModule(ctx, address, content, wallet)
 	if err != nil {
 		panic(err)
 	}
 	//
-	fmt.Printf("publish move module transaction hash: %s\n", tx.Hash)
+	fmt.Printf("publish move rpcmodule transaction hash: %s\n", txHash)
 
 	//
-	confirmed, err := client.ConfirmTransaction(ctx, tx.Hash)
+	confirmed, err := client.ConfirmTransaction(ctx, txHash)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf("publish move module transaction confirmed: %v\n", confirmed)
+	fmt.Printf("publish move rpcmodule transaction confirmed: %v\n", confirmed)
 }

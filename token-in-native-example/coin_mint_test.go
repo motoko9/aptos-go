@@ -5,11 +5,10 @@ import (
 	"encoding/hex"
 	"fmt"
 	"github.com/motoko9/aptos-go/aptos"
-	"github.com/motoko9/aptos-go/faucet"
 	"github.com/motoko9/aptos-go/rpc"
+	"github.com/motoko9/aptos-go/rpcmodule"
 	"github.com/motoko9/aptos-go/wallet"
 	"testing"
-	"time"
 )
 
 func TestMint(t *testing.T) {
@@ -31,16 +30,6 @@ func TestMint(t *testing.T) {
 	address := wallet.Address()
 	fmt.Printf("recipient address: %s\n", address)
 
-	// fund (max: 20000)
-	amount := uint64(20000)
-	hashes, err := faucet.FundAccount(address, amount)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Printf("fund txs: %v\n", hashes)
-
-	time.Sleep(time.Second * 5)
-
 	// new rpc
 	client := aptos.New(rpc.DevNet_RPC)
 
@@ -52,8 +41,8 @@ func TestMint(t *testing.T) {
 
 	//
 	mintAmount := uint64(1000000000)
-	payload := rpc.EntryFunctionPayload{
-		T:             "entry_function_payload",
+	payload := rpcmodule.TransactionPayloadEntryFunctionPayload{
+		Type:          "entry_function_payload",
 		Function:      "0x1::managed_coin::mint",
 		TypeArguments: []string{fmt.Sprintf("%s::usdt::USDTCoin", coinAddress)},
 		Arguments: []interface{}{
@@ -61,21 +50,17 @@ func TestMint(t *testing.T) {
 			fmt.Sprintf("%d", mintAmount),
 		},
 	}
-	transaction := rpc.Transaction{
-		T:                       "",
-		Hash:                    "",
-		Sender:                  coinAddress,
-		SequenceNumber:          coinAccount.SequenceNumber,
-		MaxGasAmount:            uint64(2000),
-		GasUnitPrice:            uint64(1),
-		GasCurrencyCode:         "",
-		ExpirationTimestampSecs: uint64(time.Now().Unix() + 600), // now + 10 minutes
-		Payload:                 &payload,
-		Signature:               nil,
+	encodeSubmissionReq, err := rpcmodule.EncodeSubmissionReq(
+		coinAddress, coinAccount.SequenceNumber, rpcmodule.TransactionPayload{
+			Type:   "entry_function_payload",
+			Object: payload,
+		})
+	if err != nil {
+		panic(err)
 	}
 
 	// sign message
-	signData, err := client.EncodeSubmission(ctx, &transaction)
+	signData, err := client.EncodeSubmission(ctx, encodeSubmissionReq)
 	if err != nil {
 		panic(err)
 	}
@@ -87,23 +72,28 @@ func TestMint(t *testing.T) {
 	}
 
 	// add signature
-	transaction.Signature = &rpc.Signature{
-		T: "ed25519_signature",
-		//PublicKey: fromAccount.AuthenticationKey,
-		PublicKey: "0x" + coinWallet.PublicKey().String(),
-		Signature: "0x" + hex.EncodeToString(signature),
+	submitReq, err := rpcmodule.SubmitTransactionReq(encodeSubmissionReq, rpcmodule.AccountSignature{
+		Type: "ed25519_signature",
+		Object: rpcmodule.AccountSignatureEd25519Signature{
+			Type:      "ed25519_signature",
+			PublicKey: "0x" + coinWallet.PublicKey().String(),
+			Signature: "0x" + hex.EncodeToString(signature),
+		},
+	})
+	if err != nil {
+		panic(err)
 	}
 
 	// submit
-	tx, err := client.SubmitTransaction(ctx, &transaction)
+	txHash, err := client.SubmitTransaction(ctx, submitReq)
 	if err != nil {
 		panic(err)
 	}
 	//
-	fmt.Printf("transaction hash: %s\n", tx.Hash)
+	fmt.Printf("transaction hash: %s\n", txHash)
 
 	//
-	confirmed, err := client.ConfirmTransaction(ctx, tx.Hash)
+	confirmed, err := client.ConfirmTransaction(ctx, txHash)
 	if err != nil {
 		panic(err)
 	}

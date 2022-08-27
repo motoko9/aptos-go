@@ -18,7 +18,7 @@ func TestMoveRead(t *testing.T) {
 		panic(err)
 	}
 	moduleAddress := moveModule.Address()
-	fmt.Printf("move module address: %s\n", moduleAddress)
+	fmt.Printf("move rpcmodule address: %s\n", moduleAddress)
 
 	// user account
 	wallet, err := wallet.NewFromKeygenFile("account_user")

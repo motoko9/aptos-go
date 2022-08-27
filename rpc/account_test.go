@@ -60,3 +60,33 @@ func TestClient_AccountResourceByAddressAndType(t *testing.T) {
 	accountResourceJson, _ := json.MarshalIndent(accountResource, "", "    ")
 	fmt.Printf("account resource: %s\n", string(accountResourceJson))
 }
+
+func TestClient_AccountModules(t *testing.T) {
+	client := New(DevNet_RPC)
+	ledger, err := client.Ledger(context.Background())
+	if err != nil {
+		panic(err)
+	}
+	accountResources, err := client.AccountModules(context.Background(),
+		"0x697c173eeb917c95a382b60f546eb73a4c6a2a7b2d79e6c56c87104f9c04345f", ledger.LedgerVersion)
+	if err != nil {
+		panic(err)
+	}
+	accountResourcesJson, _ := json.MarshalIndent(accountResources, "", "    ")
+	fmt.Printf("account modules: %s\n", string(accountResourcesJson))
+}
+
+func TestClient_AccountModuleByAddressAndName(t *testing.T) {
+	client := New(DevNet_RPC)
+	ledger, err := client.Ledger(context.Background())
+	if err != nil {
+		panic(err)
+	}
+	accountResources, err := client.AccountModuleByAddressAndName(context.Background(),
+		"0x697c173eeb917c95a382b60f546eb73a4c6a2a7b2d79e6c56c87104f9c04345f", "message", ledger.LedgerVersion)
+	if err != nil {
+		panic(err)
+	}
+	accountResourcesJson, _ := json.MarshalIndent(accountResources, "", "    ")
+	fmt.Printf("account modules: %s\n", string(accountResourcesJson))
+}

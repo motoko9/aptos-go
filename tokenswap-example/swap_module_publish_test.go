@@ -97,7 +97,7 @@ func TestSwapModulePublish(t *testing.T) {
 		panic(err)
 	}
 	address := wallet.Address()
-	fmt.Printf("swap module publish address: %s\n", wallet.Address())
+	fmt.Printf("swap rpcmodule publish address: %s\n", wallet.Address())
 
 	// new rpc
 	client := aptos.New(rpc.DevNet_RPC)
@@ -109,17 +109,17 @@ func TestSwapModulePublish(t *testing.T) {
 	}
 
 	// publish message
-	tx, err := client.PublishMoveModule(ctx, address, content, wallet)
+	txHash, err := client.PublishMoveModule(ctx, address, content, wallet)
 	if err != nil {
 		panic(err)
 	}
 	//
-	fmt.Printf("publish move module transaction hash: %s\n", tx.Hash)
+	fmt.Printf("publish move rpcmodule transaction hash: %s\n", txHash)
 
 	//
-	confirmed, err := client.ConfirmTransaction(ctx, tx.Hash)
+	confirmed, err := client.ConfirmTransaction(ctx, txHash)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf("publish move module transaction confirmed: %v\n", confirmed)
+	fmt.Printf("publish move rpcmodule transaction confirmed: %v\n", confirmed)
 }

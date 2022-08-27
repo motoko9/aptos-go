@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/motoko9/aptos-go/aptos"
 	"github.com/motoko9/aptos-go/rpc"
+	"github.com/motoko9/aptos-go/rpcmodule"
 	"github.com/motoko9/aptos-go/wallet"
 	"testing"
 )
@@ -61,13 +62,13 @@ func TestTransfer_raw(t *testing.T) {
 		panic(err)
 	}
 
-	transaction, err := client.TransferCoinMsg(addressFrom, accountFrom.SequenceNumber, aptos.AptosCoin, uint64(1000), addressTo)
+	encodeSubmissionReq, err := client.TransferCoinReq(addressFrom, accountFrom.SequenceNumber, aptos.AptosCoin, uint64(1000), addressTo)
 	if err != nil {
 		panic(err)
 	}
 
 	// sign message
-	signData, err := client.EncodeSubmission(ctx, transaction)
+	signData, err := client.EncodeSubmission(ctx, encodeSubmissionReq)
 	if err != nil {
 		panic(err)
 	}
@@ -79,23 +80,28 @@ func TestTransfer_raw(t *testing.T) {
 	}
 
 	// add signature
-	transaction.Signature = &rpc.Signature{
-		T: "ed25519_signature",
-		//PublicKey: fromAccount.AuthenticationKey,
-		PublicKey: "0x" + walletFrom.PublicKey().String(),
-		Signature: "0x" + hex.EncodeToString(signature),
+	submitReq, err := rpcmodule.SubmitTransactionReq(encodeSubmissionReq, rpcmodule.AccountSignature{
+		Type: "ed25519_signature",
+		Object: rpcmodule.AccountSignatureEd25519Signature{
+			Type:      "ed25519_signature",
+			PublicKey: "0x" + walletFrom.PublicKey().String(),
+			Signature: "0x" + hex.EncodeToString(signature),
+		},
+	})
+	if err != nil {
+		panic(err)
 	}
 
 	// submit
-	tx, err := client.SubmitTransaction(ctx, transaction)
+	txHash, err := client.SubmitTransaction(ctx, submitReq)
 	if err != nil {
 		panic(err)
 	}
 	//
-	fmt.Printf("transfer hash: %s\n", tx.Hash)
+	fmt.Printf("transfer hash: %s\n", txHash)
 
 	//
-	confirmed, err := client.ConfirmTransaction(ctx, tx.Hash)
+	confirmed, err := client.ConfirmTransaction(ctx, txHash)
 	if err != nil {
 		panic(err)
 	}
@@ -165,15 +171,15 @@ func TestTransfer(t *testing.T) {
 		fmt.Printf("to account balance: %d\n", balance)
 	}
 
-	tx, err := client.TransferCoin(ctx, addressFrom, aptos.AptosCoin, uint64(1000), addressTo, walletFrom)
+	txHash, err := client.TransferCoin(ctx, addressFrom, aptos.AptosCoin, uint64(1000), addressTo, walletFrom)
 	if err != nil {
 		panic(err)
 	}
 	//
-	fmt.Printf("transfer hash: %s\n", tx.Hash)
+	fmt.Printf("transfer hash: %s\n", txHash)
 
 	//
-	confirmed, err := client.ConfirmTransaction(ctx, tx.Hash)
+	confirmed, err := client.ConfirmTransaction(ctx, txHash)
 	if err != nil {
 		panic(err)
 	}

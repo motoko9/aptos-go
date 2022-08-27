@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestClient_Block2(t *testing.T) {
+func TestClient_Block(t *testing.T) {
 	client := New(DevNet_RPC)
 	block, err := client.Block(context.Background(), 795919, true)
 	if err != nil {

@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"github.com/motoko9/aptos-go/aptos"
 	"github.com/motoko9/aptos-go/rpc"
+	"github.com/motoko9/aptos-go/rpcmodule"
 	"github.com/motoko9/aptos-go/wallet"
 	"testing"
-	"time"
 )
 
 func TestCreatePool(t *testing.T) {
@@ -20,7 +20,7 @@ func TestCreatePool(t *testing.T) {
 		panic(err)
 	}
 	address := swapWallet.Address()
-	fmt.Printf("move module address: %s\n", address)
+	fmt.Printf("move rpcmodule address: %s\n", address)
 
 	// new rpc
 	client := aptos.New(rpc.DevNet_RPC)
@@ -34,27 +34,23 @@ func TestCreatePool(t *testing.T) {
 	// create pool
 	coin1 := aptos.CoinType[aptos.AptosCoin]
 	coin2 := aptos.CoinType[aptos.USDTCoin]
-	payload := rpc.EntryFunctionPayload{
-		T:             "entry_function_payload",
+	payload := rpcmodule.TransactionPayloadEntryFunctionPayload{
+		Type:          "entry_function_payload",
 		Function:      fmt.Sprintf("%s::swap::create_pool", address),
 		TypeArguments: []string{coin1, coin2},
 		Arguments:     []interface{}{},
 	}
-	transaction := rpc.Transaction{
-		T:                       "",
-		Hash:                    "",
-		Sender:                  address,
-		SequenceNumber:          account.SequenceNumber,
-		MaxGasAmount:            uint64(2000),
-		GasUnitPrice:            uint64(1),
-		GasCurrencyCode:         "",
-		ExpirationTimestampSecs: uint64(time.Now().Unix() + 600), // now + 10 minutes
-		Payload:                 &payload,
-		Signature:               nil,
+	encodeSubmissionReq, err := rpcmodule.EncodeSubmissionReq(
+		address, account.SequenceNumber, rpcmodule.TransactionPayload{
+			Type:   "entry_function_payload",
+			Object: payload,
+		})
+	if err != nil {
+		panic(err)
 	}
 
 	// sign message
-	signData, err := client.EncodeSubmission(ctx, &transaction)
+	signData, err := client.EncodeSubmission(ctx, encodeSubmissionReq)
 	if err != nil {
 		panic(err)
 	}
@@ -66,23 +62,28 @@ func TestCreatePool(t *testing.T) {
 	}
 
 	// add signature
-	transaction.Signature = &rpc.Signature{
-		T: "ed25519_signature",
-		//PublicKey: fromAccount.AuthenticationKey,
-		PublicKey: "0x" + swapWallet.PublicKey().String(),
-		Signature: "0x" + hex.EncodeToString(signature),
+	submitReq, err := rpcmodule.SubmitTransactionReq(encodeSubmissionReq, rpcmodule.AccountSignature{
+		Type: "ed25519_signature",
+		Object: rpcmodule.AccountSignatureEd25519Signature{
+			Type:      "ed25519_signature",
+			PublicKey: "0x" + swapWallet.PublicKey().String(),
+			Signature: "0x" + hex.EncodeToString(signature),
+		},
+	})
+	if err != nil {
+		panic(err)
 	}
 
 	// submit
-	tx, err := client.SubmitTransaction(ctx, &transaction)
+	txHash, err := client.SubmitTransaction(ctx, submitReq)
 	if err != nil {
 		panic(err)
 	}
 	//
-	fmt.Printf("transaction hash: %s\n", tx.Hash)
+	fmt.Printf("transaction hash: %s\n", txHash)
 
 	//
-	confirmed, err := client.ConfirmTransaction(ctx, tx.Hash)
+	confirmed, err := client.ConfirmTransaction(ctx, txHash)
 	if err != nil {
 		panic(err)
 	}

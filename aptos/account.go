@@ -4,28 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/motoko9/aptos-go/aptosmodule"
 )
-
-type Guid struct {
-	Id struct {
-		Addr        string `json:"addr"`
-		CreationNum uint64 `json:"creation_num,string"`
-	} `json:"id"`
-}
-type Coin struct {
-	Value uint64 `json:"value,string"`
-}
-
-type CoinEvents struct {
-	Counter uint64 `json:"counter,string"`
-	Guid    Guid   `json:"guid"`
-}
-
-type CoinStore struct {
-	Coin           Coin       `json:"coin"`
-	DepositEvents  CoinEvents `json:"deposit_events"`
-	WithdrawEvents CoinEvents `json:"withdraw_events"`
-}
 
 func (cl *Client) AccountBalance(ctx context.Context, address string, coin string, version uint64) (uint64, error) {
 	// how to get other coin balance
@@ -40,7 +20,7 @@ func (cl *Client) AccountBalance(ctx context.Context, address string, coin strin
 	if err != nil {
 		return 0, err
 	}
-	var coinStore CoinStore
+	var coinStore aptosmodule.CoinStore
 	if err = json.Unmarshal(accountResource.Data, &coinStore); err != nil {
 		return 0, err
 	}
