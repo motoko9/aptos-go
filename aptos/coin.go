@@ -30,7 +30,6 @@ func AddressFromCoinType(coinType string) string {
 	return items[0]
 }
 
-
 func (cl *Client) CoinInfo(ctx context.Context, coin string, version uint64) (*aptosmodule.CoinInfo, error) {
 	coinType, ok := CoinType[coin]
 	if !ok {

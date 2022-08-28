@@ -12,7 +12,7 @@ type AccountData struct {
 
 type AccountSignature struct {
 	Type   string `json:"type"`
-	Raw  json.RawMessage
+	Raw    json.RawMessage
 	Object interface{}
 }
 

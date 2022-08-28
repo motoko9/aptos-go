@@ -10,7 +10,7 @@ type Transactions []Transaction
 
 type Transaction struct {
 	Type   string `json:"type"`
-	Raw json.RawMessage
+	Raw    json.RawMessage
 	Object interface{}
 }
 
@@ -157,7 +157,7 @@ func (j *Transaction) UnmarshalJSON(data []byte) error {
 
 type TransactionPayload struct {
 	Type   string `json:"type"`
-	Raw json.RawMessage
+	Raw    json.RawMessage
 	Object interface{}
 }
 
