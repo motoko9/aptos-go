@@ -15,7 +15,7 @@ func TestMoveWrite(t *testing.T) {
 	ctx := context.Background()
 
 	// move Module account
-	moveModule, err := wallet.NewFromKeygenFile("account_move_publish")
+	moveModule, err := wallet.NewFromKeygenFile("account_helloworld")
 	if err != nil {
 		panic(err)
 	}
@@ -23,9 +23,11 @@ func TestMoveWrite(t *testing.T) {
 	fmt.Printf("move rpcmodule address: %s\n", moduleAddress)
 
 	// user account
-	wallet := wallet.New()
-	wallet.Save("account_user")
-	address := wallet.Address()
+	userWallet, err := wallet.NewFromKeygenFile("account_user")
+	if err != nil {
+		panic(err)
+	}
+	address := userWallet.Address()
 	fmt.Printf("user address: %s\n", address)
 
 	// new rpc
@@ -41,7 +43,7 @@ func TestMoveWrite(t *testing.T) {
 	message := []byte("hello world!")
 	payload := rpcmodule.TransactionPayloadEntryFunctionPayload{
 		Type:          "entry_function_payload",
-		Function:      fmt.Sprintf("%s::Message::set_message", moduleAddress),
+		Function:      fmt.Sprintf("%s::helloworld::set_message", moduleAddress),
 		TypeArguments: []string{},
 		Arguments:     []interface{}{hex.EncodeToString(message)},
 	}
@@ -61,7 +63,7 @@ func TestMoveWrite(t *testing.T) {
 	}
 
 	// sign
-	signature, err := wallet.Sign(signData)
+	signature, err := userWallet.Sign(signData)
 	if err != nil {
 		panic(err)
 	}
@@ -70,7 +72,7 @@ func TestMoveWrite(t *testing.T) {
 		Type: "ed25519_signature",
 		Object: rpcmodule.AccountSignatureEd25519Signature{
 			Type:      "ed25519_signature",
-			PublicKey: "0x" + wallet.PublicKey().String(),
+			PublicKey: "0x" + userWallet.PublicKey().String(),
 			Signature: "0x" + hex.EncodeToString(signature),
 		},
 	})

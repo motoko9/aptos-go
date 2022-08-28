@@ -59,6 +59,8 @@ func TestReadModuleAccount(t *testing.T) {
 	}
 	address := wallet.Address()
 	fmt.Printf("address: %s\n", address)
+	fmt.Printf("public key: %s\n", wallet.PublicKey().String())
+	fmt.Printf("private key: %s\n", wallet.PrivateKey.String())
 
 	// fund (max: 20000)
 	amount := uint64(20000)
@@ -88,6 +90,9 @@ func TestReadModuleAccount(t *testing.T) {
 	fmt.Printf("account balance: %d\n", balance)
 }
 
+// todo
+// can not working
+// please publish move by aptos cli
 func TestMovePublish(t *testing.T) {
 	ctx := context.Background()
 

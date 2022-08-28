@@ -4,16 +4,97 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/motoko9/aptos-go/aptos"
+	"github.com/motoko9/aptos-go/faucet"
 	"github.com/motoko9/aptos-go/rpc"
 	"github.com/motoko9/aptos-go/wallet"
 	"testing"
+	"time"
 )
+
+func TestNewUserAccount(t *testing.T) {
+	ctx := context.Background()
+
+	// new account
+	wallet := wallet.New()
+	wallet.Save("account_user")
+	address := wallet.Address()
+	fmt.Printf("address: %s\n", address)
+
+	// fund (max: 20000)
+	amount := uint64(20000)
+	hashes, err := faucet.FundAccount(address, amount)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("fund txs: %v\n", hashes)
+
+	//
+	time.Sleep(time.Second * 5)
+
+	// new rpc
+	client := aptos.New(rpc.DevNet_RPC)
+
+	// latest ledger
+	ledger, err := client.Ledger(ctx)
+	if err != nil {
+		panic(err)
+	}
+
+	// check account
+	balance, err := client.AccountBalance(ctx, address, aptos.AptosCoin, ledger.LedgerVersion)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("account balance: %d\n", balance)
+}
+
+func TestReadUserAccount(t *testing.T) {
+	ctx := context.Background()
+
+	// new account
+	wallet, err := wallet.NewFromKeygenFile("account_user")
+	if err != nil {
+		panic(err)
+	}
+	address := wallet.Address()
+	fmt.Printf("address: %s\n", address)
+	fmt.Printf("public key: %s\n", wallet.PublicKey().String())
+	fmt.Printf("private key: %s\n", wallet.PrivateKey.String())
+
+	// fund (max: 20000)
+	amount := uint64(20000)
+	hashes, err := faucet.FundAccount(address, amount)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("fund txs: %v\n", hashes)
+
+	//
+	time.Sleep(time.Second * 5)
+
+	// new rpc
+	client := aptos.New(rpc.DevNet_RPC)
+
+	// latest ledger
+	ledger, err := client.Ledger(ctx)
+	if err != nil {
+		panic(err)
+	}
+
+	// check account
+	balance, err := client.AccountBalance(ctx, address, aptos.AptosCoin, ledger.LedgerVersion)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("account balance: %d\n", balance)
+}
 
 func TestMoveRead(t *testing.T) {
 	ctx := context.Background()
 
 	// move Module account
-	moveModule, err := wallet.NewFromKeygenFile("account_move_publish")
+	moveModule, err := wallet.NewFromKeygenFile("account_helloworld")
 	if err != nil {
 		panic(err)
 	}
@@ -21,11 +102,11 @@ func TestMoveRead(t *testing.T) {
 	fmt.Printf("move rpcmodule address: %s\n", moduleAddress)
 
 	// user account
-	wallet, err := wallet.NewFromKeygenFile("account_user")
+	userWallet, err := wallet.NewFromKeygenFile("account_user")
 	if err != nil {
 		panic(err)
 	}
-	address := wallet.Address()
+	address := userWallet.Address()
 	fmt.Printf("user address: %s\n", address)
 
 	// new rpc
@@ -36,7 +117,7 @@ func TestMoveRead(t *testing.T) {
 	// only support CoinStore type
 	// need update AccountResourceByAddressAndType
 	//
-	resourceType := fmt.Sprintf("%s::Message::MessageHolder", moduleAddress)
+	resourceType := fmt.Sprintf("%s::helloworld::MessageHolder", moduleAddress)
 	accountResource, err := client.AccountResourceByAddressAndType(ctx, address, resourceType, 0)
 	if err != nil {
 		panic(err)
