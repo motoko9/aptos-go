@@ -10,6 +10,7 @@ type Transactions []Transaction
 
 type Transaction struct {
 	Type   string `json:"type"`
+	Raw json.RawMessage
 	Object interface{}
 }
 
@@ -112,6 +113,7 @@ func (j *Transaction) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, aux); err != nil {
 		return err
 	}
+	j.Raw = data
 	switch j.Type {
 	case "block_metadata_transaction":
 		var transaction TransactionBlockMetadataTransaction
@@ -155,6 +157,7 @@ func (j *Transaction) UnmarshalJSON(data []byte) error {
 
 type TransactionPayload struct {
 	Type   string `json:"type"`
+	Raw json.RawMessage
 	Object interface{}
 }
 
@@ -187,6 +190,7 @@ func (j *TransactionPayload) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, aux); err != nil {
 		return err
 	}
+	j.Raw = data
 	switch j.Type {
 	case "entry_function_payload":
 		var transactionPayload TransactionPayloadEntryFunctionPayload

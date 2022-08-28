@@ -12,6 +12,7 @@ type AccountData struct {
 
 type AccountSignature struct {
 	Type   string `json:"type"`
+	Raw  json.RawMessage
 	Object interface{}
 }
 
@@ -39,6 +40,7 @@ func (j *AccountSignature) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, aux); err != nil {
 		return err
 	}
+	j.Raw = data
 	switch j.Type {
 	case "ed25519_signature":
 		var accountSignature AccountSignatureEd25519Signature

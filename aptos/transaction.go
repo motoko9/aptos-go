@@ -111,7 +111,7 @@ func (cl *Client) RegisterRecipientReq(from string, sequenceNumber uint64, coin 
 		return nil, fmt.Errorf("coin %s is not supported", coin)
 	}
 	transferPayload := rpcmodule.TransactionPayloadEntryFunctionPayload{
-		Function:      "0x1::coins::register",
+		Function:      "0x1::managed_coin::register",
 		Arguments:     []interface{}{},
 		Type:          "entry_function_payload",
 		TypeArguments: []string{coin},
@@ -268,5 +268,50 @@ func (cl *Client) PublishMoveModule(ctx context.Context, addr string, content []
 		return "", err
 	}
 	//
+	return txHash, nil
+}
+
+func (cl *Client) RegisterRecipient(ctx context.Context, addr string, coin string, signer Signer) (string, error) {
+	// recipient account
+	account, err := cl.Account(ctx, addr, 0)
+	if err != nil {
+		return "", err
+	}
+
+	encodeSubmissionReq, err := cl.RegisterRecipientReq(addr, account.SequenceNumber, coin)
+	if err != nil {
+		return "", err
+	}
+
+	// sign message
+	signData, err := cl.EncodeSubmission(ctx, encodeSubmissionReq)
+	if err != nil {
+		return "", err
+	}
+
+	// sign
+	signature, err := signer.Sign(signData)
+	if err != nil {
+		return "", err
+	}
+
+	// add signature
+	submitReq, err := rpcmodule.SubmitTransactionReq(encodeSubmissionReq, rpcmodule.AccountSignature{
+		Type: "ed25519_signature",
+		Object: rpcmodule.AccountSignatureEd25519Signature{
+			Type:      "ed25519_signature",
+			PublicKey: "0x" + signer.PublicKey().String(),
+			Signature: "0x" + hex.EncodeToString(signature),
+		},
+	})
+	if err != nil {
+		return "", err
+	}
+
+	// submit
+	txHash, err := cl.SubmitTransaction(ctx, submitReq)
+	if err != nil {
+		return "", err
+	}
 	return txHash, nil
 }

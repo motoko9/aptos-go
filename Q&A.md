@@ -15,5 +15,19 @@ Coin only can be initialized by the account published this coin module. This acc
 
 5. encode_submission response, {"message":"The given transaction is invalid","error_code":"invalid_input","vm_error_code":null}
 
-Transaction payload is not right, address、module、function and type parameters should be right
+Transaction payload is not right, should check:
+Function is right, address, module, struct.
+TypeArguments is right.
+Arguments should be right, include the type of argument.
+
+6. publish move module with error
+   "Error": "Unexpected error: Unable to resolve packages for package 'usdt'"
+   
+Move module should add dependencies AptosFramework
+
+```
+[dependencies]
+AptosFramework = { git = "https://github.com/aptos-labs/aptos-core.git", subdir = "aptos-move/framework/aptos-framework", rev = "devnet" }
+```
+
 

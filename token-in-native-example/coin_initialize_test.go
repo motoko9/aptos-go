@@ -35,12 +35,14 @@ func TestCoinInitialize(t *testing.T) {
 	payload := rpcmodule.TransactionPayloadEntryFunctionPayload{
 		Type:          "entry_function_payload",
 		Function:      "0x1::managed_coin::initialize",
-		TypeArguments: []string{fmt.Sprintf("%s::usdt::USDTCoin", coinAddress)},
+		TypeArguments: []string{fmt.Sprintf("%s::usdt::USDT", coinAddress)},
 		Arguments: []interface{}{
 			hex.EncodeToString([]byte("usdt")),
 			hex.EncodeToString([]byte("USDT")),
-			"6",
-			false,
+			//"usdt",
+			//"USDT",
+			6,
+			true,
 		},
 	}
 	encodeSubmissionReq, err := rpcmodule.EncodeSubmissionReq(coinAddress, coinAccount.SequenceNumber, rpcmodule.TransactionPayload{

@@ -20,3 +20,12 @@ type CoinStore struct {
 	DepositEvents  CoinEvents `json:"deposit_events"`
 	WithdrawEvents CoinEvents `json:"withdraw_events"`
 }
+
+type CoinInfo struct {
+	Name string `json:"name"`
+	Symbol string `json:"symbol"`
+	Decimals uint64 `json:"decimals"`
+	// todo
+	// supply is not uint64
+	// Supply uint64 `json:"supply"`
+}
