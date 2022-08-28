@@ -49,7 +49,7 @@ func TestNewUsdcAccount(t *testing.T) {
 	fmt.Printf("account balance: %d\n", balance)
 }
 
-func TestReadUsdtAccount(t *testing.T) {
+func TestReadUsdcAccount(t *testing.T) {
 	ctx := context.Background()
 
 	// new account
@@ -59,6 +59,8 @@ func TestReadUsdtAccount(t *testing.T) {
 	}
 	address := wallet.Address()
 	fmt.Printf("address: %s\n", address)
+	fmt.Printf("public key: %s\n", wallet.PublicKey().String())
+	fmt.Printf("private key: %s\n", wallet.PrivateKey.String())
 
 	// fund (max: 20000)
 	amount := uint64(20000)

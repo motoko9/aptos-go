@@ -93,7 +93,7 @@ func TestRegisterRecipient(t *testing.T) {
 	ctx := context.Background()
 
 	// coin account
-	coinWallet, err := wallet.NewFromKeygenFile("account_usdt")
+	coinWallet, err := wallet.NewFromKeygenFile("account_usdc")
 	if err != nil {
 		panic(err)
 	}
@@ -101,9 +101,11 @@ func TestRegisterRecipient(t *testing.T) {
 	fmt.Printf("coin address: %s\n", coinAddress)
 
 	// new account
-	wallet := wallet.New()
-	wallet.Save("account_recipient")
-	address := wallet.Address()
+	userWallet, err := wallet.NewFromKeygenFile("account_recipient")
+	if err != nil {
+		panic(err)
+	}
+	address := userWallet.Address()
 	fmt.Printf("recipient address: %s\n", address)
 
 	// new rpc
@@ -118,8 +120,8 @@ func TestRegisterRecipient(t *testing.T) {
 	//
 	payload := rpcmodule.TransactionPayloadEntryFunctionPayload{
 		Type:          "entry_function_payload",
-		Function:      "0x1::coins::register",
-		TypeArguments: []string{fmt.Sprintf("%s::usdt::USDTCoin", coinAddress)},
+		Function:      fmt.Sprintf("%s::usdc::register", coinAddress),
+		TypeArguments: []string{},
 		Arguments:     []interface{}{},
 	}
 	encodeSubmissionReq, err := rpcmodule.EncodeSubmissionReq(address, account.SequenceNumber, rpcmodule.TransactionPayload{
@@ -137,7 +139,7 @@ func TestRegisterRecipient(t *testing.T) {
 	}
 
 	// sign
-	signature, err := wallet.Sign(signData)
+	signature, err := userWallet.Sign(signData)
 	if err != nil {
 		panic(err)
 	}
@@ -147,7 +149,7 @@ func TestRegisterRecipient(t *testing.T) {
 		Type: "ed25519_signature",
 		Object: rpcmodule.AccountSignatureEd25519Signature{
 			Type:      "ed25519_signature",
-			PublicKey: "0x" + wallet.PublicKey().String(),
+			PublicKey: "0x" + userWallet.PublicKey().String(),
 			Signature: "0x" + hex.EncodeToString(signature),
 		},
 	})

@@ -15,7 +15,7 @@ func TestMint(t *testing.T) {
 	ctx := context.Background()
 
 	// coin account
-	coinWallet, err := wallet.NewFromKeygenFile("account_usdt")
+	coinWallet, err := wallet.NewFromKeygenFile("account_usdc")
 	if err != nil {
 		panic(err)
 	}
@@ -23,11 +23,11 @@ func TestMint(t *testing.T) {
 	fmt.Printf("coin address: %s\n", coinAddress)
 
 	// recipient account
-	wallet, err := wallet.NewFromKeygenFile("account_recipient")
+	userWallet, err := wallet.NewFromKeygenFile("account_recipient")
 	if err != nil {
 		panic(err)
 	}
-	address := wallet.Address()
+	address := userWallet.Address()
 	fmt.Printf("recipient address: %s\n", address)
 
 	// new rpc
@@ -43,8 +43,8 @@ func TestMint(t *testing.T) {
 	mintAmount := uint64(1000000000)
 	payload := rpcmodule.TransactionPayloadEntryFunctionPayload{
 		Type:          "entry_function_payload",
-		Function:      "0x1::managed_coin::mint",
-		TypeArguments: []string{fmt.Sprintf("%s::usdt::USDTCoin", coinAddress)},
+		Function:      fmt.Sprintf("%s::usdc::mint", coinAddress),
+		TypeArguments: []string{},
 		Arguments: []interface{}{
 			address,
 			fmt.Sprintf("%d", mintAmount),

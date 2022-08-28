@@ -15,7 +15,7 @@ func TestCoinInitialize(t *testing.T) {
 	ctx := context.Background()
 
 	// coin account
-	coinWallet, err := wallet.NewFromKeygenFile("account_usdt")
+	coinWallet, err := wallet.NewFromKeygenFile("account_usdc")
 	if err != nil {
 		panic(err)
 	}
@@ -34,13 +34,12 @@ func TestCoinInitialize(t *testing.T) {
 	//
 	payload := rpcmodule.TransactionPayloadEntryFunctionPayload{
 		Type:          "entry_function_payload",
-		Function:      "0x697c173eeb917c95a382b60f546eb73a4c6a2a7b2d79e6c56c87104f9c04345f::usdc::initialize",
-		TypeArguments: []string{fmt.Sprintf("%s::usdt::USDTCoin", coinAddress)},
+		Function:      fmt.Sprintf("%s::usdc::initialize", coinAddress),
+		TypeArguments: []string{},
 		Arguments: []interface{}{
-			hex.EncodeToString([]byte("usdt")),
-			hex.EncodeToString([]byte("USDT")),
+			hex.EncodeToString([]byte("usdc")),
+			hex.EncodeToString([]byte("USDC")),
 			"6",
-			false,
 		},
 	}
 	encodeSubmissionReq, err := rpcmodule.EncodeSubmissionReq(

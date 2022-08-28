@@ -13,3 +13,7 @@ Coin only can be initialized by the account published this coin module. This acc
 
 4. VM STATUS is "Transaction Executed and Committed with Error LOOKUP_FAILED", when publish move module
 
+5. encode_submission response, {"message":"The given transaction is invalid","error_code":"invalid_input","vm_error_code":null}
+
+Transaction payload is not right, address、module、function and type parameters should be right
+

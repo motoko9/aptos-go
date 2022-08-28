@@ -54,11 +54,14 @@ func (cl *Client) Get(ctx context.Context, path string, params map[string]string
 	if err != nil {
 		return -1, err
 	}
-	if resp.StatusCode != 200 {
-		return resp.StatusCode, fmt.Errorf("response status code: %d", resp.StatusCode)
-	}
 	respBody, err := ioutil.ReadAll(resp.Body)
 	defer resp.Body.Close()
+	if resp.StatusCode != 200 {
+		// todo
+		// fetch aptos error
+		// json.Unmarshal(respBody, error)
+		return resp.StatusCode, fmt.Errorf("response status code: %d", resp.StatusCode)
+	}
 	if err != nil {
 		return resp.StatusCode, err
 	}
@@ -105,6 +108,9 @@ func (cl *Client) Post(ctx context.Context, path string, params map[string]strin
 	defer resp.Body.Close()
 	// 202 - Transaction is accepted and submitted to mempool.
 	if resp.StatusCode != 200 && resp.StatusCode != 202 {
+		// todo
+		// fetch aptos error
+		// json.Unmarshal(respBody, error)
 		return resp.StatusCode, fmt.Errorf("%s", string(respBody))
 	}
 	err = json.Unmarshal(respBody, result)

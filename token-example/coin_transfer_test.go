@@ -89,11 +89,13 @@ func TestReadToAccount(t *testing.T) {
 	fmt.Printf("account balance: %d\n", balance)
 }
 
+// need to register to account first
+//
 func TestTransfer(t *testing.T) {
 	ctx := context.Background()
 
 	// coin account
-	coinWallet, err := wallet.NewFromKeygenFile("account_usdt")
+	coinWallet, err := wallet.NewFromKeygenFile("account_usdc")
 	if err != nil {
 		panic(err)
 	}
@@ -129,8 +131,8 @@ func TestTransfer(t *testing.T) {
 	transferAmount := uint64(50000000)
 	payload := rpcmodule.TransactionPayloadEntryFunctionPayload{
 		Type:          "entry_function_payload",
-		Function:      "0x1::coin::transfer",
-		TypeArguments: []string{fmt.Sprintf("%s::usdt::USDTCoin", coinAddress)},
+		Function:      fmt.Sprintf("%s::usdc::transfer", coinAddress),
+		TypeArguments: []string{},
 		Arguments: []interface{}{
 			toAddress,
 			fmt.Sprintf("%d", transferAmount),
