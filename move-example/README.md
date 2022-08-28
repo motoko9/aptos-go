@@ -3,9 +3,8 @@
 * Aptos Env
 * Move Module by Aptos CLI
 * Move Module by RPC
-* Publishing
-* Reading resource
-* Modifying resource
+* Publish
+* Call module
 
 ## Aptos Env
 
@@ -19,22 +18,32 @@ You can create account, query account, build & publish & running Move function w
 
 ## Move Module by RPC
 
-### Bytecode
+## Publish
 
-[source code](https://github.com/aptos-labs/aptos-core/tree/main/aptos-move/move-examples/hello_blockchain)
+[source code](https://github.com/motoko9/aptos-program-library/tree/master/helloworld/contract)
 
-```bash
-tangaoyuan@tangaoyuandeMacBook-Pro aptos-core % aptos move compile --package-dir ./aptos-move/move-examples/hello_blockchain/ --named-addresses HelloBlockchain=0x7c535d32b186e114c69dc201eca92dcb36c37e3dd0b9b527c78e59581db80eca
+```
+aptos move publish --package-dir . --named-addresses NamedAddr=0x5e7f8779c8c26ec3cbba37337142b2aaa2291b4779f4b386a0de83da177df510
+```
+
+```
+package size 1660 bytes
 {
-  "Result": [
-    "7C535D32B186E114C69DC201ECA92DCB36C37E3DD0B9B527C78E59581DB80ECA::Message"
-  ]
+  "Result": {
+    "transaction_hash": "0xec24b2c091d0c02a55a2caa223e9883fa10bfb62a920967b0b694dcebe14e61b",
+    "gas_used": 189,
+    "gas_unit_price": 1,
+    "sender": "5e7f8779c8c26ec3cbba37337142b2aaa2291b4779f4b386a0de83da177df510",
+    "sequence_number": 0,
+    "success": true,
+    "timestamp_us": 1661650597217213,
+    "version": 10901294,
+    "vm_status": "Executed successfully"
+  }
 }
 ```
 
-After compile, there is a build output in package directory. You can get codes in package_dir/build/Examples/bytecode_modules.
-
-### Move RPC
+## Call module
 
 * [publish Move Module](./move_publish_test.go)
 * [Read Move Module](./move_read_test.go)

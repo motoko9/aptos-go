@@ -1,7 +1,10 @@
-# Coin example on Aptos
+# Move example on Aptos
 
 * Aptos Env
-* Coin Example
+* Move Module by Aptos CLI
+* Move Module by RPC
+* Publish
+* Call module
 
 ## Aptos Env
 
@@ -9,26 +12,43 @@ First, you need to [install Aptos-core](https://aptos.dev/guides/getting-started
 
 Second, you need to config Aptos command line tool, reference [Use Aptos CLI](https://aptos.dev/cli-tools/aptos-cli-tool/use-aptos-cli)
 
-## Coin Example
-[source code](https://github.com/aptos-labs/aptos-core/tree/main/aptos-move/move-examples/moon_coin)
+## Move Module by Aptos CLI
 
-### Bytecode
-```bash
-tangaoyuan@tangaoyuandeMacBook-Pro aptos-core % aptos move compile --package-dir ./aptos-move/move-examples/moon_coin --named-addresses MoonCoinType=0xa0db31e3cc6f597ec084d7fbcf4cb562522ab83d2fe7f3567af79f85627fcd9c
+You can create account, query account, build & publish & running Move function with Aptos CLI, reference[Use Aptos CLI](https://aptos.dev/cli-tools/aptos-cli-tool/use-aptos-cli)
+
+## Move Module by RPC
+
+## Publish
+
+[source code](https://github.com/motoko9/aptos-program-library/tree/master/token-in-native/contract)
+
+```
+aptos move publish --package-dir . --named-addresses NamedAddr=0x1685cdc9a83c3da34c59208f34bddb3217f63bfbe0c393f04462d1ba06465d08
+```
+
+```
+package size 494 bytes
 {
-  "Result": [
-    "A0DB31E3CC6F597EC084D7FBCF4CB562522AB83D2FE7F3567AF79F85627FCD9C::moon_coin"
-  ]
+  "Result": {
+    "transaction_hash": "0x46bfa491acd2deaaf0a46554e04e57e979ca6c7d4cfda74c2efa8f2409dc686a",
+    "gas_used": 62,
+    "gas_unit_price": 1,
+    "sender": "1685cdc9a83c3da34c59208f34bddb3217f63bfbe0c393f04462d1ba06465d08",
+    "sequence_number": 0,
+    "success": true,
+    "timestamp_us": 1661656715311642,
+    "version": 11307262,
+    "vm_status": "Executed successfully"
+  }
 }
 ```
-After compile, there is a build output in package directory. You can get codes in package_dir/build/Examples/bytecode_modules.
 
-### Move RPC
+## Call module
 
-* [deploy coin](coin_publish_test.go)
-* [initialize coin](coin_initialize_test.go)
-* [register recipient](register_recipient_test.go)
-* [mint coin to recipient](mint_test.go)
-
-In other networks, since tokens/coins are just balance numbers in a contract, anyone can "send" anyone else a random coin, even if the recipient doesn't want it. In Aptos, a user needs to explicitly register to receive a Coin<RandomCoin> before it can be sent to them.
+* [Publish Coin Module](./coin_module_publish_test.go)
+* [Initialize Coin Module](./coin_initialize_test.go)
+* [Query Coin info](./coin_info_test.go)
+* [Register Coin Recipient](./register_recipient_test.go)
+* [Mint Coin](./coin_mint_test.go)
+* [Transfer Coin](./coin_transfer_test.go)
 
