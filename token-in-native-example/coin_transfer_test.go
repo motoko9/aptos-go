@@ -89,7 +89,9 @@ func TestReadToAccount(t *testing.T) {
 	fmt.Printf("account balance: %d\n", balance)
 }
 
-func TestTransfer(t *testing.T) {
+// need to register to account first
+//
+func TestTransfer_Raw(t *testing.T) {
 	ctx := context.Background()
 
 	// coin account
@@ -130,7 +132,7 @@ func TestTransfer(t *testing.T) {
 	payload := rpcmodule.TransactionPayloadEntryFunctionPayload{
 		Type:          "entry_function_payload",
 		Function:      "0x1::coin::transfer",
-		TypeArguments: []string{fmt.Sprintf("%s::usdt::USDTCoin", coinAddress)},
+		TypeArguments: []string{fmt.Sprintf("%s::usdt::USDT", coinAddress)},
 		Arguments: []interface{}{
 			toAddress,
 			fmt.Sprintf("%d", transferAmount),
@@ -172,6 +174,51 @@ func TestTransfer(t *testing.T) {
 
 	// submit
 	txHash, err := client.SubmitTransaction(ctx, submitReq)
+	if err != nil {
+		panic(err)
+	}
+	//
+	fmt.Printf("transaction hash: %s\n", txHash)
+
+	//
+	confirmed, err := client.ConfirmTransaction(ctx, txHash)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("transaction confirmed: %v\n", confirmed)
+}
+
+func TestTransfer(t *testing.T) {
+	ctx := context.Background()
+
+	// coin account
+	coinWallet, err := wallet.NewFromKeygenFile("account_usdt")
+	if err != nil {
+		panic(err)
+	}
+	coinAddress := coinWallet.Address()
+	fmt.Printf("coin address: %s\n", coinAddress)
+
+	// recipient account
+	fromWallet, err := wallet.NewFromKeygenFile("account_recipient")
+	if err != nil {
+		panic(err)
+	}
+	fromAddress := fromWallet.Address()
+	fmt.Printf("from address: %s\n", fromAddress)
+
+	// to account
+	toWallet, err := wallet.NewFromKeygenFile("account_to")
+	if err != nil {
+		panic(err)
+	}
+	toAddress := toWallet.Address()
+	fmt.Printf("to address: %s\n", toAddress)
+
+	// new rpc
+	client := aptos.New(rpc.DevNet_RPC)
+	transferAmount := uint64(50000000)
+	txHash, err := client.TransferCoin(ctx, fromAddress, aptos.USDTCoin, transferAmount, toAddress, fromWallet)
 	if err != nil {
 		panic(err)
 	}
