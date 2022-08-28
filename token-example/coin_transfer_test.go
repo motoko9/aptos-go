@@ -89,7 +89,7 @@ func TestReadToAccount(t *testing.T) {
 	fmt.Printf("account balance: %d\n", balance)
 }
 
-// need to register to account first
+// need to register to account first !!!!
 //
 func TestTransfer(t *testing.T) {
 	ctx := context.Background()
