@@ -25,9 +25,9 @@ func TestCoinInfo(t *testing.T) {
 
 	//
 	resourceType := fmt.Sprintf("%s::usdc::CoinInfo", coinAddress)
-	resource, err := client.AccountResourceByAddressAndType(context.Background(), coinAddress, resourceType, 0)
-	if err != nil {
-		panic(err)
+	resource, aptosErr := client.AccountResourceByAddressAndType(context.Background(), coinAddress, resourceType, 0)
+	if aptosErr != nil {
+		panic(aptosErr)
 	}
 
 	//

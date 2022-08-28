@@ -5,20 +5,26 @@ import (
 	"github.com/motoko9/aptos-go/rpcmodule"
 )
 
-func (cl *Client) EventsByKey(ctx context.Context, key string) (*rpcmodule.Events, error) {
+func (cl *Client) EventsByKey(ctx context.Context, key string) (*rpcmodule.Events, *rpcmodule.AptosError) {
 	var events rpcmodule.Events
-	code, err := cl.Get(ctx, "/events/"+key, nil, &events)
-	if err != nil || code != 200 {
-		return nil, err
+	err, aptosErr := cl.Get(ctx, "/events/"+key, nil, &events)
+	if err != nil {
+		return nil, rpcmodule.AptosErrorFromError(err)
+	}
+	if aptosErr != nil {
+		return nil, aptosErr
 	}
 	return &events, nil
 }
 
-func (cl *Client) EventsByHandle(ctx context.Context, address string, handle string, field string) (*rpcmodule.Events, error) {
+func (cl *Client) EventsByHandle(ctx context.Context, address string, handle string, field string) (*rpcmodule.Events, *rpcmodule.AptosError) {
 	var events rpcmodule.Events
-	code, err := cl.Get(ctx, "/accounts/"+address+"/events/"+handle+"/"+field, nil, &events)
-	if err != nil || code != 200 {
-		return nil, err
+	err, aptosErr := cl.Get(ctx, "/accounts/"+address+"/events/"+handle+"/"+field, nil, &events)
+	if err != nil {
+		return nil, rpcmodule.AptosErrorFromError(err)
+	}
+	if aptosErr != nil {
+		return nil, aptosErr
 	}
 	return &events, nil
 }

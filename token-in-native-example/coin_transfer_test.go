@@ -63,9 +63,9 @@ func TestReadToAccount(t *testing.T) {
 
 	// fund (max: 20000)
 	amount := uint64(20000)
-	hashes, err := faucet.FundAccount(address, amount)
-	if err != nil {
-		panic(err)
+	hashes, aptosErr := faucet.FundAccount(address, amount)
+	if aptosErr != nil {
+		panic(aptosErr)
 	}
 	fmt.Printf("fund txs: %v\n", hashes)
 
@@ -76,15 +76,15 @@ func TestReadToAccount(t *testing.T) {
 	client := aptos.New(rpc.DevNet_RPC)
 
 	// latest ledger
-	ledger, err := client.Ledger(ctx)
-	if err != nil {
-		panic(err)
+	ledger, aptosErr := client.Ledger(ctx)
+	if aptosErr != nil {
+		panic(aptosErr)
 	}
 
 	// check account
-	balance, err := client.AccountBalance(ctx, address, aptos.AptosCoin, ledger.LedgerVersion)
-	if err != nil {
-		panic(err)
+	balance, aptosErr := client.AccountBalance(ctx, address, aptos.AptosCoin, ledger.LedgerVersion)
+	if aptosErr != nil {
+		panic(aptosErr)
 	}
 	fmt.Printf("account balance: %d\n", balance)
 }
@@ -122,9 +122,9 @@ func TestTransfer_Raw(t *testing.T) {
 	client := aptos.New(rpc.DevNet_RPC)
 
 	// coin account
-	fromAccount, err := client.Account(ctx, fromAddress, 0)
-	if err != nil {
-		panic(err)
+	fromAccount, aptosErr := client.Account(ctx, fromAddress, 0)
+	if aptosErr != nil {
+		panic(aptosErr)
 	}
 
 	//
@@ -148,9 +148,9 @@ func TestTransfer_Raw(t *testing.T) {
 	}
 
 	// sign message
-	signData, err := client.EncodeSubmission(ctx, encodeSubmissionReq)
-	if err != nil {
-		panic(err)
+	signData, aptosErr := client.EncodeSubmission(ctx, encodeSubmissionReq)
+	if aptosErr != nil {
+		panic(aptosErr)
 	}
 
 	// sign
@@ -173,17 +173,17 @@ func TestTransfer_Raw(t *testing.T) {
 	}
 
 	// submit
-	txHash, err := client.SubmitTransaction(ctx, submitReq)
-	if err != nil {
-		panic(err)
+	txHash, aptosErr := client.SubmitTransaction(ctx, submitReq)
+	if aptosErr != nil {
+		panic(aptosErr)
 	}
 	//
 	fmt.Printf("transaction hash: %s\n", txHash)
 
 	//
-	confirmed, err := client.ConfirmTransaction(ctx, txHash)
-	if err != nil {
-		panic(err)
+	confirmed, aptosErr := client.ConfirmTransaction(ctx, txHash)
+	if aptosErr != nil {
+		panic(aptosErr)
 	}
 	fmt.Printf("transaction confirmed: %v\n", confirmed)
 }
@@ -218,17 +218,17 @@ func TestTransfer(t *testing.T) {
 	// new rpc
 	client := aptos.New(rpc.DevNet_RPC)
 	transferAmount := uint64(50000000)
-	txHash, err := client.TransferCoin(ctx, fromAddress, aptos.USDTCoin, transferAmount, toAddress, fromWallet)
-	if err != nil {
-		panic(err)
+	txHash, aptosErr := client.TransferCoin(ctx, fromAddress, aptos.USDTCoin, transferAmount, toAddress, fromWallet)
+	if aptosErr != nil {
+		panic(aptosErr)
 	}
 	//
 	fmt.Printf("transaction hash: %s\n", txHash)
 
 	//
-	confirmed, err := client.ConfirmTransaction(ctx, txHash)
-	if err != nil {
-		panic(err)
+	confirmed, aptosErr := client.ConfirmTransaction(ctx, txHash)
+	if aptosErr != nil {
+		panic(aptosErr)
 	}
 	fmt.Printf("transaction confirmed: %v\n", confirmed)
 }

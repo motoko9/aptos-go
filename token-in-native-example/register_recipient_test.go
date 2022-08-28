@@ -61,9 +61,9 @@ func TestReadRecipientAccount(t *testing.T) {
 
 	// fund (max: 20000)
 	amount := uint64(20000)
-	hashes, err := faucet.FundAccount(address, amount)
-	if err != nil {
-		panic(err)
+	hashes, aptosErr := faucet.FundAccount(address, amount)
+	if aptosErr != nil {
+		panic(aptosErr)
 	}
 	fmt.Printf("fund txs: %v\n", hashes)
 
@@ -74,15 +74,15 @@ func TestReadRecipientAccount(t *testing.T) {
 	client := aptos.New(rpc.DevNet_RPC)
 
 	// latest ledger
-	ledger, err := client.Ledger(ctx)
-	if err != nil {
-		panic(err)
+	ledger, aptosErr := client.Ledger(ctx)
+	if aptosErr != nil {
+		panic(aptosErr)
 	}
 
 	// check account
-	balance, err := client.AccountBalance(ctx, address, aptos.AptosCoin, ledger.LedgerVersion)
-	if err != nil {
-		panic(err)
+	balance, aptosErr := client.AccountBalance(ctx, address, aptos.AptosCoin, ledger.LedgerVersion)
+	if aptosErr != nil {
+		panic(aptosErr)
 	}
 	fmt.Printf("account balance: %d\n", balance)
 }
@@ -108,15 +108,15 @@ func TestRegisterRecipient(t *testing.T) {
 
 	// new rpc
 	client := aptos.New(rpc.DevNet_RPC)
-	txHash, err := client.RegisterRecipient(ctx, address, aptos.USDTCoin, userWallet)
-	if err != nil {
-		panic(err)
+	txHash, aptosErr := client.RegisterRecipient(ctx, address, aptos.USDTCoin, userWallet)
+	if aptosErr != nil {
+		panic(aptosErr)
 	}
 
 	//
-	confirmed, err := client.ConfirmTransaction(ctx, txHash)
-	if err != nil {
-		panic(err)
+	confirmed, aptosErr := client.ConfirmTransaction(ctx, txHash)
+	if aptosErr != nil {
+		panic(aptosErr)
 	}
 	fmt.Printf("transaction confirmed: %v\n", confirmed)
 }

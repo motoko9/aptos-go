@@ -5,24 +5,29 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/motoko9/aptos-go/aptosmodule"
+	"github.com/motoko9/aptos-go/rpcmodule"
 )
 
-func (cl *Client) AccountBalance(ctx context.Context, address string, coin string, version uint64) (uint64, error) {
+func (cl *Client) AccountBalance(ctx context.Context, address string, coin string, version uint64) (uint64, *rpcmodule.AptosError) {
 	// how to get other coin balance
 	// todo
 	coin, ok := CoinType[coin]
 	if !ok {
-		return 0, fmt.Errorf("coin %s is not supported", coin)
+		return 0, rpcmodule.AptosErrorFromError(fmt.Errorf("coin %s is not supported", coin))
 	}
-	resourceType := fmt.Sprintf("0x1::coin::CoinStore<%s>", coin)
 	//
-	accountResource, err := cl.AccountResourceByAddressAndType(ctx, address, resourceType, version)
-	if err != nil {
-		return 0, err
+	resourceType := fmt.Sprintf("0x1::coin::CoinStore<%s>", coin)
+	accountResource, aptosErr := cl.AccountResourceByAddressAndType(ctx, address, resourceType, version)
+	if aptosErr != nil {
+		// resource not found, so balance is zero
+		if aptosErr.ErrorCode == rpcmodule.ResourceNotFound {
+			return 0, nil
+		}
+		return 0, aptosErr
 	}
 	var coinStore aptosmodule.CoinStore
-	if err = json.Unmarshal(accountResource.Data, &coinStore); err != nil {
-		return 0, err
+	if err := json.Unmarshal(accountResource.Data, &coinStore); err != nil {
+		return 0, rpcmodule.AptosErrorFromError(err)
 	}
 	return coinStore.Coin.Value, nil
 }

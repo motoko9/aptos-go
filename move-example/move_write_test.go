@@ -34,9 +34,9 @@ func TestMoveWrite(t *testing.T) {
 	client := aptos.New(rpc.DevNet_RPC)
 
 	// from account
-	account, err := client.Account(ctx, address, 0)
-	if err != nil {
-		panic(err)
+	account, aptosErr := client.Account(ctx, address, 0)
+	if aptosErr != nil {
+		panic(aptosErr)
 	}
 
 	//
@@ -57,9 +57,9 @@ func TestMoveWrite(t *testing.T) {
 	}
 
 	// sign message
-	signData, err := client.EncodeSubmission(ctx, encodeSubmissionReq)
-	if err != nil {
-		panic(err)
+	signData, aptosErr := client.EncodeSubmission(ctx, encodeSubmissionReq)
+	if aptosErr != nil {
+		panic(aptosErr)
 	}
 
 	// sign
@@ -81,17 +81,17 @@ func TestMoveWrite(t *testing.T) {
 	}
 
 	// submit
-	txHash, err := client.SubmitTransaction(ctx, submitReq)
-	if err != nil {
-		panic(err)
+	txHash, aptosErr := client.SubmitTransaction(ctx, submitReq)
+	if aptosErr != nil {
+		panic(aptosErr)
 	}
 	//
 	fmt.Printf("transaction hash: %s\n", txHash)
 
 	//
-	confirmed, err := client.ConfirmTransaction(ctx, txHash)
-	if err != nil {
-		panic(err)
+	confirmed, aptosErr := client.ConfirmTransaction(ctx, txHash)
+	if aptosErr != nil {
+		panic(aptosErr)
 	}
 	fmt.Printf("transaction confirmed: %v\n", confirmed)
 }

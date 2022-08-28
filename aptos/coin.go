@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/motoko9/aptos-go/aptosmodule"
+	"github.com/motoko9/aptos-go/rpcmodule"
 	"strings"
 )
 
@@ -30,23 +31,22 @@ func AddressFromCoinType(coinType string) string {
 	return items[0]
 }
 
-func (cl *Client) CoinInfo(ctx context.Context, coin string, version uint64) (*aptosmodule.CoinInfo, error) {
+func (cl *Client) CoinInfo(ctx context.Context, coin string, version uint64) (*aptosmodule.CoinInfo, *rpcmodule.AptosError) {
 	coinType, ok := CoinType[coin]
 	if !ok {
-		return nil, fmt.Errorf("coin %s is not supported", coin)
+		return nil, rpcmodule.AptosErrorFromError(fmt.Errorf("coin %s is not supported", coin))
 	}
-	coinAddress := AddressFromCoinType(coinType)
 	//
+	coinAddress := AddressFromCoinType(coinType)
 	coinInfoResourceType := fmt.Sprintf("0x1::coin::CoinInfo<%s>", coinType)
-	coinInfoResource, err := cl.AccountResourceByAddressAndType(ctx, coinAddress, coinInfoResourceType, version)
-	if err != nil {
-		return nil, err
+	coinInfoResource, aptosErr := cl.AccountResourceByAddressAndType(ctx, coinAddress, coinInfoResourceType, version)
+	if aptosErr != nil {
+		return nil, aptosErr
 	}
 	//
 	var coinInfo aptosmodule.CoinInfo
-	err = json.Unmarshal(coinInfoResource.Data, &coinInfo)
-	if err != nil {
-		return nil, err
+	if err := json.Unmarshal(coinInfoResource.Data, &coinInfo); err != nil {
+		return nil, rpcmodule.AptosErrorFromError(err)
 	}
 	return &coinInfo, nil
 }

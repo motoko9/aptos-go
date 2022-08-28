@@ -22,9 +22,9 @@ func TestCoinInfo(t *testing.T) {
 	client := aptos.New(rpc.DevNet_RPC)
 
 	//
-	coinInfo, err := client.CoinInfo(context.Background(), aptos.USDTCoin, 0)
-	if err != nil {
-		panic(err)
+	coinInfo, aptosErr := client.CoinInfo(context.Background(), aptos.USDTCoin, 0)
+	if aptosErr != nil {
+		panic(aptosErr)
 	}
 
 	fmt.Printf("name: %s, symbol: %s, decimals: %d\n", coinInfo.Name, coinInfo.Symbol, coinInfo.Decimals)

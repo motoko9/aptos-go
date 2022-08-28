@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"fmt"
+	"github.com/motoko9/aptos-go/rpcmodule"
 	"io/ioutil"
 	"net/http"
 )
@@ -26,10 +26,10 @@ func (cl *Client) SetHeaders(headers map[string]string) {
 	cl.headers = headers
 }
 
-func (cl *Client) Get(ctx context.Context, path string, params map[string]string, result interface{}) (int, error) {
+func (cl *Client) Get(ctx context.Context, path string, params map[string]string, result interface{}) (error, *rpcmodule.AptosError) {
 	req, err := http.NewRequest("GET", cl.url+path, nil)
 	if err != nil {
-		return -1, err
+		return err, nil
 	}
 
 	req.Header.Set("Content-Type", "application/json")
@@ -52,34 +52,45 @@ func (cl *Client) Get(ctx context.Context, path string, params map[string]string
 	req = req.WithContext(ctx)
 	resp, err := cl.client.Do(req)
 	if err != nil {
-		return -1, err
+		return err, nil
 	}
 	respBody, err := ioutil.ReadAll(resp.Body)
 	defer resp.Body.Close()
-	if resp.StatusCode != 200 {
-		// todo
-		// fetch aptos error
-		// json.Unmarshal(respBody, error)
-		return resp.StatusCode, fmt.Errorf("response status code: %d", resp.StatusCode)
-	}
 	if err != nil {
-		return resp.StatusCode, err
+		return err, nil
+	}
+	if resp.StatusCode != 200 {
+		// fetch aptos error
+		var aptosError rpcmodule.AptosError
+		if err = json.Unmarshal(respBody, &aptosError); err != nil {
+			return err, nil
+		}
+		return nil, &aptosError
+	}
+	// try to
+	// todo
+	var aptosError rpcmodule.AptosError
+	if err = json.Unmarshal(respBody, &aptosError); err != nil {
+		return err, nil
+	}
+	if aptosError.ErrorCode != "" {
+		return nil, &aptosError
 	}
 	err = json.Unmarshal(respBody, result)
 	if err != nil {
-		return -1, err
+		return err, nil
 	}
-	return resp.StatusCode, nil
+	return nil, nil
 }
 
-func (cl *Client) Post(ctx context.Context, path string, params map[string]string, body interface{}, result interface{}) (int, error) {
+func (cl *Client) Post(ctx context.Context, path string, params map[string]string, body interface{}, result interface{}) (error, *rpcmodule.AptosError) {
 	reqBody, err := json.Marshal(body)
 	if err != nil {
-		return -1, err
+		return err, nil
 	}
 	req, err := http.NewRequest("POST", cl.url+path, bytes.NewBuffer(reqBody))
 	if err != nil {
-		return -1, err
+		return err, nil
 	}
 
 	req.Header.Set("Content-Type", "application/json")
@@ -102,20 +113,34 @@ func (cl *Client) Post(ctx context.Context, path string, params map[string]strin
 	req = req.WithContext(ctx)
 	resp, err := cl.client.Do(req)
 	if err != nil {
-		return -1, err
+		return err, nil
 	}
 	respBody, err := ioutil.ReadAll(resp.Body)
 	defer resp.Body.Close()
+	if err != nil {
+		return err, nil
+	}
 	// 202 - Transaction is accepted and submitted to mempool.
 	if resp.StatusCode != 200 && resp.StatusCode != 202 {
-		// todo
 		// fetch aptos error
-		// json.Unmarshal(respBody, error)
-		return resp.StatusCode, fmt.Errorf("%s", string(respBody))
+		var aptosError rpcmodule.AptosError
+		if err = json.Unmarshal(respBody, &aptosError); err != nil {
+			return err, nil
+		}
+		return nil, &aptosError
+	}
+	// try to
+	// todo
+	var aptosError rpcmodule.AptosError
+	if err = json.Unmarshal(respBody, &aptosError); err != nil {
+		return err, nil
+	}
+	if aptosError.ErrorCode != "" {
+		return nil, &aptosError
 	}
 	err = json.Unmarshal(respBody, result)
 	if err != nil {
-		return -1, err
+		return err, nil
 	}
-	return resp.StatusCode, nil
+	return nil, nil
 }

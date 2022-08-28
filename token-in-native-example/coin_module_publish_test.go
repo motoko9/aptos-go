@@ -64,9 +64,9 @@ func TestReadUsdtAccount(t *testing.T) {
 
 	// fund (max: 20000)
 	amount := uint64(20000)
-	hashes, err := faucet.FundAccount(address, amount)
-	if err != nil {
-		panic(err)
+	hashes, aptosErr := faucet.FundAccount(address, amount)
+	if aptosErr != nil {
+		panic(aptosErr)
 	}
 	fmt.Printf("fund txs: %v\n", hashes)
 
@@ -77,15 +77,15 @@ func TestReadUsdtAccount(t *testing.T) {
 	client := aptos.New(rpc.DevNet_RPC)
 
 	// latest ledger
-	ledger, err := client.Ledger(ctx)
-	if err != nil {
-		panic(err)
+	ledger, aptosErr := client.Ledger(ctx)
+	if aptosErr != nil {
+		panic(aptosErr)
 	}
 
 	// check account
-	balance, err := client.AccountBalance(ctx, address, aptos.AptosCoin, ledger.LedgerVersion)
-	if err != nil {
-		panic(err)
+	balance, aptosErr := client.AccountBalance(ctx, address, aptos.AptosCoin, ledger.LedgerVersion)
+	if aptosErr != nil {
+		panic(aptosErr)
 	}
 	fmt.Printf("account balance: %d\n", balance)
 }
@@ -111,17 +111,17 @@ func TestCoinPublish(t *testing.T) {
 	}
 
 	// publish message
-	txHash, err := client.PublishMoveModuleLegacy(ctx, address, content, wallet)
-	if err != nil {
-		panic(err)
+	txHash, aptosErr := client.PublishMoveModuleLegacy(ctx, address, content, wallet)
+	if aptosErr != nil {
+		panic(aptosErr)
 	}
 	//
 	fmt.Printf("publish move rpcmodule transaction hash: %s\n", txHash)
 
 	//
-	confirmed, err := client.ConfirmTransaction(ctx, txHash)
-	if err != nil {
-		panic(err)
+	confirmed, aptosErr := client.ConfirmTransaction(ctx, txHash)
+	if aptosErr != nil {
+		panic(aptosErr)
 	}
 	fmt.Printf("publish move rpcmodule transaction confirmed: %v\n", confirmed)
 }

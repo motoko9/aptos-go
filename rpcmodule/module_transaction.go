@@ -8,6 +8,14 @@ import (
 
 type Transactions []Transaction
 
+const (
+	BlockMetadataTransaction   = "block_metadata_transaction"
+	GenesisTransaction         = "genesis_transaction"
+	PendingTransaction         = "pending_transaction"
+	StateCheckpointTransaction = "state_checkpoint_transaction"
+	UserTransaction            = "user_transaction"
+)
+
 type Transaction struct {
 	Type   string `json:"type"`
 	Raw    json.RawMessage
@@ -115,35 +123,35 @@ func (j *Transaction) UnmarshalJSON(data []byte) error {
 	}
 	j.Raw = data
 	switch j.Type {
-	case "block_metadata_transaction":
+	case BlockMetadataTransaction:
 		var transaction TransactionBlockMetadataTransaction
 		if err := json.Unmarshal(data, &transaction); err != nil {
 			return err
 		}
 		j.Object = transaction
 		return nil
-	case "genesis_transaction":
+	case GenesisTransaction:
 		var transaction TransactionGenesisTransaction
 		if err := json.Unmarshal(data, &transaction); err != nil {
 			return err
 		}
 		j.Object = transaction
 		return nil
-	case "pending_transaction":
+	case PendingTransaction:
 		var transaction TransactionPendingTransaction
 		if err := json.Unmarshal(data, &transaction); err != nil {
 			return err
 		}
 		j.Object = transaction
 		return nil
-	case "state_checkpoint_transaction":
+	case StateCheckpointTransaction:
 		var transaction TransactionStateCheckpointTransaction
 		if err := json.Unmarshal(data, &transaction); err != nil {
 			return err
 		}
 		j.Object = transaction
 		return nil
-	case "user_transaction":
+	case UserTransaction:
 		var transaction TransactionUserTransaction
 		if err := json.Unmarshal(data, &transaction); err != nil {
 			return err
@@ -154,6 +162,12 @@ func (j *Transaction) UnmarshalJSON(data []byte) error {
 		return fmt.Errorf("unsupport transaction type")
 	}
 }
+
+const (
+	EntryFunctionPayload = "entry_function_payload"
+	ModuleBundlePayload  = "module_bundle_payload"
+	ScriptPayload        = "script_payload"
+)
 
 type TransactionPayload struct {
 	Type   string `json:"type"`
@@ -192,21 +206,21 @@ func (j *TransactionPayload) UnmarshalJSON(data []byte) error {
 	}
 	j.Raw = data
 	switch j.Type {
-	case "entry_function_payload":
+	case EntryFunctionPayload:
 		var transactionPayload TransactionPayloadEntryFunctionPayload
 		if err := json.Unmarshal(data, &transactionPayload); err != nil {
 			return err
 		}
 		j.Object = transactionPayload
 		return nil
-	case "module_bundle_payload":
+	case ModuleBundlePayload:
 		var transactionPayload TransactionPayloadModuleBundlePayload
 		if err := json.Unmarshal(data, &transactionPayload); err != nil {
 			return err
 		}
 		j.Object = transactionPayload
 		return nil
-	case "script_payload":
+	case ScriptPayload:
 		var transactionPayload TransactionPayloadScriptPayload
 		if err := json.Unmarshal(data, &transactionPayload); err != nil {
 			return err
