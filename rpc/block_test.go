@@ -9,7 +9,7 @@ import (
 
 func TestClient_Block(t *testing.T) {
 	client := New(DevNet_RPC)
-	block, err := client.Block(context.Background(), 79591900, true)
+	block, err := client.BlockByHeight(context.Background(), 79591900, true)
 	if err != nil {
 		panic(err)
 	}

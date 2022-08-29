@@ -81,7 +81,7 @@ func (cl *Client) AccountModuleByAddressAndName(ctx context.Context, address str
 		params["version"] = fmt.Sprintf("%d", version)
 	}
 	var moveModule rpcmodule.MoveModule
-	err, aptosErr := cl.Get(ctx, "/accounts/"+address+"/rpcmodule/"+name, params, &moveModule)
+	err, aptosErr := cl.Get(ctx, "/accounts/"+address+"/module/"+name, params, &moveModule)
 	if err != nil {
 		return nil, rpcmodule.AptosErrorFromError(err)
 	}

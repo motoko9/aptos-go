@@ -69,13 +69,15 @@ func (cl *Client) Get(ctx context.Context, path string, params map[string]string
 	}
 	// try to
 	// todo
-	var aptosError rpcmodule.AptosError
-	if err = json.Unmarshal(respBody, &aptosError); err != nil {
-		return err, nil
-	}
-	if aptosError.ErrorCode != "" {
-		return nil, &aptosError
-	}
+	/*
+		var aptosError rpcmodule.AptosError
+		if err = json.Unmarshal(respBody, &aptosError); err != nil {
+			return err, nil
+		}
+		if aptosError.ErrorCode != "" {
+			return nil, &aptosError
+		}
+	*/
 	err = json.Unmarshal(respBody, result)
 	if err != nil {
 		return err, nil
@@ -131,13 +133,15 @@ func (cl *Client) Post(ctx context.Context, path string, params map[string]strin
 	}
 	// try to
 	// todo
-	var aptosError rpcmodule.AptosError
-	if err = json.Unmarshal(respBody, &aptosError); err != nil {
-		return err, nil
-	}
-	if aptosError.ErrorCode != "" {
-		return nil, &aptosError
-	}
+	/*
+		var aptosError rpcmodule.AptosError
+		if err = json.Unmarshal(respBody, &aptosError); err != nil {
+			return err, nil
+		}
+		if aptosError.ErrorCode != "" {
+			return nil, &aptosError
+		}
+	*/
 	err = json.Unmarshal(respBody, result)
 	if err != nil {
 		return err, nil

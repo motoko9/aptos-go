@@ -20,7 +20,7 @@ func TestMoveWrite(t *testing.T) {
 		panic(err)
 	}
 	moduleAddress := moveModule.Address()
-	fmt.Printf("move rpcmodule address: %s\n", moduleAddress)
+	fmt.Printf("move module address: %s\n", moduleAddress)
 
 	// user account
 	userWallet, err := wallet.NewFromKeygenFile("account_user")

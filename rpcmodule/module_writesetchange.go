@@ -5,8 +5,18 @@ import (
 	"fmt"
 )
 
+const (
+	DeleteModule    = "delete_module"
+	DeleteResource  = "delete_resource"
+	DeleteTableItem = "delete_table_item"
+	WriteModule     = "write_module"
+	WriteResource   = "write_resource"
+	WriteTableItem  = "write_table_item"
+)
+
 type WriteSetChange struct {
 	Type   string `json:"type"`
+	Raw    json.RawMessage
 	Object interface{}
 }
 
@@ -14,7 +24,7 @@ type WriteSetChangeDeleteModule struct {
 	Type         string `json:"type"`
 	Address      string `json:"address"`
 	StateKeyHash string `json:"state_key_hash"`
-	Module       string `json:"rpcmodule"`
+	Module       string `json:"module"`
 }
 
 type WriteSetChangeDeleteResource struct {
@@ -66,42 +76,42 @@ func (j *WriteSetChange) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	switch j.Type {
-	case "delete_module":
+	case DeleteModule:
 		var change WriteSetChangeDeleteModule
 		if err := json.Unmarshal(data, &change); err != nil {
 			return err
 		}
 		j.Object = change
 		return nil
-	case "delete_resource":
+	case DeleteResource:
 		var change WriteSetChangeDeleteResource
 		if err := json.Unmarshal(data, &change); err != nil {
 			return err
 		}
 		j.Object = change
 		return nil
-	case "delete_table_item":
+	case DeleteTableItem:
 		var change WriteSetChangeDeleteTableItem
 		if err := json.Unmarshal(data, &change); err != nil {
 			return err
 		}
 		j.Object = change
 		return nil
-	case "write_module":
+	case WriteModule:
 		var change WriteSetChangeWriteModule
 		if err := json.Unmarshal(data, &change); err != nil {
 			return err
 		}
 		j.Object = change
 		return nil
-	case "write_resource":
+	case WriteResource:
 		var change WriteSetChangeWriteResource
 		if err := json.Unmarshal(data, &change); err != nil {
 			return err
 		}
 		j.Object = change
 		return nil
-	case "write_table_item":
+	case WriteTableItem:
 		var change WriteSetChangeWriteTableItem
 		if err := json.Unmarshal(data, &change); err != nil {
 			return err

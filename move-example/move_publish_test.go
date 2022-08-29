@@ -119,12 +119,12 @@ func TestMovePublish(t *testing.T) {
 		panic(aptosErr)
 	}
 	//
-	fmt.Printf("publish move rpcmodule transaction hash: %s\n", txHash)
+	fmt.Printf("publish move module transaction hash: %s\n", txHash)
 
 	//
 	confirmed, aptosErr := client.ConfirmTransaction(ctx, txHash)
 	if aptosErr != nil {
 		panic(aptosErr)
 	}
-	fmt.Printf("publish move rpcmodule transaction confirmed: %v\n", confirmed)
+	fmt.Printf("publish move module transaction confirmed: %v\n", confirmed)
 }

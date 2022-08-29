@@ -1,5 +1,7 @@
 package rpcmodule
 
+import "encoding/json"
+
 const (
 	ClientError              = "client_error"
 	AccountNotFound          = "account_not_found"
@@ -28,6 +30,11 @@ type AptosError struct {
 	Message     string `json:"message"`
 	ErrorCode   string `json:"error_code"`
 	VmErrorCode int64  `json:"vm_error_code"`
+}
+
+func (ae *AptosError) String() string {
+	err, _ := json.Marshal(ae)
+	return string(err)
 }
 
 func AptosErrorFromError(err error) *AptosError {
