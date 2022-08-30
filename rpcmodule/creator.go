@@ -3,7 +3,7 @@ package rpcmodule
 type Creator func() interface{}
 
 // TransactionCreators
-// for event objects
+// for Transaction objects
 //
 var TransactionCreators = map[string]Creator{}
 
@@ -13,6 +13,23 @@ func RegisterTransactionCreator(t string, creator Creator) {
 
 func createTransactionObject(t string) interface{} {
 	creator, ok := TransactionCreators[t]
+	if !ok {
+		return nil
+	}
+	return creator()
+}
+
+// TransactionPayloadCreators
+// for TransactionPayload objects
+//
+var TransactionPayloadCreators = map[string]Creator{}
+
+func RegisterTransactionPayloadCreator(t string, creator Creator) {
+	TransactionPayloadCreators[t] = creator
+}
+
+func createTransactionPayloadObject(t string) interface{} {
+	creator, ok := TransactionPayloadCreators[t]
 	if !ok {
 		return nil
 	}

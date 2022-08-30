@@ -145,7 +145,7 @@ func (j *Transaction) UnmarshalJSON(data []byte) error {
 	//
 	object := createTransactionObject(j.Type)
 	if object == nil {
-		return nil
+		return fmt.Errorf("unsupport transaction type")
 	}
 	if err := json.Unmarshal(data, object); err != nil {
 		return err
@@ -159,6 +159,18 @@ const (
 	ModuleBundlePayload  = "module_bundle_payload"
 	ScriptPayload        = "script_payload"
 )
+
+func EntryFunctionPayloadCreator() interface{} {
+	return &TransactionPayloadEntryFunctionPayload{}
+}
+
+func ModuleBundlePayloadCreator() interface{} {
+	return &TransactionPayloadModuleBundlePayload{}
+}
+
+func ScriptPayloadCreator() interface{} {
+	return &TransactionPayloadScriptPayload{}
+}
 
 type TransactionPayload struct {
 	Type   string `json:"type"`
@@ -196,31 +208,16 @@ func (j *TransactionPayload) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	j.Raw = data
-	switch j.Type {
-	case EntryFunctionPayload:
-		var transactionPayload TransactionPayloadEntryFunctionPayload
-		if err := json.Unmarshal(data, &transactionPayload); err != nil {
-			return err
-		}
-		j.Object = transactionPayload
-		return nil
-	case ModuleBundlePayload:
-		var transactionPayload TransactionPayloadModuleBundlePayload
-		if err := json.Unmarshal(data, &transactionPayload); err != nil {
-			return err
-		}
-		j.Object = transactionPayload
-		return nil
-	case ScriptPayload:
-		var transactionPayload TransactionPayloadScriptPayload
-		if err := json.Unmarshal(data, &transactionPayload); err != nil {
-			return err
-		}
-		j.Object = transactionPayload
-		return nil
-	default:
+	//
+	object := createTransactionPayloadObject(j.Type)
+	if object == nil {
 		return fmt.Errorf("unsupport transaction payload type")
 	}
+	if err := json.Unmarshal(data, object); err != nil {
+		return err
+	}
+	j.Object = object
+	return nil
 }
 
 type EncodeSubmissionRequest struct {
