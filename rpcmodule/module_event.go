@@ -18,7 +18,7 @@ func (j Event) MarshalJSON() ([]byte, error) {
 	raw, _ := json.Marshal(j.Object)
 	j.Raw = raw
 	type Aux Event
-	aux := j
+	aux := Aux(j)
 	return json.Marshal(aux)
 }
 
@@ -33,7 +33,7 @@ func (j *Event) UnmarshalJSON(data []byte) error {
 	if object == nil {
 		return nil
 	}
-	if err := json.Unmarshal(j.Raw, &object); err != nil {
+	if err := json.Unmarshal(j.Raw, object); err != nil {
 		return err
 	}
 	j.Object = object

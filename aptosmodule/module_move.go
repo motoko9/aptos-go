@@ -22,6 +22,10 @@ type CoinStore struct {
 	WithdrawEvents Events `json:"withdraw_events"`
 }
 
+func CoinStoreCreator() interface{} {
+	return &CoinStore{}
+}
+
 type CoinInfo struct {
 	Name     string `json:"name"`
 	Symbol   string `json:"symbol"`
@@ -31,10 +35,18 @@ type CoinInfo struct {
 	// Supply uint64 `json:"supply"`
 }
 
+func CoinInfoCreator() interface{} {
+	return &CoinInfo{}
+}
+
 type Account struct {
 	AuthenticationKey  string `json:"authentication_key"`
 	CoinRegisterEvents Events `json:"coin_register_events"`
 	GuidCreationNum    uint64 `json:"guid_creation_num,string"`
 	KeyRotationEvents  Events `json:"key_rotation_events"`
 	SequenceNumber     uint64 `json:"sequence_number,string"`
+}
+
+func AccountCreator() interface{} {
+	return &Account{}
 }

@@ -1,6 +1,25 @@
 package rpcmodule
 
+import "strings"
+
 type Creator func() interface{}
+
+// AccountSignatureCreators
+// for Transaction objects
+//
+var AccountSignatureCreators = map[string]Creator{}
+
+func RegisterAccountSignatureCreator(t string, creator Creator) {
+	AccountSignatureCreators[t] = creator
+}
+
+func createAccountSignatureObject(t string) interface{} {
+	creator, ok := AccountSignatureCreators[t]
+	if !ok {
+		return nil
+	}
+	return creator()
+}
 
 // TransactionCreators
 // for Transaction objects
@@ -63,6 +82,11 @@ func RegisterResourceObjectCreator(t string, creator Creator) {
 }
 
 func createResourceObject(t string) interface{} {
+	// remove type
+	index := strings.IndexByte(t, '<')
+	if index != -1 {
+		t = t[0:index]
+	}
 	creator, ok := ResourceObjectCreators[t]
 	if !ok {
 		return nil
@@ -78,7 +102,12 @@ func init() {
 	RegisterTransactionCreator(StateCheckpointTransaction, StateCheckpointTransactionCreator)
 	RegisterTransactionCreator(UserTransaction, UserTransactionCreator)
 
-	// register aptos framework event creator
-	RegisterEventObjectCreator("0x1::coin::WithdrawEvent", WithdrawEventCreator)
-	RegisterEventObjectCreator("0x1::coin::DepositEvent", DepositEventCreator)
+	// register transactionpayload creator
+	RegisterTransactionPayloadCreator(EntryFunctionPayload, EntryFunctionPayloadCreator)
+	RegisterTransactionPayloadCreator(ModuleBundlePayload, ModuleBundlePayloadCreator)
+	RegisterTransactionPayloadCreator(ScriptPayload, ScriptPayloadCreator)
+
+	// register accountsignature creator
+	RegisterAccountSignatureCreator(Ed25519Signature, Ed25519SignatureCreator)
+	RegisterAccountSignatureCreator(MultiEd25519Signature, MultiEd25519SignatureCreator)
 }

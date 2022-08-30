@@ -2,7 +2,6 @@ package aptos
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"github.com/motoko9/aptos-go/aptosmodule"
 	"github.com/motoko9/aptos-go/rpcmodule"
@@ -25,9 +24,6 @@ func (cl *Client) AccountBalance(ctx context.Context, address string, coin strin
 		}
 		return 0, aptosErr
 	}
-	var coinStore aptosmodule.CoinStore
-	if err := json.Unmarshal(accountResource.Data, &coinStore); err != nil {
-		return 0, rpcmodule.AptosErrorFromError(err)
-	}
+	coinStore := accountResource.Object.(*aptosmodule.CoinStore)
 	return coinStore.Coin.Value, nil
 }

@@ -45,8 +45,35 @@ type MoveAbi struct {
 type MoveResources []MoveResource
 
 type MoveResource struct {
-	Type string          `json:"type"`
-	Data json.RawMessage `json:"data"`
+	Type   string          `json:"type"`
+	Raw    json.RawMessage `json:"data"`
+	Object interface{}
+}
+
+func (j MoveResource) MarshalJSON() ([]byte, error) {
+	raw, _ := json.Marshal(j.Object)
+	j.Raw = raw
+	type Aux MoveResource
+	aux := Aux(j)
+	return json.Marshal(aux)
+}
+
+func (j *MoveResource) UnmarshalJSON(data []byte) error {
+	type Aux MoveResource
+	aux := (*Aux)(j)
+	if err := json.Unmarshal(data, aux); err != nil {
+		return err
+	}
+	//
+	object := createResourceObject(j.Type)
+	if object == nil {
+		return nil
+	}
+	if err := json.Unmarshal(j.Raw, object); err != nil {
+		return err
+	}
+	j.Object = object
+	return nil
 }
 
 type MoveModules []MoveModule

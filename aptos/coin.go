@@ -2,7 +2,6 @@ package aptos
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"github.com/motoko9/aptos-go/aptosmodule"
 	"github.com/motoko9/aptos-go/rpcmodule"
@@ -43,10 +42,6 @@ func (cl *Client) CoinInfo(ctx context.Context, coin string, version uint64) (*a
 	if aptosErr != nil {
 		return nil, aptosErr
 	}
-	//
-	var coinInfo aptosmodule.CoinInfo
-	if err := json.Unmarshal(coinInfoResource.Data, &coinInfo); err != nil {
-		return nil, rpcmodule.AptosErrorFromError(err)
-	}
-	return &coinInfo, nil
+	coinInfo := coinInfoResource.Object.(*aptosmodule.CoinInfo)
+	return coinInfo, nil
 }

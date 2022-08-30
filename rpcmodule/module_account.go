@@ -10,6 +10,19 @@ type AccountData struct {
 	AuthenticationKey string `json:"authentication_key"`
 }
 
+const (
+	Ed25519Signature      = "ed25519_signature"
+	MultiEd25519Signature = "multi_ed25519_signature"
+)
+
+func Ed25519SignatureCreator() interface{} {
+	return &AccountSignatureEd25519Signature{}
+}
+
+func MultiEd25519SignatureCreator() interface{} {
+	return &AccountSignatureMultiEd25519Signature{}
+}
+
 type AccountSignature struct {
 	Type   string `json:"type"`
 	Raw    json.RawMessage
@@ -41,22 +54,14 @@ func (j *AccountSignature) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	j.Raw = data
-	switch j.Type {
-	case "ed25519_signature":
-		var accountSignature AccountSignatureEd25519Signature
-		if err := json.Unmarshal(data, &accountSignature); err != nil {
-			return err
-		}
-		j.Object = accountSignature
-		return nil
-	case "multi_ed25519_signature":
-		var accountSignature AccountSignatureMultiEd25519Signature
-		if err := json.Unmarshal(data, &accountSignature); err != nil {
-			return err
-		}
-		j.Object = accountSignature
-		return nil
-	default:
+	//
+	object := createAccountSignatureObject(j.Type)
+	if object == nil {
 		return fmt.Errorf("unsupport account signature type")
 	}
+	if err := json.Unmarshal(data, object); err != nil {
+		return err
+	}
+	j.Object = object
+	return nil
 }
