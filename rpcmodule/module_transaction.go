@@ -16,6 +16,26 @@ const (
 	UserTransaction            = "user_transaction"
 )
 
+func BlockMetadataTransactionCreator() interface{} {
+	return &TransactionBlockMetadataTransaction{}
+}
+
+func GenesisTransactionCreator() interface{} {
+	return &TransactionGenesisTransaction{}
+}
+
+func PendingTransactionCreator() interface{} {
+	return &TransactionPendingTransaction{}
+}
+
+func StateCheckpointTransactionCreator() interface{} {
+	return &TransactionStateCheckpointTransaction{}
+}
+
+func UserTransactionCreator() interface{} {
+	return &TransactionUserTransaction{}
+}
+
 type Transaction struct {
 	Type   string `json:"type"`
 	Raw    json.RawMessage
@@ -122,45 +142,16 @@ func (j *Transaction) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	j.Raw = data
-	switch j.Type {
-	case BlockMetadataTransaction:
-		var transaction TransactionBlockMetadataTransaction
-		if err := json.Unmarshal(data, &transaction); err != nil {
-			return err
-		}
-		j.Object = transaction
+	//
+	object := createTransactionObject(j.Type)
+	if object == nil {
 		return nil
-	case GenesisTransaction:
-		var transaction TransactionGenesisTransaction
-		if err := json.Unmarshal(data, &transaction); err != nil {
-			return err
-		}
-		j.Object = transaction
-		return nil
-	case PendingTransaction:
-		var transaction TransactionPendingTransaction
-		if err := json.Unmarshal(data, &transaction); err != nil {
-			return err
-		}
-		j.Object = transaction
-		return nil
-	case StateCheckpointTransaction:
-		var transaction TransactionStateCheckpointTransaction
-		if err := json.Unmarshal(data, &transaction); err != nil {
-			return err
-		}
-		j.Object = transaction
-		return nil
-	case UserTransaction:
-		var transaction TransactionUserTransaction
-		if err := json.Unmarshal(data, &transaction); err != nil {
-			return err
-		}
-		j.Object = transaction
-		return nil
-	default:
-		return fmt.Errorf("unsupport transaction type")
 	}
+	if err := json.Unmarshal(data, object); err != nil {
+		return err
+	}
+	j.Object = object
+	return nil
 }
 
 const (
