@@ -61,6 +61,7 @@ func init() {
 	RegisterTransactionCreator(StateCheckpointTransaction, StateCheckpointTransactionCreator)
 	RegisterTransactionCreator(UserTransaction, UserTransactionCreator)
 
-	RegisterEventObjectCreator("0x1::coin::WithdrawEvent", TransferEventCreator)
-	RegisterEventObjectCreator("0x1::coin::DepositEvent", TransferEventCreator)
+	// register aptos framework event creator
+	RegisterEventObjectCreator("0x1::coin::WithdrawEvent", WithdrawEventCreator)
+	RegisterEventObjectCreator("0x1::coin::DepositEvent", DepositEventCreator)
 }

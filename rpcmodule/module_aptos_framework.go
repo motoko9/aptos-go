@@ -1,9 +1,17 @@
 package rpcmodule
 
-type TransferEvent struct {
+type DepositEvent struct {
 	Amount uint64 `json:"amount,string"`
 }
 
-func TransferEventCreator() interface{} {
-	return &TransferEvent{}
+func DepositEventCreator() interface{} {
+	return &DepositEvent{}
+}
+
+type WithdrawEvent struct {
+	Amount uint64 `json:"amount,string"`
+}
+
+func WithdrawEventCreator() interface{} {
+	return &WithdrawEvent{}
 }
