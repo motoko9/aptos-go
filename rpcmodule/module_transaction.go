@@ -252,6 +252,19 @@ func EncodeSubmissionReq(sender string, sequence uint64, payload TransactionPayl
 	return &req, nil
 }
 
+func EncodeSubmissionWithSecondarySignersReq(sender string, sequence uint64, payload TransactionPayload, secondarySigners []string) (*EncodeSubmissionRequest, error) {
+	req := EncodeSubmissionRequest{
+		Sender:                  sender,
+		SequenceNumber:          sequence,
+		MaxGasAmount:            uint64(2000),
+		GasUnitPrice:            uint64(1),
+		ExpirationTimestampSecs: uint64(time.Now().Unix() + 600), // now + 10 minutes
+		Payload:                 payload,
+		SecondarySigners:        secondarySigners,
+	}
+	return &req, nil
+}
+
 type SubmitTransactionRequest struct {
 	Sender                  string             `json:"sender"`
 	SequenceNumber          uint64             `json:"sequence_number,string"`
