@@ -4,23 +4,6 @@ import "strings"
 
 type Creator func() interface{}
 
-// AccountSignatureCreators
-// for Transaction objects
-//
-var AccountSignatureCreators = map[string]Creator{}
-
-func RegisterAccountSignatureCreator(t string, creator Creator) {
-	AccountSignatureCreators[t] = creator
-}
-
-func createAccountSignatureObject(t string) interface{} {
-	creator, ok := AccountSignatureCreators[t]
-	if !ok {
-		return nil
-	}
-	return creator()
-}
-
 // TransactionCreators
 // for Transaction objects
 //
@@ -49,6 +32,23 @@ func RegisterTransactionPayloadCreator(t string, creator Creator) {
 
 func createTransactionPayloadObject(t string) interface{} {
 	creator, ok := TransactionPayloadCreators[t]
+	if !ok {
+		return nil
+	}
+	return creator()
+}
+
+// SignatureCreators
+// for Signature objects
+//
+var SignatureCreators = map[string]Creator{}
+
+func RegisterSignatureCreator(t string, creator Creator) {
+	SignatureCreators[t] = creator
+}
+
+func createSignatureObject(t string) interface{} {
+	creator, ok := SignatureCreators[t]
 	if !ok {
 		return nil
 	}
@@ -95,19 +95,20 @@ func createResourceObject(t string) interface{} {
 }
 
 func init() {
-	// register transaction creator
+	// register Transaction creator
 	RegisterTransactionCreator(BlockMetadataTransaction, BlockMetadataTransactionCreator)
 	RegisterTransactionCreator(GenesisTransaction, GenesisTransactionCreator)
 	RegisterTransactionCreator(PendingTransaction, PendingTransactionCreator)
 	RegisterTransactionCreator(StateCheckpointTransaction, StateCheckpointTransactionCreator)
 	RegisterTransactionCreator(UserTransaction, UserTransactionCreator)
 
-	// register transactionpayload creator
+	// register TransactionPayload creator
 	RegisterTransactionPayloadCreator(EntryFunctionPayload, EntryFunctionPayloadCreator)
 	RegisterTransactionPayloadCreator(ModuleBundlePayload, ModuleBundlePayloadCreator)
 	RegisterTransactionPayloadCreator(ScriptPayload, ScriptPayloadCreator)
 
-	// register accountsignature creator
-	RegisterAccountSignatureCreator(Ed25519Signature, Ed25519SignatureCreator)
-	RegisterAccountSignatureCreator(MultiEd25519Signature, MultiEd25519SignatureCreator)
+	// register Signature creator
+	RegisterSignatureCreator(Ed25519Signature, Ed25519SignatureCreator)
+	RegisterSignatureCreator(MultiEd25519Signature, MultiEd25519SignatureCreator)
+	RegisterSignatureCreator(MultiAgentSignature, MultiAgentSignatureCreator)
 }

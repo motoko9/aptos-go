@@ -158,9 +158,9 @@ func TestTransfer_raw(t *testing.T) {
 	}
 
 	// add signature
-	submitReq, err := rpcmodule.SubmitTransactionReq(encodeSubmissionReq, rpcmodule.AccountSignature{
+	submitReq, err := rpcmodule.SubmitTransactionReq(encodeSubmissionReq, rpcmodule.Signature{
 		Type: "ed25519_signature",
-		Object: rpcmodule.AccountSignatureEd25519Signature{
+		Object: rpcmodule.SignatureEd25519Signature{
 			Type:      "ed25519_signature",
 			PublicKey: "0x" + walletFrom.PublicKey().String(),
 			Signature: "0x" + hex.EncodeToString(signature),

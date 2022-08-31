@@ -51,7 +51,7 @@ type TransactionPendingTransaction struct {
 	GasUnitPrice            uint64             `json:"gas_unit_price,string"`
 	ExpirationTimestampSecs uint64             `json:"expiration_timestamp_secs,string"`
 	Payload                 TransactionPayload `json:"payload"`
-	Signature               AccountSignature   `json:"signature,omitempty"`
+	Signature               Signature          `json:"signature,omitempty"`
 }
 
 type TransactionStateCheckpointTransaction struct {
@@ -126,13 +126,18 @@ type TransactionUserTransaction struct {
 	GasUnitPrice            uint64             `json:"gas_unit_price,string"`
 	ExpirationTimestampSecs uint64             `json:"expiration_timestamp_secs,string"`
 	Payload                 TransactionPayload `json:"payload"`
-	Signature               AccountSignature   `json:"signature,omitempty"`
+	Signature               Signature          `json:"signature,omitempty"`
 	Events                  []Event            `json:"events"`
 	Timestamp               uint64             `json:"timestamp,string"`
 }
 
 func (j Transaction) MarshalJSON() ([]byte, error) {
-	return json.Marshal(j.Object)
+	raw, err := json.Marshal(j.Object)
+	if err != nil {
+		return nil, err
+	}
+	j.Raw = raw
+	return raw, nil
 }
 
 func (j *Transaction) UnmarshalJSON(data []byte) error {
@@ -198,7 +203,12 @@ type TransactionPayloadScriptPayload struct {
 }
 
 func (j TransactionPayload) MarshalJSON() ([]byte, error) {
-	return json.Marshal(j.Object)
+	raw, err := json.Marshal(j.Object)
+	if err != nil {
+		return nil, err
+	}
+	j.Raw = raw
+	return raw, nil
 }
 
 func (j *TransactionPayload) UnmarshalJSON(data []byte) error {
@@ -249,10 +259,10 @@ type SubmitTransactionRequest struct {
 	GasUnitPrice            uint64             `json:"gas_unit_price,string"`
 	ExpirationTimestampSecs uint64             `json:"expiration_timestamp_secs,string"`
 	Payload                 TransactionPayload `json:"payload"`
-	Signature               AccountSignature   `json:"signature"`
+	Signature               Signature          `json:"signature"`
 }
 
-func SubmitTransactionReq(encodeSubmissionReq *EncodeSubmissionRequest, signature AccountSignature) (*SubmitTransactionRequest, error) {
+func SubmitTransactionReq(encodeSubmissionReq *EncodeSubmissionRequest, signature Signature) (*SubmitTransactionRequest, error) {
 	req := SubmitTransactionRequest{
 		Sender:                  encodeSubmissionReq.Sender,
 		SequenceNumber:          encodeSubmissionReq.SequenceNumber,
