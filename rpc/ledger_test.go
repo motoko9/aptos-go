@@ -8,7 +8,6 @@ import (
 )
 
 func TestClient_Ledger(t *testing.T) {
-	client := New(DevNet_RPC)
 	ledger, err := client.Ledger(context.Background())
 	if err != nil {
 		panic(err)

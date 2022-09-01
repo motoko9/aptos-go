@@ -2,6 +2,7 @@ package move_example
 
 import (
 	"context"
+	"encoding/hex"
 	"fmt"
 	"github.com/motoko9/aptos-go/aptos"
 	"github.com/motoko9/aptos-go/faucet"
@@ -62,6 +63,7 @@ func TestReadModuleAccount(t *testing.T) {
 	fmt.Printf("public key: %s\n", wallet.PublicKey().String())
 	fmt.Printf("private key: %s\n", wallet.PrivateKey.String())
 
+<<<<<<< Updated upstream
 	// fund (max: 20000)
 	amount := uint64(20000)
 	hashes, aptosErr := faucet.FundAccount(address, amount)
@@ -80,6 +82,12 @@ func TestReadModuleAccount(t *testing.T) {
 	ledger, aptosErr := client.Ledger(ctx)
 	if aptosErr != nil {
 		panic(aptosErr)
+=======
+	// sign message
+	signData, err := client.TransactionEncodeSubmission(ctx, transaction)
+	if err != nil {
+		panic(err)
+>>>>>>> Stashed changes
 	}
 
 	// check account
@@ -104,8 +112,18 @@ func TestMovePublish(t *testing.T) {
 	address := wallet.Address()
 	fmt.Printf("account move publish address: %s\n", wallet.Address())
 
+<<<<<<< Updated upstream
 	// new rpc
 	client := aptos.New(rpc.DevNet_RPC)
+=======
+	// add signature
+	transaction.Signature = &rpc.Signature{
+		Type: "ed25519_signature",
+		//PublicKey: fromAccount.AuthenticationKey,
+		PublicKey: "0x" + wallet.PublicKey().String(),
+		Signature: "0x" + hex.EncodeToString(signature),
+	}
+>>>>>>> Stashed changes
 
 	// read move byte code
 	content, err := ioutil.ReadFile("./helloworld.mv")
