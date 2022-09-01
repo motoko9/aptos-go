@@ -1,316 +1,190 @@
 package aptos
 
 import (
-	"context"
-	"encoding/hex"
-	"fmt"
-	"github.com/motoko9/aptos-go/rpcmodule"
-	"github.com/motoko9/aptos-go/utils"
-	"time"
+    "context"
+    "encoding/hex"
+    "fmt"
+    "github.com/motoko9/aptos-go/crypto"
+    "github.com/motoko9/aptos-go/rpcmodule"
+    "time"
 )
 
-type Signer interface {
-	Sign(data []byte) ([]byte, error)
-	PublicKey() utils.PublicKey
+func (cl *Client) TransactionPending(ctx context.Context, hash string) (bool, error) {
+    tx, err := cl.TransactionByHash(ctx, hash)
+    if err != nil {
+        if err.Error() == rpcmodule.TransactionNotFound {
+            return true, nil
+        }
+        return false, err
+    }
+
+    return tx.Type == rpcmodule.PendingTransaction, nil
 }
 
-func (cl *Client) TransactionPending(ctx context.Context, hash string) (bool, *rpcmodule.AptosError) {
-	var transaction rpcmodule.Transaction
-	err, aptosErr := cl.Get(ctx, "/transactions/by_hash/"+hash, nil, &transaction)
-	if err != nil {
-		return false, rpcmodule.AptosErrorFromError(err)
-	}
-	if aptosErr != nil {
-		if aptosErr.ErrorCode == rpcmodule.TransactionNotFound {
-			return true, nil
-		}
-	}
-	// can get transaction
-	if transaction.Type == rpcmodule.PendingTransaction {
-		return true, nil
-	} else {
-		return false, nil
-	}
+func (cl *Client) ConfirmTransaction(ctx context.Context, hash string) (bool, error) {
+    counter := 0
+    for counter < 100 {
+        pending, err := cl.TransactionPending(ctx, hash)
+        if err != nil {
+            return false, err
+        }
+        if !pending {
+            return true, nil
+        }
+        counter++
+        time.Sleep(time.Second * 1)
+    }
+    return false, nil
 }
 
-func (cl *Client) ConfirmTransaction(ctx context.Context, hash string) (bool, *rpcmodule.AptosError) {
-	counter := 0
-	for counter < 100 {
-		pending, err := cl.TransactionPending(ctx, hash)
-		if err != nil {
-			return false, err
-		}
-		if !pending {
-			return true, nil
-		}
-		counter++
-		time.Sleep(time.Second * 1)
-	}
-	return false, nil
+func TransferCoinPayload(coin string, amount uint64, receipt string) (*rpcmodule.TransactionPayload, error) {
+    // transfer
+    coin, ok := CoinType[coin]
+    if !ok {
+        return nil, fmt.Errorf("coin %s is not supported", coin)
+    }
+    transferPayload := rpcmodule.TransactionPayloadEntryFunctionPayload{
+        Type:          rpcmodule.EntryFunctionPayload,
+        Function:      "0x1::coin::transfer",
+        Arguments:     []interface{}{receipt, fmt.Sprintf("%d", amount)},
+        TypeArguments: []string{coin},
+    }
+    return &rpcmodule.TransactionPayload{
+        Type:   rpcmodule.EntryFunctionPayload,
+        Object: transferPayload,
+    }, nil
 }
 
-func (cl *Client) PublishMoveModuleLegacyReq(addr string, sequenceNumber uint64, content []byte) (*rpcmodule.EncodeSubmissionRequest, error) {
-	publishPayload := rpcmodule.TransactionPayloadModuleBundlePayload{
-		Type: rpcmodule.ModuleBundlePayload,
-		Modules: []rpcmodule.MoveModule{
-			{
-				ByteCode: "0x" + hex.EncodeToString(content),
-			},
-		},
-	}
-	return rpcmodule.EncodeSubmissionReq(addr, sequenceNumber,
-		rpcmodule.TransactionPayload{
-			Type:   rpcmodule.ModuleBundlePayload,
-			Object: publishPayload,
-		})
+func (cl *Client) TransferCoin(ctx context.Context, from string, coin string, amount uint64, receipt string, signer crypto.Signer) (string, error) {
+    accountFrom, err := cl.Account(ctx, from, 0)
+    if err != nil {
+        return "", err
+    }
+
+    payload, err := TransferCoinPayload(coin, amount, receipt)
+    if err != nil {
+        return "", err
+    }
+
+    req, err := rpcmodule.EncodeSubmissionReq(from, accountFrom.SequenceNumber, payload)
+    if err != nil {
+        return "", err
+    }
+    return cl.SignAndSubmitTransaction(ctx, req, signer)
 }
 
-func (cl *Client) PublishMoveModuleReq(addr string, sequenceNumber uint64, content []byte, meta []byte) (*rpcmodule.EncodeSubmissionRequest, error) {
-	publishPayload := rpcmodule.TransactionPayloadEntryFunctionPayload{
-		Type:     rpcmodule.EntryFunctionPayload,
-		Function: "0x1::code::publish_package_txn",
-		Arguments: []interface{}{
-			"0x" + hex.EncodeToString(meta),
-			[]interface{}{
-				"0x" + hex.EncodeToString(content),
-			},
-		},
-		TypeArguments: []string{},
-	}
-	return rpcmodule.EncodeSubmissionReq(addr, sequenceNumber,
-		rpcmodule.TransactionPayload{
-			Type:   rpcmodule.EntryFunctionPayload,
-			Object: publishPayload,
-		})
-}
-
-func (cl *Client) TransferCoinReq(from string, sequenceNumber uint64, coin string, amount uint64, receipt string) (*rpcmodule.EncodeSubmissionRequest, error) {
-	// transfer
-	coin, ok := CoinType[coin]
-	if !ok {
-		return nil, fmt.Errorf("coin %s is not supported", coin)
-	}
-	transferPayload := rpcmodule.TransactionPayloadEntryFunctionPayload{
-		Type:          rpcmodule.EntryFunctionPayload,
-		Function:      "0x1::coin::transfer",
-		Arguments:     []interface{}{receipt, fmt.Sprintf("%d", amount)},
-		TypeArguments: []string{coin},
-	}
-	return rpcmodule.EncodeSubmissionReq(from, sequenceNumber,
-		rpcmodule.TransactionPayload{
-			Type:   rpcmodule.EntryFunctionPayload,
-			Object: transferPayload,
-		})
-}
-
-func (cl *Client) RegisterRecipientReq(from string, sequenceNumber uint64, coin string) (*rpcmodule.EncodeSubmissionRequest, error) {
-	// transfer
-	coin, ok := CoinType[coin]
-	if !ok {
-		return nil, fmt.Errorf("coin %s is not supported", coin)
-	}
-	transferPayload := rpcmodule.TransactionPayloadEntryFunctionPayload{
-		Type:          rpcmodule.EntryFunctionPayload,
-		Function:      "0x1::managed_coin::register",
-		Arguments:     []interface{}{},
-		TypeArguments: []string{coin},
-	}
-	return rpcmodule.EncodeSubmissionReq(from, sequenceNumber,
-		rpcmodule.TransactionPayload{
-			Type:   rpcmodule.EntryFunctionPayload,
-			Object: transferPayload,
-		})
-}
-
-func (cl *Client) TransferCoin(ctx context.Context, from string, coin string, amount uint64, receipt string, signer Signer) (string, *rpcmodule.AptosError) {
-	// from account
-	accountFrom, aptosErr := cl.Account(ctx, from, 0)
-	if aptosErr != nil {
-		return "", aptosErr
-	}
-
-	encodeSubmissionReq, err := cl.TransferCoinReq(from, accountFrom.SequenceNumber, coin, amount, receipt)
-	if err != nil {
-		return "", rpcmodule.AptosErrorFromError(err)
-	}
-
-	// sign message
-	signData, aptosErr := cl.EncodeSubmission(ctx, encodeSubmissionReq)
-	if aptosErr != nil {
-		return "", aptosErr
-	}
-
-	// sign
-	signature, err := signer.Sign(signData)
-	if err != nil {
-		return "", rpcmodule.AptosErrorFromError(err)
-	}
-
-	// add signature
-	submitReq, err := rpcmodule.SubmitTransactionReq(encodeSubmissionReq, rpcmodule.Signature{
-		Type: "ed25519_signature",
-		Object: rpcmodule.SignatureEd25519Signature{
-			Type:      "ed25519_signature",
-			PublicKey: "0x" + signer.PublicKey().String(),
-			Signature: "0x" + hex.EncodeToString(signature),
-		},
-	})
-	if err != nil {
-		return "", rpcmodule.AptosErrorFromError(err)
-	}
-
-	// submit
-	txHash, aptosErr := cl.SubmitTransaction(ctx, submitReq)
-	if aptosErr != nil {
-		return "", aptosErr
-	}
-	//
-	return txHash, nil
+func PublishMoveModuleLegacyPayload(content []byte) (*rpcmodule.TransactionPayload, error) {
+    publishPayload := rpcmodule.TransactionPayloadModuleBundlePayload{
+        Type: rpcmodule.ModuleBundlePayload,
+        Modules: []rpcmodule.MoveModule{
+            {
+                ByteCode: "0x" + hex.EncodeToString(content),
+            },
+        },
+    }
+    return &rpcmodule.TransactionPayload{
+        Type:   rpcmodule.ModuleBundlePayload,
+        Object: publishPayload,
+    }, nil
 }
 
 // PublishMoveModuleLegacy
 // can publish move module with batch
 // do not working
-func (cl *Client) PublishMoveModuleLegacy(ctx context.Context, addr string, content []byte, signer Signer) (string, *rpcmodule.AptosError) {
-	// from account
-	account, aptosErr := cl.Account(ctx, addr, 0)
-	if aptosErr != nil {
-		return "", aptosErr
-	}
+// return with hash, but can not find tx in explorer
+func (cl *Client) PublishMoveModuleLegacy(ctx context.Context, addr string, content []byte, signer crypto.Signer) (string, error) {
+    // from account
+    account, err := cl.Account(ctx, addr, 0)
+    if err != nil {
+        return "", err
+    }
 
-	// publish message
-	encodeSubmissionReq, err := cl.PublishMoveModuleLegacyReq(addr, account.SequenceNumber, content)
-	if err != nil {
-		return "", rpcmodule.AptosErrorFromError(err)
-	}
+    // publish message
+    payload, err := PublishMoveModuleLegacyPayload(content)
+    if err != nil {
+        return "", err
+    }
 
-	// sign message
-	signData, aptosErr := cl.EncodeSubmission(ctx, encodeSubmissionReq)
-	if aptosErr != nil {
-		return "", aptosErr
-	}
+    req, err := rpcmodule.EncodeSubmissionReq(addr, account.SequenceNumber, payload)
+    if err != nil {
+        return "", err
+    }
 
-	// sign
-	signature, err := signer.Sign(signData)
-	if err != nil {
-		return "", rpcmodule.AptosErrorFromError(err)
-	}
-
-	// add signature
-	submitReq, err := rpcmodule.SubmitTransactionReq(encodeSubmissionReq, rpcmodule.Signature{
-		Type: "ed25519_signature",
-		Object: rpcmodule.SignatureEd25519Signature{
-			Type:      "ed25519_signature",
-			PublicKey: "0x" + signer.PublicKey().String(),
-			Signature: "0x" + hex.EncodeToString(signature),
-		},
-	})
-	if err != nil {
-		return "", rpcmodule.AptosErrorFromError(err)
-	}
-
-	// submit
-	txHash, aptosErr := cl.SubmitTransaction(ctx, submitReq)
-	if aptosErr != nil {
-		return "", aptosErr
-	}
-	//
-	return txHash, nil
+    return cl.SignAndSubmitTransaction(ctx, req, signer)
 }
 
-// PublishMoveModule
-// todo
-// do not working
-func (cl *Client) PublishMoveModule(ctx context.Context, addr string, content []byte, signer Signer) (string, *rpcmodule.AptosError) {
-	// from account
-	account, aptosErr := cl.Account(ctx, addr, 0)
-	if aptosErr != nil {
-		return "", aptosErr
-	}
-
-	// publish message
-	// todo
-	// how to get meta ?
-	encodeSubmissionReq, err := cl.PublishMoveModuleReq(addr, account.SequenceNumber, content, content)
-	if err != nil {
-		return "", rpcmodule.AptosErrorFromError(err)
-	}
-
-	// sign message
-	signData, aptosErr := cl.EncodeSubmission(ctx, encodeSubmissionReq)
-	if aptosErr != nil {
-		return "", aptosErr
-	}
-
-	// sign
-	signature, err := signer.Sign(signData)
-	if err != nil {
-		return "", rpcmodule.AptosErrorFromError(err)
-	}
-
-	// add signature
-	submitReq, err := rpcmodule.SubmitTransactionReq(encodeSubmissionReq, rpcmodule.Signature{
-		Type: "ed25519_signature",
-		Object: rpcmodule.SignatureEd25519Signature{
-			Type:      "ed25519_signature",
-			PublicKey: "0x" + signer.PublicKey().String(),
-			Signature: "0x" + hex.EncodeToString(signature),
-		},
-	})
-	if err != nil {
-		return "", rpcmodule.AptosErrorFromError(err)
-	}
-
-	// submit
-	txHash, aptosErr := cl.SubmitTransaction(ctx, submitReq)
-	if aptosErr != nil {
-		return "", aptosErr
-	}
-	//
-	return txHash, nil
+func PublishMoveModulePayload(content []byte, meta []byte) (*rpcmodule.TransactionPayload, error) {
+    publishPayload := rpcmodule.TransactionPayloadEntryFunctionPayload{
+        Type:     rpcmodule.EntryFunctionPayload,
+        Function: "0x1::code::publish_package_txn",
+        TypeArguments: []string{},
+        Arguments: []interface{}{
+            hex.EncodeToString(meta),
+            []interface{}{
+                hex.EncodeToString(content),
+            },
+        },
+    }
+    return &rpcmodule.TransactionPayload{
+        Type:   rpcmodule.EntryFunctionPayload,
+        Object: publishPayload,
+    }, nil
 }
 
-func (cl *Client) RegisterRecipient(ctx context.Context, addr string, coin string, signer Signer) (string, *rpcmodule.AptosError) {
-	// recipient account
-	account, aptosErr := cl.Account(ctx, addr, 0)
-	if aptosErr != nil {
-		return "", aptosErr
-	}
+func (cl *Client) PublishMoveModule(ctx context.Context, addr string, content []byte, signer crypto.Signer) (string, error) {
+    // from account
+    account, err := cl.Account(ctx, addr, 0)
+    if err != nil {
+        return "", err
+    }
 
-	encodeSubmissionReq, err := cl.RegisterRecipientReq(addr, account.SequenceNumber, coin)
-	if err != nil {
-		return "", rpcmodule.AptosErrorFromError(err)
-	}
+    // says from  https://github.com/aptos-labs/aptos-core/blob/06b946df79889a1ac19f13aa336f8c069603345b/ecosystem/typescript/sdk/src/aptos_client.ts#L619
+    // * Publishes a move package. `packageMetadata` and `modules` can be generated with command
+    // * `aptos move compile --save-metadata [ --included-artifacts=<...> ]`.
+    // did not work
+    // publish message
+    // todo
+    // how to get meta ?
+    payload, err := PublishMoveModulePayload(content, content)
+    if err != nil {
+        return "", err
+    }
 
-	// sign message
-	signData, aptosErr := cl.EncodeSubmission(ctx, encodeSubmissionReq)
-	if aptosErr != nil {
-		return "", aptosErr
-	}
+    req, err := rpcmodule.EncodeSubmissionReq(addr, account.SequenceNumber, payload)
+    if err != nil {
+        return "", err
+    }
 
-	// sign
-	signature, err := signer.Sign(signData)
-	if err != nil {
-		return "", rpcmodule.AptosErrorFromError(err)
-	}
+    return cl.SignAndSubmitTransaction(ctx, req, signer)
+}
 
-	// add signature
-	submitReq, err := rpcmodule.SubmitTransactionReq(encodeSubmissionReq, rpcmodule.Signature{
-		Type: "ed25519_signature",
-		Object: rpcmodule.SignatureEd25519Signature{
-			Type:      "ed25519_signature",
-			PublicKey: "0x" + signer.PublicKey().String(),
-			Signature: "0x" + hex.EncodeToString(signature),
-		},
-	})
-	if err != nil {
-		return "", rpcmodule.AptosErrorFromError(err)
-	}
+func (cl *Client) SignAndSubmitTransaction(ctx context.Context, request *rpcmodule.EncodeSubmissionRequest, signer crypto.Signer) (string, error) {
 
-	// submit
-	txHash, aptosErr := cl.SubmitTransaction(ctx, submitReq)
-	if aptosErr != nil {
-		return "", aptosErr
-	}
-	return txHash, nil
+    // sign message
+    signData, err := cl.EncodeSubmission(ctx, request)
+    if err != nil {
+        return "", err
+    }
+
+    // sign
+    signature, err := signer.Sign(signData)
+    if err != nil {
+        return "", err
+    }
+
+    // add signature
+    submitReq, err := rpcmodule.SubmitTransactionReq(request, rpcmodule.Signature{
+        Type: "ed25519_signature",
+        Object: rpcmodule.SignatureEd25519Signature{
+            Type:      "ed25519_signature",
+            PublicKey: "0x" + signer.PublicKey().String(),
+            Signature: "0x" + hex.EncodeToString(signature),
+        },
+    })
+    if err != nil {
+        return "", err
+    }
+
+    // submit
+    return cl.SubmitTransaction(ctx, submitReq)
 }

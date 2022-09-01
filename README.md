@@ -19,6 +19,10 @@ $ go get github.com/motoko9/aptos-go
 * [Move example on Aptos](move-example/README.md)
 
 ### coin module example
+<<<<<<< Updated upstream
 * [Coin Module example on Aptos](token-example/README.md)
 * [Coin Module with native example](token-in-native-example/README.md)
+=======
+* [Coin Module example on Aptos](examples/coin/README.md)
+>>>>>>> Stashed changes
 

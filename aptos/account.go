@@ -7,23 +7,23 @@ import (
 	"github.com/motoko9/aptos-go/rpcmodule"
 )
 
-func (cl *Client) AccountBalance(ctx context.Context, address string, coin string, version uint64) (uint64, *rpcmodule.AptosError) {
+func (cl *Client) AccountBalance(ctx context.Context, address string, coin string, version uint64) (uint64, error) {
 	// how to get other coin balance
 	// todo
 	coin, ok := CoinType[coin]
 	if !ok {
-		return 0, rpcmodule.AptosErrorFromError(fmt.Errorf("coin %s is not supported", coin))
+		return 0, rpcmodule.ClientErrorCtor(400, fmt.Sprintf("coin %s is not supported", coin))
 	}
-	//
+
+	var coinStore aptosmodule.CoinStore
 	resourceType := fmt.Sprintf("0x1::coin::CoinStore<%s>", coin)
-	accountResource, aptosErr := cl.AccountResourceByAddressAndType(ctx, address, resourceType, version)
-	if aptosErr != nil {
+	err := cl.AccountResourceByAddressAndType(ctx, address, resourceType, version, &coinStore)
+	if err != nil {
 		// resource not found, so balance is zero
-		if aptosErr.ErrorCode == rpcmodule.ResourceNotFound {
+		if err.Error() == rpcmodule.ResourceNotFound {
 			return 0, nil
 		}
-		return 0, aptosErr
+		return 0, err
 	}
-	coinStore := accountResource.Object.(*aptosmodule.CoinStore)
 	return coinStore.Coin.Value, nil
 }
