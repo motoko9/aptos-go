@@ -8,6 +8,7 @@ import (
     "github.com/motoko9/aptos-go/crypto"
     "github.com/motoko9/aptos-go/examples"
     "github.com/motoko9/aptos-go/rpc"
+    "github.com/motoko9/aptos-go/rpcmodule"
     "github.com/stretchr/testify/assert"
     "testing"
     "time"
@@ -90,10 +91,12 @@ func Test_CreateSigningMessage(t *testing.T) {
 
     addressTo := "0x4c80f1fe097f290528975c49ae8c64ce0c3cf673a16876471962910f4ecea74e"
 
-    encodeSubmissionReq, err := client.TransferCoin(addressFrom, accountFrom.SequenceNumber, aptos.AptosCoin, uint64(100), addressTo)
+    payload, err := aptos.TransferCoinPayload(aptos.AptosCoin, uint64(100), addressTo)
     assert.NoError(t, err)
 
-    str, err := client.TransactionEncodeSubmission(context.Background(), encodeSubmissionReq)
+    req, err := rpcmodule.EncodeSubmissionReq(addressFrom, accountFrom.SequenceNumber, payload)
+    assert.NoError(t, err)
+    str, err := client.TransactionEncodeSubmission(context.Background(), req)
     assert.NoError(t, err)
     fmt.Println(str)
 
