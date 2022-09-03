@@ -3,7 +3,6 @@ package fetchclient
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/hashicorp/go-hclog"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -22,7 +21,6 @@ var (
 
 type ClientInterface interface {
 	execute(r *Request) (*Response, error)
-	log() hclog.Logger
 	Get(url string) *Request
 	Post(url string) *Request
 	Do(method, url string) *Request
@@ -32,27 +30,25 @@ type Client struct {
 	Header             http.Header
 	host               string
 	httpClient         *http.Client
-	logger             hclog.Logger
 	traceBodySizeLimit int64
 }
 
-func NewClient(logger hclog.Logger) *Client {
-	return NewClientWithEndpoint("", logger)
+func NewClient() *Client {
+	return NewClientWithEndpoint("")
 }
 
 // NewClientWithEndpoint create a new fetch client with the predefined host url
-func NewClientWithEndpoint(endpoint string, logger hclog.Logger) *Client {
-	return NewClientWithCustomHttpClient(&http.Client{}, endpoint, logger)
+func NewClientWithEndpoint(endpoint string) *Client {
+	return NewClientWithCustomHttpClient(&http.Client{}, endpoint)
 }
 
-func NewClientWithCustomHttpClient(httpClient *http.Client, endpoint string, logger hclog.Logger) *Client {
+func NewClientWithCustomHttpClient(httpClient *http.Client, endpoint string) *Client {
 	if t, ok := httpClient.Transport.(*http.Transport); ok {
 		t.MaxIdleConnsPerHost = 10
 	}
 	return &Client{
 		host:               endpoint,
 		httpClient:         httpClient,
-		logger:             logger,
 		Header:             http.Header{},
 		traceBodySizeLimit: 1024,
 	}
@@ -143,10 +139,6 @@ func (c *Client) execute(r *Request) (*Response, error) {
 		rawResponse: rawResponse,
 		bodyBytes:   bodyBytes,
 	}, nil
-}
-
-func (c *Client) log() hclog.Logger {
-	return c.logger
 }
 
 func parseRequestURL(c *Client, r *Request) error {
