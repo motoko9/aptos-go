@@ -2,17 +2,17 @@ package aptos
 
 import (
     "context"
+    "encoding/json"
     "fmt"
-    "github.com/hashicorp/go-hclog"
-    "github.com/motoko9/aptos-go/common/jsonutil"
-    "github.com/stretchr/testify/assert"
     "testing"
 )
 
 func TestClient_AccountBalance(t *testing.T) {
-    client := NewClient(DevNet_RPC, hclog.Default())
+    client := New(DevNet_RPC)
     ledger, err := client.Ledger(context.Background())
-    assert.NoError(t, err)
+    if err != nil {
+        panic(err)
+    }
     {
         balance, err := client.AccountBalance(
             context.Background(),
@@ -49,12 +49,13 @@ func TestClient_AccountBalance(t *testing.T) {
 }
 
 func TestClient_AccountResources_Latest(t *testing.T) {
-    client := NewClient(DevNet_RPC, hclog.Default())
+    client := New(DevNet_RPC)
     accountResources, err := client.AccountResources(context.Background(),
         "0x697c173eeb917c95a382b60f546eb73a4c6a2a7b2d79e6c56c87104f9c04345f", 0)
     if err != nil {
         panic(err)
     }
     fmt.Printf("account resources: \n")
-    jsonutil.PrintJsonStringWithIndent(accountResources)
+    accountResourcesJson, _ := json.MarshalIndent(accountResources, "", "    ")
+    fmt.Printf(string(accountResourcesJson))
 }

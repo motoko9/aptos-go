@@ -3,12 +3,11 @@ package aptos
 import (
     "context"
     "fmt"
-    "github.com/hashicorp/go-hclog"
     "testing"
 )
 
 func TestClient_CoinInfo(t *testing.T) {
-    client := NewClient(DevNet_RPC, hclog.Default())
+    client := New(DevNet_RPC)
     {
         aptosCoinInfo, err := client.CoinInfo(context.Background(), AptosCoin, 0)
         if err != nil {

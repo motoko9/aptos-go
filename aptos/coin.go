@@ -33,23 +33,34 @@ func AddressFromCoinType(coinType string) string {
     return items[0]
 }
 
-func (cl *Client) CoinInfo(ctx context.Context, coin string, version uint64) (*aptosmodule.CoinInfo, error) {
+func (cl *Client) CoinInfo(ctx context.Context, coin string, version uint64) (*aptosmodule.CoinInfo, *rpcmodule.AptosError) {
     coinType, ok := CoinType[coin]
     if !ok {
-        return nil, rpcmodule.ClientErrorCtor(400, fmt.Sprintf("coin %s is not supported", coin))
+        return nil, &rpcmodule.AptosError{
+            Message:     fmt.Sprintf("coin %s resouce is invalid", coin),
+            ErrorCode:   "400",
+            VmErrorCode: 0,
+        }
     }
     //
     coinAddress := AddressFromCoinType(coinType)
     coinInfoResourceType := fmt.Sprintf("0x1::coin::CoinInfo<%s>", coinType)
-    var coinInfo aptosmodule.CoinInfo
-    err := cl.AccountResourceByAddressAndType(ctx, coinAddress, coinInfoResourceType, version, &coinInfo)
+    accountResource, err := cl.AccountResourceByAddressAndType(ctx, coinAddress, coinInfoResourceType, version)
     if err != nil {
         return nil, err
     }
-    return &coinInfo, nil
+    coinInfo, ok := accountResource.Object.(*aptosmodule.CoinInfo)
+    if !ok {
+        return nil, &rpcmodule.AptosError{
+            Message:     fmt.Sprintf("coin %s resouce is invalid", coin),
+            ErrorCode:   "400",
+            VmErrorCode: 0,
+        }
+    }
+    return coinInfo, nil
 }
 
-func InitializeCoinPayload(typeArguments []string, arguments []interface{}) (*rpcmodule.TransactionPayload, error) {
+func InitializeCoinPayload(typeArguments []string, arguments []interface{}) (*rpcmodule.TransactionPayload, *rpcmodule.AptosError) {
     payload := &rpcmodule.TransactionPayloadEntryFunctionPayload{
         Type:          "entry_function_payload",
         Function:      "0x1::managed_coin::initialize",
@@ -62,7 +73,7 @@ func InitializeCoinPayload(typeArguments []string, arguments []interface{}) (*rp
     }, nil
 }
 
-func (cl *Client) InitializeCoin(ctx context.Context, addr string, typeArguments []string, arguments []interface{}, signer crypto.Signer) (string, error) {
+func (cl *Client) InitializeCoin(ctx context.Context, addr string, typeArguments []string, arguments []interface{}, signer crypto.Signer) (string, *rpcmodule.AptosError) {
     accountFrom, err := cl.Account(ctx, addr, 0)
     if err != nil {
         return "", err
@@ -73,15 +84,15 @@ func (cl *Client) InitializeCoin(ctx context.Context, addr string, typeArguments
         return "", err
     }
 
-    req, err := rpcmodule.EncodeSubmissionReq(addr, accountFrom.SequenceNumber, payload)
-    if err != nil {
-        return "", err
+    req, err1 := rpcmodule.EncodeSubmissionReq(addr, accountFrom.SequenceNumber, payload)
+    if err1 != nil {
+        return "", rpcmodule.AptosErrorFromError(err1)
     }
 
     return cl.SignAndSubmitTransaction(ctx, req, signer)
 }
 
-func MintCoinPayload(typeArguments []string, arguments []interface{}) (*rpcmodule.TransactionPayload, error) {
+func MintCoinPayload(typeArguments []string, arguments []interface{}) (*rpcmodule.TransactionPayload, *rpcmodule.AptosError) {
     payload := &rpcmodule.TransactionPayloadEntryFunctionPayload{
         Type:          "entry_function_payload",
         Function:      "0x1::managed_coin::mint",
@@ -94,7 +105,7 @@ func MintCoinPayload(typeArguments []string, arguments []interface{}) (*rpcmodul
     }, nil
 }
 
-func (cl *Client) MintCoin(ctx context.Context, addr string, typeArguments []string, arguments []interface{}, signer crypto.Signer) (string, error) {
+func (cl *Client) MintCoin(ctx context.Context, addr string, typeArguments []string, arguments []interface{}, signer crypto.Signer) (string, *rpcmodule.AptosError) {
     accountFrom, err := cl.Account(ctx, addr, 0)
     if err != nil {
         return "", err
@@ -105,9 +116,9 @@ func (cl *Client) MintCoin(ctx context.Context, addr string, typeArguments []str
         return "", err
     }
 
-    req, err := rpcmodule.EncodeSubmissionReq(addr, accountFrom.SequenceNumber, payload)
-    if err != nil {
-        return "", err
+    req, err1 := rpcmodule.EncodeSubmissionReq(addr, accountFrom.SequenceNumber, payload)
+    if err1 != nil {
+        return "", rpcmodule.AptosErrorFromError(err1)
     }
 
     return cl.SignAndSubmitTransaction(ctx, req, signer)
@@ -131,21 +142,21 @@ func RegisterRecipientPayload(coin string) (*rpcmodule.TransactionPayload, error
     }, nil
 }
 
-func (cl *Client) RegisterRecipient(ctx context.Context, addr string, coin string, signer crypto.Signer) (string, error) {
+func (cl *Client) RegisterRecipient(ctx context.Context, addr string, coin string, signer crypto.Signer) (string, *rpcmodule.AptosError) {
     // recipient account
     account, err := cl.Account(ctx, addr, 0)
     if err != nil {
         return "", err
     }
 
-    payload, err := RegisterRecipientPayload(coin)
-    if err != nil {
-        return "", err
+    payload, err1 := RegisterRecipientPayload(coin)
+    if err1 != nil {
+        return "", rpcmodule.AptosErrorFromError(err1)
     }
 
-    req, err := rpcmodule.EncodeSubmissionReq(addr, account.SequenceNumber, payload)
-    if err != nil {
-        return "", err
+    req, err1 := rpcmodule.EncodeSubmissionReq(addr, account.SequenceNumber, payload)
+    if err1 != nil {
+        return "", rpcmodule.AptosErrorFromError(err1)
     }
 
     return cl.SignAndSubmitTransaction(ctx, req, signer)
