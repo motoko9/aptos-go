@@ -9,8 +9,8 @@ type Client struct {
 	*rpc.Client
 }
 
-func NewClient(endpoint string, logger hclog.Logger) *Client {
-	client := rpc.NewClient(endpoint, logger)
+func New(endpoint string, logger hclog.Logger) *Client {
+	client := rpc.New(endpoint, logger)
 	return &Client{
 		client,
 	}

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/hashicorp/go-hclog"
+	"github.com/motoko9/aptos-go/aptos"
 	"github.com/motoko9/aptos-go/crypto"
 	"github.com/motoko9/aptos-go/rpc"
 	"github.com/stretchr/testify/assert"
@@ -31,14 +32,14 @@ func Test_Faucet(t *testing.T) {
 	time.Sleep(time.Second * 10)
 
 	// new rpc
-	client := rpc.NewClient(rpc.DevNet_RPC, hclog.Default())
+	client := aptos.NewClient(rpc.DevNet_RPC, hclog.Default())
 
 	// latest ledger
 	ledger, err := client.Ledger(ctx)
 	assert.NoError(t, err)
 
 	// query balance of new account
-	balance, err := client.AccountBalance(ctx, address, rpc.AptosCoin, ledger.LedgerVersion)
+	balance, err := client.AccountBalance(ctx, address, aptos.AptosCoin, ledger.LedgerVersion)
 	assert.NoError(t, err)
 	assert.Equal(t, amount, balance)
 	fmt.Printf("account balance is: %d\n", balance)
@@ -64,14 +65,14 @@ func Test_Faucet_Address(t *testing.T) {
 	time.Sleep(time.Second * 10)
 
 	// new rpc
-	client := rpc.NewClient(rpc.DevNet_RPC, hclog.Default())
+	client := aptos.NewClient(rpc.DevNet_RPC, hclog.Default())
 
 	// latest ledger
 	ledger, err := client.Ledger(ctx)
 	assert.NoError(t, err)
 
 	// query balance of new account
-	balance, err := client.AccountBalance(ctx, addr, rpc.AptosCoin, ledger.LedgerVersion)
+	balance, err := client.AccountBalance(ctx, addr, aptos.AptosCoin, ledger.LedgerVersion)
 	assert.NoError(t, err)
 	assert.Equal(t, amount, balance)
 	fmt.Printf("account balance is: %d\n", balance)

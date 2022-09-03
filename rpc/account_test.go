@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/motoko9/aptos-go/common/jsonutil"
 	"testing"
 )
 
@@ -14,7 +13,11 @@ func TestClient_Account(t *testing.T) {
 		panic(err)
 	}
 	fmt.Printf("account: \n")
-	jsonutil.PrintJsonStringWithIndent(account)
+	accountJson, err := json.MarshalIndent(account, "", "    ")
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf(string(accountJson))
 }
 
 func TestClient_AccountResources(t *testing.T) {
@@ -38,7 +41,11 @@ func TestClient_AccountResources_Latest(t *testing.T) {
 		panic(err)
 	}
 	fmt.Printf("account resources: \n")
-	jsonutil.PrintJsonStringWithIndent(accountResources)
+	accountJson, err := json.MarshalIndent(accountResources, "", "    ")
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf(string(accountJson))
 }
 
 func TestClient_AccountResourceByAddressAndType(t *testing.T) {
@@ -57,7 +64,11 @@ func TestClient_AccountResourceByAddressAndType(t *testing.T) {
 		panic(err)
 	}
 	fmt.Printf("account resource: \n")
-	jsonutil.PrintJsonStringWithIndent(a)
+	accountJson, err := json.MarshalIndent(accountResources, "", "    ")
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf(string(accountJson))
 }
 
 func TestClient_AccountModules(t *testing.T) {

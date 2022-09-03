@@ -1,4 +1,4 @@
-package web
+package httpclient
 
 import "encoding/json"
 

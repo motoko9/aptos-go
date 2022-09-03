@@ -1,11 +1,10 @@
-package fetch
+package httpclient
 
 import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/motoko9/aptos-go/common/reflectutil"
-	"github.com/motoko9/aptos-go/web"
+	reflectutil2 "github.com/motoko9/aptos-go/httpclient/reflectutil"
 	"io"
 	"net/http"
 	"net/url"
@@ -51,7 +50,7 @@ func (r *Request) SetURL(url string) *Request {
 
 func (r *Request) SetJSONBody(body interface{}) *Request {
 	r.Body = body
-	r.SetHeader(web.HdrContentType, web.ApplicationJSON)
+	r.SetHeader(hdrContentTypeKey, "application/json")
 	return r
 }
 
@@ -112,7 +111,7 @@ func (r *Request) fmtBodyString(sl int64) (body string) {
 	var err error
 
 	contentType := r.Header.Get(hdrContentTypeKey)
-	kind := reflectutil.KindOf(r.Body)
+	kind := reflectutil2.KindOf(r.Body)
 	if canJSONMarshal(contentType, kind) {
 		prtBodyBytes, err = json.MarshalIndent(&r.Body, "", " ")
 	} else if b, ok := r.Body.(string); ok {

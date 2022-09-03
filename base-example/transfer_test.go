@@ -34,7 +34,7 @@ func TestNewToAccount(t *testing.T) {
 	time.Sleep(time.Second * 5)
 
 	// new rpc
-	client := aptos.New(rpc.DevNet_RPC)
+	client := aptos.New(aptos.DevNet_RPC, nil)
 
 	// latest ledger
 	ledger, err := client.Ledger(ctx)
@@ -73,7 +73,7 @@ func TestReadToAccount(t *testing.T) {
 	time.Sleep(time.Second * 5)
 
 	// new rpc
-	client := aptos.New(rpc.DevNet_RPC)
+	client := aptos.New(rpc.DevNet_RPC, nil)
 
 	// latest ledger
 	ledger, aptosErr := client.Ledger(ctx)
@@ -108,7 +108,7 @@ func TestTransfer_raw(t *testing.T) {
 	fmt.Printf("to address: %s\n", addressTo)
 
 	// new rpc
-	client := aptos.New(rpc.DevNet_RPC)
+	client := aptos.New(rpc.DevNet_RPC, nil)
 
 	// latest ledger
 	ledger, aptosErr := client.Ledger(ctx)
@@ -140,7 +140,7 @@ func TestTransfer_raw(t *testing.T) {
 		panic(aptosErr)
 	}
 
-	encodeSubmissionReq, err := client.TransferCoinReq(addressFrom, accountFrom.SequenceNumber, aptos.AptosCoin, uint64(1000), addressTo)
+	encodeSubmissionReq, err := aptos.TransferCoinPayload(addressFrom, accountFrom.SequenceNumber, aptos.AptosCoin, uint64(1000), addressTo)
 	if err != nil {
 		panic(err)
 	}

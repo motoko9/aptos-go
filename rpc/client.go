@@ -2,18 +2,16 @@ package rpc
 
 import (
     "github.com/hashicorp/go-hclog"
-    "github.com/motoko9/aptos-go/web/fetch"
+    "github.com/motoko9/aptos-go/httpclient"
 )
 
 type Client struct {
-    fetchClient *fetch.Client
-    logger      hclog.Logger
+    fetchClient *httpclient.Client
 }
 
-func NewClient(endpoint string, logger hclog.Logger) *Client {
-    l := logger.ResetNamed("rpc-fetchClient")
+func New(endpoint string) *Client {
+    l := hclog.Default().Named("rpc-client")
     return &Client{
-        fetchClient: fetch.NewClientWithEndpoint(endpoint, l),
-        logger:      l,
+        fetchClient: httpclient.NewClientWithEndpoint(endpoint, l),
     }
 }

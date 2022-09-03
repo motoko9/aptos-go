@@ -1,4 +1,4 @@
-package fetch
+package httpclient
 
 type (
 	// RequestMiddleware type is for request middleware, called before a request is sent

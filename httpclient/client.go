@@ -1,11 +1,10 @@
-package fetch
+package httpclient
 
 import (
 	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/hashicorp/go-hclog"
-	"github.com/motoko9/aptos-go/web"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -184,6 +183,7 @@ func (c *Client) execute(r *Request) (*Response, error) {
 	}
 
 	_ = traceResponse(c, response)
+
 	err = handleError(c, response)
 	if err != nil {
 		return response, err
@@ -311,7 +311,7 @@ func traceResponse(c *Client, res *Response) error {
 func handleError(c *Client, r *Response) (err error) {
 	if r.IsError() {
 		c.logger.Warn("got error response", "statusCode", r.StatusCode())
-		return web.ServerErrorCtor(r.StatusCode(), r.fmtBodyString(c.traceBodySizeLimit))
+		return ServerErrorCtor(r.StatusCode(), r.fmtBodyString(c.traceBodySizeLimit))
 	}
 	return nil
 }
