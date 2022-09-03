@@ -33,7 +33,7 @@ func TestCoinInitialize(t *testing.T) {
 
 	//
 	payload := rpcmodule.TransactionPayloadEntryFunctionPayload{
-		Type:          "entry_function_payload",
+		Type:          rpcmodule.EntryFunctionPayload,
 		Function:      fmt.Sprintf("%s::usdc::initialize", coinAddress),
 		TypeArguments: []string{},
 		Arguments: []interface{}{
@@ -42,14 +42,11 @@ func TestCoinInitialize(t *testing.T) {
 			"6",
 		},
 	}
-	encodeSubmissionReq, err := rpcmodule.EncodeSubmissionReq(
-		coinAddress, coinAccount.SequenceNumber, rpcmodule.TransactionPayload{
-			Type:   "entry_function_payload",
+	encodeSubmissionReq := rpcmodule.EncodeSubmissionReq(
+		coinAddress, coinAccount.SequenceNumber, &rpcmodule.TransactionPayload{
+			Type:   rpcmodule.EntryFunctionPayload,
 			Object: payload,
 		})
-	if err != nil {
-		panic(err)
-	}
 
 	// sign message
 	signData, aptosErr := client.EncodeSubmission(ctx, encodeSubmissionReq)
@@ -64,7 +61,7 @@ func TestCoinInitialize(t *testing.T) {
 	}
 
 	// add signature
-	submitReq, err := rpcmodule.SubmitTransactionReq(encodeSubmissionReq, rpcmodule.Signature{
+	submitReq := rpcmodule.SubmitTransactionReq(encodeSubmissionReq, rpcmodule.Signature{
 		Type: "ed25519_signature",
 		Object: rpcmodule.SignatureEd25519Signature{
 			Type:      "ed25519_signature",
@@ -72,9 +69,6 @@ func TestCoinInitialize(t *testing.T) {
 			Signature: "0x" + hex.EncodeToString(signature),
 		},
 	})
-	if err != nil {
-		panic(err)
-	}
 
 	// submit
 	txHash, aptosErr := client.SubmitTransaction(ctx, submitReq)

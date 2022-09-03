@@ -34,7 +34,7 @@ func TestNewToAccount(t *testing.T) {
 	time.Sleep(time.Second * 5)
 
 	// new rpc
-	client := aptos.New(aptos.DevNet_RPC, nil)
+	client := aptos.New(aptos.DevNet_RPC)
 
 	// latest ledger
 	ledger, err := client.Ledger(ctx)
@@ -73,7 +73,7 @@ func TestReadToAccount(t *testing.T) {
 	time.Sleep(time.Second * 5)
 
 	// new rpc
-	client := aptos.New(rpc.DevNet_RPC, nil)
+	client := aptos.New(rpc.DevNet_RPC)
 
 	// latest ledger
 	ledger, aptosErr := client.Ledger(ctx)
@@ -108,7 +108,7 @@ func TestTransfer_raw(t *testing.T) {
 	fmt.Printf("to address: %s\n", addressTo)
 
 	// new rpc
-	client := aptos.New(rpc.DevNet_RPC, nil)
+	client := aptos.New(rpc.DevNet_RPC)
 
 	// latest ledger
 	ledger, aptosErr := client.Ledger(ctx)
@@ -140,10 +140,12 @@ func TestTransfer_raw(t *testing.T) {
 		panic(aptosErr)
 	}
 
-	encodeSubmissionReq, err := aptos.TransferCoinPayload(addressFrom, accountFrom.SequenceNumber, aptos.AptosCoin, uint64(1000), addressTo)
-	if err != nil {
-		panic(err)
+	payload, aptosErr := aptos.TransferCoinPayload(aptos.AptosCoin, uint64(1000), addressTo)
+	if aptosErr != nil {
+		panic(aptosErr)
 	}
+
+	encodeSubmissionReq := rpcmodule.EncodeSubmissionReq(addressFrom, accountFrom.SequenceNumber, payload)
 
 	// sign message
 	signData, aptosErr := client.EncodeSubmission(ctx, encodeSubmissionReq)
@@ -158,17 +160,14 @@ func TestTransfer_raw(t *testing.T) {
 	}
 
 	// add signature
-	submitReq, err := rpcmodule.SubmitTransactionReq(encodeSubmissionReq, rpcmodule.Signature{
-		Type: "ed25519_signature",
+	submitReq := rpcmodule.SubmitTransactionReq(encodeSubmissionReq, rpcmodule.Signature{
+		Type: rpcmodule.Ed25519Signature,
 		Object: rpcmodule.SignatureEd25519Signature{
-			Type:      "ed25519_signature",
+			Type:      rpcmodule.Ed25519Signature,
 			PublicKey: "0x" + walletFrom.PublicKey().String(),
 			Signature: "0x" + hex.EncodeToString(signature),
 		},
 	})
-	if err != nil {
-		panic(err)
-	}
 
 	// submit
 	txHash, aptosErr := client.SubmitTransaction(ctx, submitReq)

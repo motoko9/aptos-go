@@ -28,7 +28,7 @@ func (cl *Client) TransactionByHash(ctx context.Context, hash string) (*rpcmodul
 	url := fmt.Sprintf("/transactions/by_hash/%s", hash)
 	var transaction rpcmodule.Transaction
 	var aptosError rpcmodule.AptosError
-    cl.fetchClient.Get(url).Execute(&transaction, &aptosError)
+	cl.fetchClient.Get(url).Execute(&transaction, &aptosError)
 	if aptosError.IsError() {
 		return nil, &aptosError
 	}
@@ -39,7 +39,7 @@ func (cl *Client) TransactionByVersion(ctx context.Context, version uint64) (*rp
 	url := fmt.Sprintf("/transactions/by_version/%d", version)
 	var transaction rpcmodule.Transaction
 	var aptosError rpcmodule.AptosError
-    cl.fetchClient.Get(url).Execute(&transaction, &aptosError)
+	cl.fetchClient.Get(url).Execute(&transaction, &aptosError)
 	if aptosError.IsError() {
 		return nil, &aptosError
 	}
@@ -50,7 +50,7 @@ func (cl *Client) EncodeSubmission(ctx context.Context, tx *rpcmodule.EncodeSubm
 	url := fmt.Sprintf("/transactions/encode_submission")
 	var raw string
 	var aptosError rpcmodule.AptosError
-    cl.fetchClient.Post(url).SetJSONBody(tx).Execute(&raw, &aptosError)
+	cl.fetchClient.Post(url).SetJSONBody(tx).Execute(&raw, &aptosError)
 	if aptosError.IsError() {
 		return nil, &aptosError
 	}
@@ -66,7 +66,7 @@ func (cl *Client) SubmitTransaction(ctx context.Context, tx *rpcmodule.SubmitTra
 	url := fmt.Sprintf("/transactions")
 	var transaction rpcmodule.TransactionPendingTransaction
 	var aptosError rpcmodule.AptosError
-    cl.fetchClient.Post(url).SetJSONBody(tx).Execute(&transaction, &aptosError)
+	cl.fetchClient.Post(url).SetJSONBody(tx).Execute(&transaction, &aptosError)
 	if aptosError.IsError() {
 		return "", &aptosError
 	}
@@ -77,7 +77,7 @@ func (cl *Client) EstimateGasPrice(ctx context.Context) (uint64, *rpcmodule.Apto
 	url := fmt.Sprintf("/estimate_gas_price")
 	var gasEstimate rpcmodule.GasEstimate
 	var aptosError rpcmodule.AptosError
-    cl.fetchClient.Get(url).Execute(&gasEstimate, &aptosError)
+	cl.fetchClient.Get(url).Execute(&gasEstimate, &aptosError)
 	if aptosError.IsError() {
 		return 0, &aptosError
 	}

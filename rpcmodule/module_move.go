@@ -47,7 +47,7 @@ type MoveResources []MoveResource
 type MoveResource struct {
 	Type   string          `json:"type"`
 	Raw    json.RawMessage `json:"data"`
-	Object interface{} `json:",omitempty"`
+	Object interface{}     `json:",omitempty"`
 }
 
 func (j MoveResource) MarshalJSON() ([]byte, error) {

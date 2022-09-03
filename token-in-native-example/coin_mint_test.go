@@ -42,7 +42,7 @@ func TestMint(t *testing.T) {
 	//
 	mintAmount := uint64(1000000000)
 	payload := rpcmodule.TransactionPayloadEntryFunctionPayload{
-		Type:          "entry_function_payload",
+		Type:          rpcmodule.EntryFunctionPayload,
 		Function:      "0x1::managed_coin::mint",
 		TypeArguments: []string{fmt.Sprintf("%s::usdt::USDT", coinAddress)},
 		Arguments: []interface{}{
@@ -50,9 +50,9 @@ func TestMint(t *testing.T) {
 			fmt.Sprintf("%d", mintAmount),
 		},
 	}
-	encodeSubmissionReq, err := rpcmodule.EncodeSubmissionReq(
-		coinAddress, coinAccount.SequenceNumber, rpcmodule.TransactionPayload{
-			Type:   "entry_function_payload",
+	encodeSubmissionReq := rpcmodule.EncodeSubmissionReq(
+		coinAddress, coinAccount.SequenceNumber, &rpcmodule.TransactionPayload{
+			Type:   rpcmodule.EntryFunctionPayload,
 			Object: payload,
 		})
 	if err != nil {
@@ -72,10 +72,10 @@ func TestMint(t *testing.T) {
 	}
 
 	// add signature
-	submitReq, err := rpcmodule.SubmitTransactionReq(encodeSubmissionReq, rpcmodule.Signature{
-		Type: "ed25519_signature",
+	submitReq := rpcmodule.SubmitTransactionReq(encodeSubmissionReq, rpcmodule.Signature{
+		Type: rpcmodule.Ed25519Signature,
 		Object: rpcmodule.SignatureEd25519Signature{
-			Type:      "ed25519_signature",
+			Type:      rpcmodule.Ed25519Signature,
 			PublicKey: "0x" + coinWallet.PublicKey().String(),
 			Signature: "0x" + hex.EncodeToString(signature),
 		},

@@ -42,19 +42,16 @@ func TestMoveWrite(t *testing.T) {
 	//
 	message := []byte("hello world!")
 	payload := rpcmodule.TransactionPayloadEntryFunctionPayload{
-		Type:          "entry_function_payload",
+		Type:          rpcmodule.EntryFunctionPayload,
 		Function:      fmt.Sprintf("%s::helloworld::set_message", moduleAddress),
 		TypeArguments: []string{},
 		Arguments:     []interface{}{hex.EncodeToString(message)},
 	}
-	encodeSubmissionReq, err := rpcmodule.EncodeSubmissionReq(
-		address, account.SequenceNumber, rpcmodule.TransactionPayload{
-			Type:   "entry_function_payload",
+	encodeSubmissionReq := rpcmodule.EncodeSubmissionReq(
+		address, account.SequenceNumber, &rpcmodule.TransactionPayload{
+			Type:   rpcmodule.EntryFunctionPayload,
 			Object: payload,
 		})
-	if err != nil {
-		panic(err)
-	}
 
 	// sign message
 	signData, aptosErr := client.EncodeSubmission(ctx, encodeSubmissionReq)
@@ -68,10 +65,10 @@ func TestMoveWrite(t *testing.T) {
 		panic(err)
 	}
 
-	submitReq, err := rpcmodule.SubmitTransactionReq(encodeSubmissionReq, rpcmodule.Signature{
-		Type: "ed25519_signature",
+	submitReq := rpcmodule.SubmitTransactionReq(encodeSubmissionReq, rpcmodule.Signature{
+		Type: rpcmodule.Ed25519Signature,
 		Object: rpcmodule.SignatureEd25519Signature{
-			Type:      "ed25519_signature",
+			Type:      rpcmodule.Ed25519Signature,
 			PublicKey: "0x" + userWallet.PublicKey().String(),
 			Signature: "0x" + hex.EncodeToString(signature),
 		},

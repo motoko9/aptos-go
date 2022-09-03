@@ -50,7 +50,7 @@ type SignatureMultiEd25519Signature struct {
 
 type SignatureMultiAgentSignature struct {
 	Type                     string      `json:"type"`
-	Sender                Signature   `json:"sender"`
+	Sender                   Signature   `json:"sender"`
 	SecondarySignerAddresses []string    `json:"secondary_signer_addresses"`
 	SecondarySigners         []Signature `json:"secondary_signers"`
 }

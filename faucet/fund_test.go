@@ -14,8 +14,7 @@ import (
 func Test_Faucet(t *testing.T) {
 	ctx := context.Background()
 
-	pubK, priv, err := crypto.NewRandomPrivateKey()
-	assert.NoError(t, err)
+	pubK, priv, _ := crypto.NewRandomPrivateKey()
 	address := pubK.Address()
 	fmt.Printf("private is: %v\n", priv.String())
 	fmt.Printf("address is: %v\n", address)
@@ -48,8 +47,7 @@ func Test_Faucet_Address(t *testing.T) {
 	ctx := context.Background()
 
 	privHexStr := "fc20bed4ec67f04b28f66faafc3e178c6c8936112c0e5f0a9c005fc056cf20fb729c5ad55087d8c9d2280c7d26e888a1ab4b463c56eb3901b5f9b150317cc3ae"
-	priv, err := crypto.NewPrivateKeyFromHexString(privHexStr)
-	assert.NoError(t, err)
+	priv, _ := crypto.NewPrivateKeyFromHexString(privHexStr)
 
 	addr := priv.PublicKey().Address()
 

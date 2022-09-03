@@ -1,25 +1,22 @@
 package faucet
 
 import (
-    "encoding/json"
-    "fmt"
-    "github.com/hashicorp/go-hclog"
+	"fmt"
 	"github.com/motoko9/aptos-go/fetchclient"
+	"github.com/motoko9/aptos-go/rpcmodule"
 )
 
-func FundAccount(address string, amount uint64) ([]string, error) {
-    fetchClient := fetchclient.NewClientWithEndpoint("https://faucet.devnet.aptoslabs.com", hclog.Default())
-    resp, err := fetchClient.Post("/mint").
-        SetQueryParams(map[string]string{
-            "amount":  fmt.Sprintf("%d", amount),
-            "address": address,
-        }).Execute()
-    if err != nil {
-        return nil, err
-    }
-    var hashes []string
-    if err = json.Unmarshal(resp.BodyBytes(), &hashes); err != nil {
-        return nil, err
-    }
-    return hashes, nil
+func FundAccount(address string, amount uint64) ([]string, *rpcmodule.AptosError) {
+	fetchClient := fetchclient.NewClientWithEndpoint("https://faucet.devnet.aptoslabs.com")
+	var hashes []string
+	var aptosError rpcmodule.AptosError
+	fetchClient.Post("/mint").
+		SetQueryParams(map[string]string{
+			"amount":  fmt.Sprintf("%d", amount),
+			"address": address,
+		}).Execute(&hashes, &aptosError)
+	if aptosError.IsError() {
+		return nil, &aptosError
+	}
+	return hashes, nil
 }
