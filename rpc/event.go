@@ -2,32 +2,28 @@ package rpc
 
 import (
     "context"
-    "encoding/json"
+    "fmt"
     "github.com/motoko9/aptos-go/rpcmodule"
 )
 
-func (cl *Client) EventsByKey(ctx context.Context, key string) (*rpcmodule.Events, error) {
-    resp, err := cl.fetchClient.Get("/events/" + key).Execute()
-    if err != nil {
-        return nil, err
-    }
-
+func (cl *Client) EventsByKey(ctx context.Context, key string) (*rpcmodule.Events, *rpcmodule.AptosError) {
+    url := fmt.Sprintf("/events/%s", key)
     var events rpcmodule.Events
-    if err = json.Unmarshal(resp.BodyBytes(), &events); err != nil {
-        return nil, err
+    var aptosError rpcmodule.AptosError
+    cl.fetchClient.Get(url).Execute(&events, &aptosError)
+    if aptosError.IsError() {
+        return nil, &aptosError
     }
     return &events, nil
 }
 
-func (cl *Client) EventsByHandle(ctx context.Context, address string, handle string, field string) (*rpcmodule.Events, error) {
-    resp, err := cl.fetchClient.Get("/accounts/" + address + "/events/" + handle + "/" + field).Execute()
-    if err != nil {
-        return nil, err
-    }
-
+func (cl *Client) EventsByHandle(ctx context.Context, address string, handle string, field string) (*rpcmodule.Events, *rpcmodule.AptosError) {
+    url := fmt.Sprintf("/accounts/%s/events/%s/%s", address, handle, field)
     var events rpcmodule.Events
-    if err = json.Unmarshal(resp.BodyBytes(), &events); err != nil {
-        return nil, err
+    var aptosError rpcmodule.AptosError
+    cl.fetchClient.Get(url).Execute(&events, &aptosError)
+    if aptosError.IsError() {
+        return nil, &aptosError
     }
     return &events, nil
 }

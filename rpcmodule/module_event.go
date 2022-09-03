@@ -11,12 +11,14 @@ type Event struct {
 	SequenceNumber uint64          `json:"sequence_number,string"`
 	Type           string          `json:"type"`
 	Raw            json.RawMessage `json:"data"`
-	Object         interface{}
+	Object         interface{} `json:",omitempty"`
 }
 
 func (j Event) MarshalJSON() ([]byte, error) {
-	raw, _ := json.Marshal(j.Object)
-	j.Raw = raw
+	if len(j.Raw) == 0 {
+		raw, _ := json.Marshal(j.Object)
+		j.Raw = raw
+	}
 	type Aux Event
 	aux := Aux(j)
 	return json.Marshal(aux)

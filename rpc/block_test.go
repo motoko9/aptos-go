@@ -2,15 +2,17 @@ package rpc
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
-	"github.com/motoko9/aptos-go/common/jsonutil"
-	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
 func Test_Block(t *testing.T) {
-	block, err := client.BlockByHeight(context.Background(), 79591900, true)
-	assert.NoError(t, err)
+	block, err := client.BlockByHeight(context.Background(), 8655089, true)
+	if err != nil {
+		panic(err)
+	}
 	fmt.Printf("block: \n")
-	jsonutil.PrintJsonStringWithIndent(block)
+	blockJson, _ := json.MarshalIndent(block, "", "    ")
+	fmt.Printf(string(blockJson))
 }

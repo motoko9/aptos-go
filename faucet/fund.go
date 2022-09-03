@@ -4,11 +4,11 @@ import (
     "encoding/json"
     "fmt"
     "github.com/hashicorp/go-hclog"
-    "github.com/motoko9/aptos-go/httpclient"
+	"github.com/motoko9/aptos-go/fetchclient"
 )
 
 func FundAccount(address string, amount uint64) ([]string, error) {
-    fetchClient := httpclient.NewClientWithEndpoint("https://faucet.devnet.aptoslabs.com", hclog.Default())
+    fetchClient := fetchclient.NewClientWithEndpoint("https://faucet.devnet.aptoslabs.com", hclog.Default())
     resp, err := fetchClient.Post("/mint").
         SetQueryParams(map[string]string{
             "amount":  fmt.Sprintf("%d", amount),

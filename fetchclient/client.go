@@ -1,16 +1,13 @@
-package httpclient
+package fetchclient
 
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"github.com/hashicorp/go-hclog"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"regexp"
-	"sync"
 )
 
 var (
@@ -20,22 +17,14 @@ var (
 	hdrContentLengthKey   = http.CanonicalHeaderKey("Content-Length")
 	hdrContentEncodingKey = http.CanonicalHeaderKey("Content-Encoding")
 	hdrLocationKey        = http.CanonicalHeaderKey("Location")
-
-	jsonCheck = regexp.MustCompile(`(?i:(application|text)/(json|.*\+json|json\-.*)(;|$))`)
-
-	bufPool = &sync.Pool{New: func() interface{} { return &bytes.Buffer{} }}
+	applicationJSON       = "application/json"
 )
-
-const traceRequestLogKey = "__fetchTraceRequestLog"
 
 type ClientInterface interface {
 	execute(r *Request) (*Response, error)
 	log() hclog.Logger
-
 	Get(url string) *Request
-
 	Post(url string) *Request
-
 	Do(method, url string) *Request
 }
 
@@ -45,9 +34,6 @@ type Client struct {
 	httpClient         *http.Client
 	logger             hclog.Logger
 	traceBodySizeLimit int64
-
-	beforeRequest  []RequestMiddleware
-	beforeResponse []ResponseMiddleware
 }
 
 func NewClient(logger hclog.Logger) *Client {
@@ -60,33 +46,16 @@ func NewClientWithEndpoint(endpoint string, logger hclog.Logger) *Client {
 }
 
 func NewClientWithCustomHttpClient(httpClient *http.Client, endpoint string, logger hclog.Logger) *Client {
-	l := logger
-	if l == nil {
-		l = hclog.Default()
-	}
 	if t, ok := httpClient.Transport.(*http.Transport); ok {
 		t.MaxIdleConnsPerHost = 10
 	}
 	return &Client{
 		host:               endpoint,
 		httpClient:         httpClient,
-		logger:             l,
+		logger:             logger,
 		Header:             http.Header{},
 		traceBodySizeLimit: 1024,
-		beforeRequest:      make([]RequestMiddleware, 0, 0),
-		beforeResponse:     make([]ResponseMiddleware, 0, 0),
 	}
-}
-
-// OnBeforeRequest method appends request middleware into the before request chain.
-func (c *Client) OnBeforeRequest(m RequestMiddleware) *Client {
-	c.beforeRequest = append(c.beforeRequest, m)
-	return c
-}
-
-func (c *Client) OnBeforeResponse(m ResponseMiddleware) *Client {
-	c.beforeResponse = append(c.beforeResponse, m)
-	return c
 }
 
 func (c *Client) AddHeaders(header map[string]string) *Client {
@@ -138,13 +107,6 @@ func (c *Client) createHttpRawRequest(r *Request) error {
 }
 
 func (c *Client) execute(r *Request) (*Response, error) {
-
-	for _, m := range c.beforeRequest {
-		if err := m(c, r); err != nil {
-			return nil, err
-		}
-	}
-
 	err := parseRequestURL(c, r)
 	if err != nil {
 		return nil, err
@@ -158,39 +120,29 @@ func (c *Client) execute(r *Request) (*Response, error) {
 		return nil, err
 	}
 
-	_ = traceRequest(c, r)
-
 	err = c.createHttpRawRequest(r)
 	if err != nil {
 		return nil, err
 	}
 
 	rawResponse, err := c.httpClient.Do(r.rawRequest)
-
-	response := &Response{
-		Request:     r,
-		rawResponse: rawResponse,
-	}
-
 	if err != nil {
-		return response, err
+		return nil, err
 	}
 
+	// before here, http request handle error
+	// after here, http request handle ok, http server may give error response
+	//
 	defer rawResponse.Body.Close()
-	respBody := rawResponse.Body
-	if response.bodyBytes, err = ioutil.ReadAll(respBody); err != nil {
-		return response, err
-	}
-
-	_ = traceResponse(c, response)
-
-	err = handleError(c, response)
+	bodyBytes, err := ioutil.ReadAll(rawResponse.Body)
 	if err != nil {
-		return response, err
+		return nil, err
 	}
-	err = parseResponseBody(c, response)
 
-	return response, err
+	return &Response{
+		rawResponse: rawResponse,
+		bodyBytes:   bodyBytes,
+	}, nil
 }
 
 func (c *Client) log() hclog.Logger {
@@ -253,7 +205,7 @@ func parseRequestBody(c *Client, r *Request) (err error) {
 		case string:
 			r.bodyBytes = []byte(v)
 		default:
-			if IsJSONType(r.Header.Get(hdrContentTypeKey)) {
+			if r.Header.Get(hdrContentTypeKey) == applicationJSON {
 				r.bodyBytes, err = json.Marshal(v)
 				if err != nil {
 					return
@@ -263,59 +215,4 @@ func parseRequestBody(c *Client, r *Request) (err error) {
 	}
 
 	return nil
-}
-
-func parseResponseBody(c *Client, r *Response) (err error) {
-	if r.StatusCode() == http.StatusNoContent {
-		return
-	}
-	return
-}
-
-func traceRequest(c *Client, r *Request) error {
-	if c.logger != nil && c.logger.IsTrace() {
-		rl := &RequestLog{Header: copyHeaders(r.Header), Body: r.fmtBodyString(c.traceBodySizeLimit)}
-
-		reqLog := "\n==============================================================================\n" +
-			"~~~ REQUEST ~~~\n" +
-			fmt.Sprintf("%s  %s\n", r.Method, r.URL) +
-			fmt.Sprintf("HEADERS:\n%s\n", composeHeaders(rl.Header)) +
-			fmt.Sprintf("BODY   :\n%v\n", rl.Body) +
-			"------------------------------------------------------------------------------\n"
-
-		r.initValuesMap()
-		r.values[traceRequestLogKey] = reqLog
-	}
-
-	return nil
-}
-
-func traceResponse(c *Client, res *Response) error {
-	if c.logger.IsTrace() {
-		rl := &ResponseLog{Header: copyHeaders(res.Header()), Body: res.fmtBodyString(c.traceBodySizeLimit)}
-
-		debugLog := res.Request.values[traceRequestLogKey].(string)
-		debugLog += "~~~ RESPONSE ~~~\n" +
-			fmt.Sprintf("STATUS       : %d\n", res.StatusCode()) +
-			"HEADERS      :\n" +
-			composeHeaders(rl.Header) + "\n"
-		debugLog += fmt.Sprintf("BODY         :\n%v\n", rl.Body)
-		debugLog += "==============================================================================\n"
-
-		c.logger.Trace(debugLog)
-	}
-
-	return nil
-}
-
-func handleError(c *Client, r *Response) (err error) {
-	if r.IsError() {
-		c.logger.Warn("got error response", "statusCode", r.StatusCode())
-		return ServerErrorCtor(r.StatusCode(), r.fmtBodyString(c.traceBodySizeLimit))
-	}
-	return nil
-}
-
-func IsJSONType(contentType string) bool {
-	return jsonCheck.Match([]byte(contentType))
 }

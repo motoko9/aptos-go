@@ -71,3 +71,32 @@ func (ce ClientError) Message() string {
     return ce.message
 }
 
+type AptosError struct {
+    Message     string `json:"message"`
+    ErrorCode   string `json:"error_code"`
+    VmErrorCode int64  `json:"vm_error_code"`
+}
+
+func (ae *AptosError) SetError(code string, message string) {
+    ae.ErrorCode = code
+    ae.Message = message
+}
+
+func (ae *AptosError) String() string {
+    err, _ := json.Marshal(ae)
+    return string(err)
+}
+
+func (ae *AptosError) IsError() bool {
+    return ae.ErrorCode != ""
+}
+
+func AptosErrorFromError(err error) *AptosError {
+    aptosErr := &AptosError{
+        Message:     err.Error(),
+        ErrorCode:   "client_error",
+        VmErrorCode: 0,
+    }
+    return aptosErr
+}
+
