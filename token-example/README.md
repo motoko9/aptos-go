@@ -43,14 +43,14 @@ package size 3652 bytes
 }
 ```
 
-<<<<<<< Updated upstream
 ## Call module
-=======
+
 * [deploy coin](../../coin-example/coin_publish_test.go)
 * [initialize coin](../../coin-example/coin_initialize_test.go)
 * [register recipient](../../coin-example/register_recipient_test.go)
 * [mint coin to recipient](../../coin-example/mint_test.go)
->>>>>>> Stashed changes
+
+
 
 * [Publish Coin Module](./coin_module_publish_test.go)
 * [Initialize Coin Module](./coin_initialize_test.go)
