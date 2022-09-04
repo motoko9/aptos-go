@@ -1,22 +1,13 @@
 package hello_blockchain
 
 import (
+	"github.com/motoko9/aptos-go/aptosmodule"
 	"github.com/motoko9/aptos-go/rpcmodule"
 )
 
-type MessageChangeEvents struct {
-	Counter string `json:"counter"`
-	Guid    struct {
-		Id struct {
-			Addr        string `json:"addr"`
-			CreationNum string `json:"creation_num"`
-		} `json:"id"`
-	} `json:"guid"`
-}
-
 type MessageHolder struct {
 	Message             string              `json:"message"`
-	MessageChangeEvents MessageChangeEvents `json:"message_change_events"`
+	MessageChangeEvents aptosmodule.Events `json:"message_change_events"`
 }
 
 func MessageHolderCreator() interface{} {
@@ -24,5 +15,5 @@ func MessageHolderCreator() interface{} {
 }
 
 func init() {
-	rpcmodule.RegisterResourceObjectCreator("0x1::account::Account", MessageHolderCreator)
+	rpcmodule.RegisterResourceObjectCreator("0xbb04c2079bc5611345689582eabab626732411b909045f8326d2b4980eac9b07::message::MessageHolder", MessageHolderCreator)
 }

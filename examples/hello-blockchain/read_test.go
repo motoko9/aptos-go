@@ -23,9 +23,9 @@ func Test_ReadFromResource(t *testing.T) {
 	// todo
 	// need to test
 	resourceType := fmt.Sprintf("%s::message::MessageHolder", moduleAddress)
-	resouce, err := client.AccountResourceByAddressAndType(ctx, userAddr, resourceType, 0)
+	resource, err := client.AccountResourceByAddressAndType(ctx, userAddr, resourceType, 0)
 	assert.Equal(t, nil, err)
-	messageHold, ok := resouce.Object.(*MessageHolder)
+	messageHold, ok := resource.Object.(*MessageHolder)
 	assert.Equal(t, true, ok)
 	fmt.Printf("account resource: %v\n", messageHold)
 }
