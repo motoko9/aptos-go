@@ -6,7 +6,7 @@ import (
 )
 
 type MessageHolder struct {
-	Message             string              `json:"message"`
+	Message             string             `json:"message"`
 	MessageChangeEvents aptosmodule.Events `json:"message_change_events"`
 }
 

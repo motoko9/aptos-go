@@ -16,7 +16,7 @@ func TestNewRecipientAccount(t *testing.T) {
 
 	// new account
 	wallet := wallet.New()
-	wallet.Save("account_recipient")
+	wallet.SaveToKeygenFile("account_recipient")
 	address := wallet.Address()
 	fmt.Printf("address: %s\n", address)
 

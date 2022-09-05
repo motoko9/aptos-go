@@ -6,6 +6,7 @@ import (
 	"github.com/motoko9/aptos-go/aptos"
 	"github.com/motoko9/aptos-go/crypto"
 	"github.com/motoko9/aptos-go/faucet"
+	"github.com/motoko9/aptos-go/wallet"
 	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
@@ -17,15 +18,15 @@ func Test_RegisterRecipient(t *testing.T) {
 	// coin account
 	privFrom := priv
 	pubKFrom := privFrom.PublicKey()
-	coinAddress := pubKFrom.Address()
+	coinAddress := wallet.PublicKey2Address(pubKFrom)
 	fmt.Printf("coin address: %s\n", coinAddress)
 
 	// new account
 	pubKTo, privTo, err := crypto.NewRandomPrivateKey()
 	assert.NoError(t, err)
-	addressTo := pubKTo.Address()
+	addressTo := wallet.PublicKey2Address(pubKTo)
 	fmt.Printf("recipient address: %s\n", addressTo)
-	privTo.Save("addr_registered.key")
+	privTo.SaveToFile("addr_registered.key")
 
 	// fund (max: 20000)
 	amount := uint64(20000)

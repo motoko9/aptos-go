@@ -6,6 +6,7 @@ import (
 	"github.com/motoko9/aptos-go/aptos"
 	"github.com/motoko9/aptos-go/crypto"
 	"github.com/motoko9/aptos-go/rpc"
+	"github.com/motoko9/aptos-go/wallet"
 	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
@@ -14,9 +15,9 @@ import (
 func Test_Faucet(t *testing.T) {
 	ctx := context.Background()
 
-	pubK, priv, _ := crypto.NewRandomPrivateKey()
-	address := pubK.Address()
-	fmt.Printf("private is: %v\n", priv.String())
+	wallet := wallet.New()
+	address := wallet.Address()
+	fmt.Printf("private is: %v\n", wallet.Key())
 	fmt.Printf("address is: %v\n", address)
 
 	// fund (max: 20000)
@@ -49,7 +50,7 @@ func Test_Faucet_Address(t *testing.T) {
 	privHexStr := "fc20bed4ec67f04b28f66faafc3e178c6c8936112c0e5f0a9c005fc056cf20fb729c5ad55087d8c9d2280c7d26e888a1ab4b463c56eb3901b5f9b150317cc3ae"
 	priv, _ := crypto.NewPrivateKeyFromHexString(privHexStr)
 
-	addr := priv.PublicKey().Address()
+	addr := wallet.PublicKey2Address(priv.PublicKey())
 
 	// fund (max: 20000)
 	amount := uint64(20000)

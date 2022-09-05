@@ -7,7 +7,6 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"fmt"
-	"golang.org/x/crypto/sha3"
 	"io/ioutil"
 )
 
@@ -22,7 +21,7 @@ func NewRandomPrivateKey() (PublicKey, PrivateKey, error) {
 	return PublicKey(pub), PrivateKey(priv), nil
 }
 
-func NewKeyFromSeed(seed []byte) PrivateKey {
+func NewPrivateKeyFromSeed(seed []byte) PrivateKey {
 	p := ed25519.NewKeyFromSeed(seed)
 	return PrivateKey(p)
 }
@@ -32,7 +31,7 @@ func NewPrivateKeyFromHexString(key string) (PrivateKey, error) {
 	if err != nil {
 		return nil, fmt.Errorf("account from private key: private key from b58: %w", err)
 	}
-	return k, nil
+	return NewPrivateKeyFromSeed(k), nil
 }
 
 func NewPrivateKeyFromFile(file string) (PrivateKey, error) {
@@ -40,11 +39,7 @@ func NewPrivateKeyFromFile(file string) (PrivateKey, error) {
 	if err != nil {
 		return nil, fmt.Errorf("read keygen file failed. err = %w", err)
 	}
-	seed, err := hex.DecodeString(string(content))
-	if err != nil {
-		return nil, fmt.Errorf("parse keygen file failed. err = %w", err)
-	}
-	return NewKeyFromSeed(seed), nil
+	return NewPrivateKeyFromHexString(string(content))
 }
 
 func (p PrivateKey) Seed() []byte {
@@ -53,8 +48,12 @@ func (p PrivateKey) Seed() []byte {
 	return seed
 }
 
-func (p PrivateKey) Save(file string) error {
-	k := hex.EncodeToString(p.Seed())
+func (p PrivateKey) HexString() string {
+	return hex.EncodeToString(p.Seed())
+}
+
+func (p PrivateKey) SaveToFile(file string) error {
+	k := p.HexString()
 	return ioutil.WriteFile(file, []byte(k), 0666)
 }
 
@@ -69,18 +68,11 @@ func (p PrivateKey) PublicKey() PublicKey {
 }
 
 func (p PrivateKey) String() string {
-	return hex.EncodeToString(p)
+	return p.HexString()
 }
 
 func (p PrivateKey) Equal(x PrivateKey) bool {
 	return bytes.Equal(p, x)
-}
-
-func (pubK PublicKey) Address() string {
-	hash := sha3.New256()
-	hash.Write(pubK[:])
-	hash.Write([]byte{0})
-	return "0x" + hex.EncodeToString(hash.Sum(nil))
 }
 
 func (pubK PublicKey) String() string {

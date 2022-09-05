@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/motoko9/aptos-go/crypto"
+	"github.com/motoko9/aptos-go/wallet"
 	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
@@ -15,12 +16,12 @@ func Test_MintTo(t *testing.T) {
 	// coin account
 	privFrom := priv
 	pubKFrom := privFrom.PublicKey()
-	coinAddress := pubKFrom.Address()
+	coinAddress := wallet.PublicKey2Address(pubKFrom)
 	fmt.Printf("coin address: %s\n", coinAddress)
 
 	// recipient address generate by register_recipient_test
 	privTo, _ := crypto.NewPrivateKeyFromFile("addr_registered.key")
-	recipientAddress := privTo.PublicKey().Address()
+	recipientAddress := wallet.PublicKey2Address(privTo.PublicKey())
 
 	mintAmount := uint64(1000000000)
 	hash, err := client.MintCoin(

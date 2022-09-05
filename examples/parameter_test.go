@@ -4,6 +4,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"github.com/motoko9/aptos-go/crypto"
+	"github.com/motoko9/aptos-go/wallet"
 	"testing"
 )
 
@@ -17,5 +18,5 @@ func printKey(k crypto.PrivateKey) {
 	fmt.Println("#####################")
 	fmt.Printf("seed   : %v\n", hex.EncodeToString(k.Seed()))
 	fmt.Printf("key    : %v\n", k.PublicKey().String())
-	fmt.Printf("address: %v\n", k.PublicKey().Address())
+	fmt.Printf("address: %v\n", wallet.PublicKey2Address(k.PublicKey()))
 }

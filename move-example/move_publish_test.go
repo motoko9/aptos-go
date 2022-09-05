@@ -17,7 +17,7 @@ func TestNewModuleAccount(t *testing.T) {
 
 	// new account
 	wallet := wallet.New()
-	wallet.Save("account_helloworld")
+	wallet.SaveToKeygenFile("account_helloworld")
 	address := wallet.Address()
 	fmt.Printf("address: %s\n", address)
 
@@ -53,7 +53,7 @@ func TestReadModuleAccount(t *testing.T) {
 	ctx := context.Background()
 
 	// new account
-	wallet, err := wallet.LoadFromKeygenFile("account_helloworld")
+	wallet, err := wallet.NewFromKeygenFile("account_helloworld")
 	if err != nil {
 		panic(err)
 	}

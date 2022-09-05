@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/hex"
 	"fmt"
+	"github.com/motoko9/aptos-go/wallet"
 	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
@@ -14,7 +15,7 @@ func Test_Initialize(t *testing.T) {
 
 	privFrom := priv
 	pubKFrom := privFrom.PublicKey()
-	initializeAddress := pubKFrom.Address()
+	initializeAddress := wallet.PublicKey2Address(pubKFrom)
 	fmt.Printf("coin initialize address: %s\n", initializeAddress)
 
 	hash, aptosErr := client.InitializeCoin(

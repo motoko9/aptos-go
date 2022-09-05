@@ -1,4 +1,4 @@
-package move_example
+package base_example
 
 import (
 	"context"
@@ -7,17 +7,16 @@ import (
 	"github.com/motoko9/aptos-go/faucet"
 	"github.com/motoko9/aptos-go/rpc"
 	"github.com/motoko9/aptos-go/wallet"
-	"io/ioutil"
 	"testing"
 	"time"
 )
 
-func TestNewUsdtAccount(t *testing.T) {
+func TestNewExampleAccount(t *testing.T) {
 	ctx := context.Background()
 
 	// new account
 	wallet := wallet.New()
-	wallet.SaveToKeygenFile("account_usdt")
+	wallet.SaveToKeygenFile("account_example")
 	address := wallet.Address()
 	fmt.Printf("address: %s\n", address)
 
@@ -33,7 +32,7 @@ func TestNewUsdtAccount(t *testing.T) {
 	time.Sleep(time.Second * 5)
 
 	// new rpc
-	client := aptos.New(rpc.DevNet_RPC)
+	client := aptos.New(aptos.DevNet_RPC)
 
 	// latest ledger
 	ledger, err := client.Ledger(ctx)
@@ -49,18 +48,16 @@ func TestNewUsdtAccount(t *testing.T) {
 	fmt.Printf("account balance: %d\n", balance)
 }
 
-func TestReadUsdtAccount(t *testing.T) {
+func TestReadExampleAccount(t *testing.T) {
 	ctx := context.Background()
 
 	// new account
-	wallet, err := wallet.NewFromKeygenFile("account_usdt")
+	wallet, err := wallet.NewFromKeygenFile("account_example")
 	if err != nil {
 		panic(err)
 	}
 	address := wallet.Address()
 	fmt.Printf("address: %s\n", address)
-	fmt.Printf("public key: %s\n", wallet.PublicKey().String())
-	fmt.Printf("private key: %s\n", wallet.PrivateKey.String())
 
 	// fund (max: 20000)
 	amount := uint64(20000)
@@ -90,38 +87,78 @@ func TestReadUsdtAccount(t *testing.T) {
 	fmt.Printf("account balance: %d\n", balance)
 }
 
-func TestCoinPublish(t *testing.T) {
+func TestNewToAccount(t *testing.T) {
 	ctx := context.Background()
 
-	// coin account
-	wallet, err := wallet.NewFromKeygenFile("account_usdt")
+	// new account
+	wallet := wallet.New()
+	wallet.SaveToKeygenFile("account_to")
+	address := wallet.Address()
+	fmt.Printf("address: %s\n", address)
+
+	// fund (max: 20000)
+	amount := uint64(20000)
+	hashes, err := faucet.FundAccount(address, amount)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("fund txs: %v\n", hashes)
+
+	//
+	time.Sleep(time.Second * 5)
+
+	// new rpc
+	client := aptos.New(aptos.DevNet_RPC)
+
+	// latest ledger
+	ledger, err := client.Ledger(ctx)
+	if err != nil {
+		panic(err)
+	}
+
+	// check account
+	balance, err := client.AccountBalance(ctx, address, aptos.AptosCoin, ledger.LedgerVersion)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("account balance: %d\n", balance)
+}
+
+func TestReadToAccount(t *testing.T) {
+	ctx := context.Background()
+
+	// new account
+	wallet, err := wallet.NewFromKeygenFile("account_to")
 	if err != nil {
 		panic(err)
 	}
 	address := wallet.Address()
-	fmt.Printf("coin publish address: %s\n", wallet.Address())
+	fmt.Printf("address: %s\n", address)
+
+	// fund (max: 20000)
+	amount := uint64(20000)
+	hashes, aptosErr := faucet.FundAccount(address, amount)
+	if aptosErr != nil {
+		panic(aptosErr)
+	}
+	fmt.Printf("fund txs: %v\n", hashes)
+
+	//
+	time.Sleep(time.Second * 5)
 
 	// new rpc
 	client := aptos.New(rpc.DevNet_RPC)
 
-	// read move byte code
-	content, err := ioutil.ReadFile("./usdt.mv")
-	if err != nil {
-		panic(err)
-	}
-
-	// publish message
-	txHash, aptosErr := client.PublishMoveModuleLegacy(ctx, address, content, wallet)
+	// latest ledger
+	ledger, aptosErr := client.Ledger(ctx)
 	if aptosErr != nil {
 		panic(aptosErr)
 	}
-	//
-	fmt.Printf("publish move module transaction hash: %s\n", txHash)
 
-	//
-	confirmed, aptosErr := client.ConfirmTransaction(ctx, txHash)
+	// check account
+	balance, aptosErr := client.AccountBalance(ctx, address, aptos.AptosCoin, ledger.LedgerVersion)
 	if aptosErr != nil {
 		panic(aptosErr)
 	}
-	fmt.Printf("publish move module transaction confirmed: %v\n", confirmed)
+	fmt.Printf("account balance: %d\n", balance)
 }

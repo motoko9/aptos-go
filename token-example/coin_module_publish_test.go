@@ -17,7 +17,7 @@ func TestNewUsdcAccount(t *testing.T) {
 
 	// new account
 	wallet := wallet.New()
-	wallet.Save("account_usdc")
+	wallet.SaveToKeygenFile("account_usdc")
 	address := wallet.Address()
 	fmt.Printf("address: %s\n", address)
 

@@ -8,6 +8,7 @@ import (
 	"github.com/motoko9/aptos-go/examples"
 	"github.com/motoko9/aptos-go/rpc"
 	"github.com/motoko9/aptos-go/rpcmodule"
+	"github.com/motoko9/aptos-go/wallet"
 	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
@@ -20,7 +21,7 @@ var to string
 func init() {
 	client = aptos.New(rpc.DevNet_RPC)
 	priv = examples.PrivateKey
-	to = examples.AlicePrivateKey.PublicKey().Address()
+	to = wallet.PublicKey2Address(examples.AlicePrivateKey.PublicKey())
 }
 
 func Test_Transfer_Aptos(t *testing.T) {
@@ -29,7 +30,7 @@ func Test_Transfer_Aptos(t *testing.T) {
 	// account
 	privFrom := priv
 	pubKFrom := privFrom.PublicKey()
-	addressFrom := pubKFrom.Address()
+	addressFrom := wallet.PublicKey2Address(pubKFrom)
 	fmt.Printf("from address: %s\n", addressFrom)
 
 	// latest ledger
@@ -84,7 +85,7 @@ func Test_Transfer_Aptos(t *testing.T) {
 func Test_CreateSigningMessage(t *testing.T) {
 	privFrom := priv
 	pubKFrom := privFrom.PublicKey()
-	addressFrom := pubKFrom.Address()
+	addressFrom := wallet.PublicKey2Address(pubKFrom)
 	accountFrom, e1 := client.Account(context.Background(), addressFrom, 0)
 	assert.Equal(t, nil, e1)
 

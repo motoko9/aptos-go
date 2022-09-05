@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/motoko9/aptos-go/examples"
 	"github.com/motoko9/aptos-go/rpcmodule"
+	"github.com/motoko9/aptos-go/wallet"
 	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
@@ -17,7 +18,7 @@ func Test_ReadFromResource(t *testing.T) {
 
 	// user account
 	userPriv := examples.BobPrivateKey
-	userAddr := userPriv.PublicKey().Address()
+	userAddr := wallet.PublicKey2Address(userPriv.PublicKey())
 	fmt.Printf("user address: %s\n", userAddr)
 
 	// todo
@@ -35,7 +36,7 @@ func Test_ReadFromModuleMethod(t *testing.T) {
 
 	// user account
 	userPriv := examples.BobPrivateKey
-	userAddr := userPriv.PublicKey().Address()
+	userAddr := wallet.PublicKey2Address(userPriv.PublicKey())
 	fmt.Printf("user address: %s\n", userAddr)
 
 	userAcc, err := client.Account(ctx, userAddr, 0)

@@ -2,11 +2,9 @@ package wallet
 
 import (
 	"encoding/hex"
-	"encoding/json"
 	"fmt"
 	"github.com/motoko9/aptos-go/crypto"
 	"golang.org/x/crypto/sha3"
-	"io/ioutil"
 )
 
 type Wallet struct {
@@ -43,25 +41,16 @@ func NewFromKeygenFile(file string) (*Wallet, error) {
 	}, nil
 }
 
+func (a *Wallet) SaveToKeygenFile(file string) error {
+	return a.PrivateKey.SaveToFile(file)
+}
+
+func (a *Wallet) Key() string {
+	return a.PrivateKey.HexString()
+}
+
 func (a *Wallet) PublicKey() crypto.PublicKey {
 	return a.PrivateKey.PublicKey()
-}
-
-func (a *Wallet) Save(file string) error {
-	keyJson, _ := json.Marshal(a.PrivateKey)
-	return ioutil.WriteFile(file, keyJson, 0666)
-}
-
-func LoadFromKeygenFile(file string) (*Wallet, error) {
-	content, err := ioutil.ReadFile(file)
-	if err != nil {
-		return nil, fmt.Errorf("read file failed. err = %w", err)
-	}
-	var privateKey crypto.PrivateKey
-	if err = json.Unmarshal(content, &privateKey); err != nil {
-		return nil, err
-	}
-	return &Wallet{PrivateKey: privateKey}, nil
 }
 
 func (a *Wallet) Sign(data []byte) ([]byte, error) {

@@ -73,9 +73,6 @@ func TestMoveWrite(t *testing.T) {
 			Signature: "0x" + hex.EncodeToString(signature),
 		},
 	})
-	if err != nil {
-		panic(err)
-	}
 
 	// submit
 	txHash, aptosErr := client.SubmitTransaction(ctx, submitReq)

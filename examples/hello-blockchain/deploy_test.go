@@ -7,6 +7,7 @@ import (
 	"github.com/motoko9/aptos-go/crypto"
 	"github.com/motoko9/aptos-go/examples"
 	"github.com/motoko9/aptos-go/rpc"
+	"github.com/motoko9/aptos-go/wallet"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"testing"
@@ -20,7 +21,7 @@ var moduleAddress string
 func init() {
 	client = aptos.New(rpc.DevNet_RPC)
 	priv = examples.PrivateKey
-	moduleAddress = priv.PublicKey().Address()
+	moduleAddress = wallet.PublicKey2Address(priv.PublicKey())
 }
 
 func Test_Deploy(t *testing.T) {
@@ -28,7 +29,7 @@ func Test_Deploy(t *testing.T) {
 
 	privFrom := priv
 	pubKFrom := privFrom.PublicKey()
-	deployAddress := pubKFrom.Address()
+	deployAddress := wallet.PublicKey2Address(pubKFrom)
 	fmt.Printf("coin deploy address: %s\n", deployAddress)
 
 	// read move byte code

@@ -12,14 +12,12 @@ func Test_GenerateRandomKey(t *testing.T) {
 	assert.NoError(t, err)
 	privHexStr := hex.EncodeToString(priv)
 	pubHexStr := hex.EncodeToString(pub)
-	addr := pub.Address()
 	fmt.Printf("private key: %v \n", privHexStr)
 	fmt.Printf("public  key: %v \n", pubHexStr)
-	fmt.Printf("address  is: %v \n", addr)
 
 	k, err := NewPrivateKeyFromHexString(privHexStr)
 	assert.NoError(t, err)
-	assert.Equal(t, addr, k.PublicKey().Address())
+	assert.Equal(t, k, priv)
 }
 
 func Test_SignAndVerify(t *testing.T) {
@@ -43,7 +41,7 @@ func Test_SaveKey(t *testing.T) {
 	privHexStr := hex.EncodeToString(priv)
 	fmt.Printf("private key: %v \n", privHexStr)
 
-	err = priv.Save(file)
+	err = priv.SaveToFile(file)
 	assert.NoError(t, err)
 
 	np, err := NewPrivateKeyFromFile(file)
@@ -57,5 +55,4 @@ func Test_NewFromHexString(t *testing.T) {
 
 	fmt.Println(hex.EncodeToString(priv.Seed()))
 	fmt.Println(priv.PublicKey().String())
-	fmt.Println(priv.PublicKey().Address())
 }
