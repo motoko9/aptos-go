@@ -3,7 +3,7 @@ package fetchclient
 import (
 	"context"
 	"encoding/json"
-	"fmt"
+	"github.com/motoko9/aptos-go/rpcmodule"
 	"net/http"
 	"net/url"
 )
@@ -77,33 +77,22 @@ func (r *Request) WithContext(ctx context.Context) *Request {
 	return r
 }
 
-func (r *Request) Execute(rsp interface{}, err FetchError) {
-	httpRsp, internalErr := r.client.execute(r)
-	// handle error
-	if internalErr != nil {
-		err.SetError("internal_error", internalErr.Error())
-		return
+func (r *Request) Execute(rsp interface{}) error {
+	httpRsp, err := r.client.execute(r)
+	if err != nil {
+		return err
 	}
 
-	// http error response
-	// todo
-	// need to handle http server error and aptos server error
-	if httpRsp.StatusCode() >= 400 {
-		// aptos server error
-		if internalErr = json.Unmarshal(httpRsp.bodyBytes, err); internalErr != nil {
-			err.SetError("internal_error", internalErr.Error())
-			return
+	if httpRsp.StatusCode() != http.StatusOK {
+		var aptErr rpcmodule.AptosError
+		if err := json.Unmarshal(httpRsp.bodyBytes, &aptErr); err != nil {
+			return err
 		}
-		// http server error
-		if !err.IsError() {
-			err.SetError("web_framework_error", fmt.Sprintf("status code: %d", httpRsp.StatusCode()))
-			return
-		}
-		return
+		return aptErr
 	}
 
-	// http response
-	if internalErr = json.Unmarshal(httpRsp.bodyBytes, rsp); internalErr != nil {
-		err.SetError("internal_error", internalErr.Error())
+	if err := json.Unmarshal(httpRsp.bodyBytes, rsp); err != nil {
+		return err
 	}
+	return nil
 }
