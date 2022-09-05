@@ -53,7 +53,7 @@ func TestReadModuleAccount(t *testing.T) {
 	ctx := context.Background()
 
 	// new account
-	wallet, err := wallet.NewFromKeygenFile("account_helloworld")
+	wallet, err := wallet.LoadFromKeygenFile("account_helloworld")
 	if err != nil {
 		panic(err)
 	}

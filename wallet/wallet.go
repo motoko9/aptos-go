@@ -52,6 +52,18 @@ func (a *Wallet) Save(file string) error {
 	return ioutil.WriteFile(file, keyJson, 0666)
 }
 
+func LoadFromKeygenFile(file string) (*Wallet, error) {
+	content, err := ioutil.ReadFile(file)
+	if err != nil {
+		return nil, fmt.Errorf("read file failed. err = %w", err)
+	}
+	var privateKey crypto.PrivateKey
+	if err = json.Unmarshal(content, &privateKey); err != nil {
+		return nil, err
+	}
+	return &Wallet{PrivateKey: privateKey}, nil
+}
+
 func (a *Wallet) Sign(data []byte) ([]byte, error) {
 	return a.PrivateKey.Sign(data)
 }
