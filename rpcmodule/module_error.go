@@ -77,6 +77,10 @@ type AptosError struct {
 	VmErrorCode int64  `json:"vm_error_code"`
 }
 
+func (ae AptosError) Error() string {
+	return ae.Message
+}
+
 func (ae *AptosError) SetError(code string, message string) {
 	ae.ErrorCode = code
 	ae.Message = message
