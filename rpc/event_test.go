@@ -7,8 +7,11 @@ import (
 	"testing"
 )
 
-func TestClient_EventsByKey(t *testing.T) {
-	events, err := client.EventsByKey(context.Background(), "0x0200000000000000697c173eeb917c95a382b60f546eb73a4c6a2a7b2d79e6c56c87104f9c04345f")
+func TestClient_EventsByHandle(t *testing.T) {
+	events, err := client.EventsByHandle(context.Background(),
+		"0x74f3bbe39c7e2793a2e5445ee0336c9ac3191534762b41dcfc1054ad077ccc7c",
+		"0x1::coin::CoinStore<0x1::aptos_coin::AptosCoin>",
+		"deposit_events")
 	if err != nil {
 		panic(err)
 	}
@@ -16,11 +19,10 @@ func TestClient_EventsByKey(t *testing.T) {
 	fmt.Printf("events: %s\n", string(eventsJson))
 }
 
-func TestClient_EventsByHandle(t *testing.T) {
-	events, err := client.EventsByHandle(context.Background(),
-		"0x697c173eeb917c95a382b60f546eb73a4c6a2a7b2d79e6c56c87104f9c04345f",
-		"0x1::coin::CoinStore<0x1::aptos_coin::AptosCoin>",
-		"deposit_events")
+func TestClient_EventsByCreationNumber(t *testing.T) {
+	events, err := client.EventsByCreationNumber(context.Background(),
+		"0x74f3bbe39c7e2793a2e5445ee0336c9ac3191534762b41dcfc1054ad077ccc7c",
+		2)
 	if err != nil {
 		panic(err)
 	}

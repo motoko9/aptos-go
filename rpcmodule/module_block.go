@@ -18,4 +18,5 @@ type Ledger struct {
 	OldestBlockHeight   uint64 `json:"oldest_block_height,string"`
 	LedgerTimestamp     uint64 `json:"ledger_timestamp,string"`
 	NodeRole            string `json:"node_role"`
+	GitHash             string `json:"git_hash"`
 }

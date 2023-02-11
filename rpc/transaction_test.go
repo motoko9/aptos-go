@@ -7,8 +7,8 @@ import (
 	"testing"
 )
 
-func Test_Transaction(t *testing.T) {
-	transaction, err := client.TransactionByHash(context.Background(), "0x8da4d51ea5d07edd7059b9a6665c46c2050ef0d31d70b5be7f5884349fb5ca03")
+func Test_Transactions(t *testing.T) {
+	transaction, err := client.Transactions(context.Background(), 425348794, 5)
 	if err != nil {
 		panic(err)
 	}
@@ -17,7 +17,7 @@ func Test_Transaction(t *testing.T) {
 }
 
 func Test_TransactionByHash(t *testing.T) {
-	transaction, err := client.TransactionByHash(context.Background(), "0xa78f68c3479e80e0bb4823e4d19956a311a2213c2afd39181ffe75be01d004d2")
+	transaction, err := client.TransactionByHash(context.Background(), "0xe77db8c8612ffc9c7ac779817c674dcc95f1dbf9ccd830aa4da51de2511ef725")
 	if err != nil {
 		panic(err)
 	}
@@ -26,7 +26,16 @@ func Test_TransactionByHash(t *testing.T) {
 }
 
 func Test_TransactionByVersion(t *testing.T) {
-	transaction, err := client.TransactionByVersion(context.Background(), 1000)
+	transaction, err := client.TransactionByVersion(context.Background(), 425348797)
+	if err != nil {
+		panic(err)
+	}
+	transactionJson, _ := json.MarshalIndent(transaction, "", "    ")
+	fmt.Printf("transaction: %s\n", string(transactionJson))
+}
+
+func Test_TransactionsByAccount(t *testing.T) {
+	transaction, err := client.TransactionsByAccount(context.Background(), "0x74f3bbe39c7e2793a2e5445ee0336c9ac3191534762b41dcfc1054ad077ccc7c", 0, 5)
 	if err != nil {
 		panic(err)
 	}

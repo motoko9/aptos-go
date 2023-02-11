@@ -7,12 +7,20 @@ import (
 	"testing"
 )
 
-func Test_Block(t *testing.T) {
-	block, err := client.BlockByHeight(context.Background(), 8655089, true)
+func Test_BlockByHeight(t *testing.T) {
+	block, err := client.BlockByHeight(context.Background(), 57770440, true)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf("block: \n")
+	blockJson, _ := json.MarshalIndent(block, "", "    ")
+	fmt.Printf(string(blockJson))
+}
+
+func Test_BlockByVersion(t *testing.T) {
+	block, err := client.BlockByVersion(context.Background(), 425348794, true)
+	if err != nil {
+		panic(err)
+	}
 	blockJson, _ := json.MarshalIndent(block, "", "    ")
 	fmt.Printf(string(blockJson))
 }

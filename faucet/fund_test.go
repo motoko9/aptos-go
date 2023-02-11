@@ -15,10 +15,10 @@ import (
 func Test_Faucet(t *testing.T) {
 	ctx := context.Background()
 
-	wallet := wallet.New()
-	address := wallet.Address()
-	fmt.Printf("private is: %v\n", wallet.Key())
-	fmt.Printf("address is: %v\n", address)
+	//wallet := wallet.New()
+	address := "0x30764c46f4a43cda25680bc646f9c2e31bf420f8fe5f3570b389b48f9322ee07"
+	//fmt.Printf("private is: %v\n", wallet.Key())
+	//fmt.Printf("address is: %v\n", address)
 
 	// fund (max: 20000)
 	amount := uint64(20000)

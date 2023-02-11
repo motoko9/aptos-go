@@ -289,3 +289,36 @@ func SubmitTransactionReq(encodeSubmissionReq *EncodeSubmissionRequest, signatur
 type GasEstimate struct {
 	GasEstimate uint64 `json:"gas_estimate"`
 }
+
+type PendingTransactionRsp struct {
+	Hash                    string             `json:"hash"`
+	Sender                  string             `json:"sender"`
+	SequenceNumber          uint64             `json:"sequence_number,string"`
+	MaxGasAmount            uint64             `json:"max_gas_amount,string"`
+	GasUnitPrice            uint64             `json:"gas_unit_price,string"`
+	ExpirationTimestampSecs uint64             `json:"expiration_timestamp_secs,string"`
+	Payload                 TransactionPayload `json:"payload"`
+	Signature               Signature          `json:"signature,omitempty"`
+}
+
+type UserTransactionRsp struct {
+	Version                 uint64             `json:"version,string"`
+	Hash                    string             `json:"hash"`
+	StateChangeHash         string             `json:"state_change_hash"`
+	EventRootHash           string             `json:"event_root_hash"`
+	StateCheckpointHash     string             `json:"state_checkpoint_hash"`
+	GasUsed                 uint64             `json:"gas_used,string"`
+	Success                 bool               `json:"success"`
+	VmStatus                string             `json:"vm_status"`
+	AccumulatorRootHash     string             `json:"accumulator_root_hash"`
+	Changes                 []WriteSetChange   `json:"changes"`
+	Sender                  string             `json:"sender"`
+	SequenceNumber          uint64             `json:"sequence_number,string"`
+	MaxGasAmount            uint64             `json:"max_gas_amount,string"`
+	GasUnitPrice            uint64             `json:"gas_unit_price,string"`
+	ExpirationTimestampSecs uint64             `json:"expiration_timestamp_secs,string"`
+	Payload                 TransactionPayload `json:"payload"`
+	Signature               Signature          `json:"signature,omitempty"`
+	Events                  []Event            `json:"events"`
+	Timestamp               uint64             `json:"timestamp,string"`
+}

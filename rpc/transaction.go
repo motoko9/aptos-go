@@ -7,7 +7,7 @@ import (
 	"github.com/motoko9/aptos-go/rpcmodule"
 )
 
-func (cl *Client) Transactions(ctx context.Context, start, limit int64) (*rpcmodule.Transactions, *rpcmodule.AptosError) {
+func (cl *Client) Transactions(ctx context.Context, start int64, limit int16) (*rpcmodule.Transactions, *rpcmodule.AptosError) {
 	var params map[string]string
 	if start > 0 && limit > 0 {
 		params = make(map[string]string)
@@ -46,6 +46,23 @@ func (cl *Client) TransactionByVersion(ctx context.Context, version uint64) (*rp
 	return &transaction, nil
 }
 
+func (cl *Client) TransactionsByAccount(ctx context.Context, address string, start int64, limit int16) (*rpcmodule.Transactions, *rpcmodule.AptosError) {
+	var params map[string]string
+	if start > 0 && limit > 0 {
+		params = make(map[string]string)
+		params["start"] = fmt.Sprintf("%d", start)
+		params["limit"] = fmt.Sprintf("%d", limit)
+	}
+	url := fmt.Sprintf("accounts/%s/transactions", address)
+	var transactions rpcmodule.Transactions
+	var aptosError rpcmodule.AptosError
+	cl.fetchClient.Get(url).SetQueryParams(params).Execute(&transactions, &aptosError)
+	if aptosError.IsError() {
+		return nil, &aptosError
+	}
+	return &transactions, nil
+}
+
 func (cl *Client) EncodeSubmission(ctx context.Context, tx *rpcmodule.EncodeSubmissionRequest) ([]byte, *rpcmodule.AptosError) {
 	url := fmt.Sprintf("/transactions/encode_submission")
 	var raw string
@@ -64,7 +81,18 @@ func (cl *Client) EncodeSubmission(ctx context.Context, tx *rpcmodule.EncodeSubm
 
 func (cl *Client) SubmitTransaction(ctx context.Context, tx *rpcmodule.SubmitTransactionRequest) (string, *rpcmodule.AptosError) {
 	url := fmt.Sprintf("/transactions")
-	var transaction rpcmodule.TransactionPendingTransaction
+	var transaction rpcmodule.PendingTransactionRsp
+	var aptosError rpcmodule.AptosError
+	cl.fetchClient.Post(url).SetJSONBody(tx).Execute(&transaction, &aptosError)
+	if aptosError.IsError() {
+		return "", &aptosError
+	}
+	return transaction.Hash, nil
+}
+
+func (cl *Client) SimulateTransaction(ctx context.Context, tx *rpcmodule.SubmitTransactionRequest) (string, *rpcmodule.AptosError) {
+	url := fmt.Sprintf("/transactions/simulate")
+	var transaction rpcmodule.UserTransactionRsp
 	var aptosError rpcmodule.AptosError
 	cl.fetchClient.Post(url).SetJSONBody(tx).Execute(&transaction, &aptosError)
 	if aptosError.IsError() {
