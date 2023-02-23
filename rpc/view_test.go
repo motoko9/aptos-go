@@ -9,7 +9,7 @@ import (
 
 func Test_View(t *testing.T) {
 	viewReq := &rpcmodule.ViewRequest{
-		Function:      "0x1::token::balance",
+		Function:      "0x1::coin::balance",
 		TypeArguments: []string{"0x1::aptos_coin::AptosCoin"},
 		Arguments:     []interface{}{"0x74f3bbe39c7e2793a2e5445ee0336c9ac3191534762b41dcfc1054ad077ccc7c"},
 	}

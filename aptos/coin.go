@@ -38,7 +38,7 @@ func (cl *Client) CoinInfo(ctx context.Context, coin string, version uint64) (*a
 	if err != nil {
 		return nil, err
 	}
-	coinInfoResourceType := fmt.Sprintf("0x1::token::CoinInfo<%s>", coinType)
+	coinInfoResourceType := fmt.Sprintf("0x1::coin::CoinInfo<%s>", coinType)
 	accountResource, err := cl.AccountResourceByAddressAndType(ctx, coinAddress, coinInfoResourceType, version)
 	if err != nil {
 		return nil, err

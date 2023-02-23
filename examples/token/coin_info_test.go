@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/motoko9/aptos-go/aptos"
 	"github.com/motoko9/aptos-go/rpc"
+	"github.com/motoko9/aptos-go/rpcmodule"
 	"github.com/motoko9/aptos-go/wallet"
 	"testing"
 )
@@ -16,7 +17,7 @@ func TestCoinInfo(t *testing.T) {
 		panic(err)
 	}
 	coinAddress := coinWallet.Address()
-	fmt.Printf("token address: %s\n", coinAddress)
+	fmt.Printf("coin address: %s\n", coinAddress)
 
 	// new rpc
 	client := aptos.New(rpc.TestNet_RPC)
@@ -28,4 +29,58 @@ func TestCoinInfo(t *testing.T) {
 	}
 
 	fmt.Printf("name: %s, symbol: %s, decimals: %d\n", coinInfo.Name, coinInfo.Symbol, coinInfo.Decimals)
+}
+
+func TestCoinInfo1(t *testing.T) {
+	// token account
+	coinWallet, err := wallet.NewFromKeygenFile("account_usdt")
+	if err != nil {
+		panic(err)
+	}
+	coinAddress := coinWallet.Address()
+	fmt.Printf("coin address: %s\n", coinAddress)
+
+	// recipient account
+	userWallet, err := wallet.NewFromKeygenFile("account_mint")
+	if err != nil {
+		panic(err)
+	}
+	userAddress := userWallet.Address()
+	fmt.Printf("recipient address: %s\n", userAddress)
+
+	// new rpc
+	client := aptos.New(rpc.TestNet_RPC)
+
+	//
+	raw, aptosErr := client.View(context.Background(), &rpcmodule.ViewRequest{
+		Function:      "0x1::coin::balance",
+		TypeArguments: []string{aptos.CoinType[aptos.USDTCoin]},
+		Arguments:     []interface{}{userAddress},
+	})
+	if aptosErr != nil {
+		panic(aptosErr)
+	}
+	fmt.Printf("balance: %s\n", raw)
+
+	//
+	raw, aptosErr = client.View(context.Background(), &rpcmodule.ViewRequest{
+		Function:      "0x1::coin::name",
+		TypeArguments: []string{aptos.CoinType[aptos.USDTCoin]},
+		Arguments:     []interface{}{},
+	})
+	if aptosErr != nil {
+		panic(aptosErr)
+	}
+	fmt.Printf("name: %s\n", raw)
+
+	//
+	raw, aptosErr = client.View(context.Background(), &rpcmodule.ViewRequest{
+		Function:      "0x1::coin::symbol",
+		TypeArguments: []string{aptos.CoinType[aptos.USDTCoin]},
+		Arguments:     []interface{}{},
+	})
+	if aptosErr != nil {
+		panic(aptosErr)
+	}
+	fmt.Printf("symbol: %s\n", raw)
 }
