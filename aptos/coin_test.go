@@ -3,11 +3,12 @@ package aptos
 import (
 	"context"
 	"fmt"
+	"github.com/motoko9/aptos-go/rpc"
 	"testing"
 )
 
 func TestClient_CoinInfo(t *testing.T) {
-	client := New(DevNet_RPC)
+	client := New(rpc.TestNet_RPC)
 	{
 		aptosCoinInfo, err := client.CoinInfo(context.Background(), AptosCoin, 0)
 		if err != nil {

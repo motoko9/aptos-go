@@ -1,7 +1,5 @@
 package rpcmodule
 
-import "strings"
-
 type Creator func() interface{}
 
 // TransactionCreators
@@ -83,11 +81,11 @@ func RegisterResourceObjectCreator(t string, creator Creator) {
 
 func createResourceObject(t string) interface{} {
 	// remove type
-	index := strings.IndexByte(t, '<')
-	if index != -1 {
-		t = t[0:index]
+	m, _, err := ExtractFromResource(t)
+	if err != nil {
+		return nil
 	}
-	creator, ok := ResourceObjectCreators[t]
+	creator, ok := ResourceObjectCreators[m]
 	if !ok {
 		return nil
 	}

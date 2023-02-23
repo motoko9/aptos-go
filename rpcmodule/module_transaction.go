@@ -244,8 +244,8 @@ func EncodeSubmissionReq(sender string, sequence uint64, payload *TransactionPay
 	req := EncodeSubmissionRequest{
 		Sender:                  sender,
 		SequenceNumber:          sequence,
-		MaxGasAmount:            uint64(2000),
-		GasUnitPrice:            uint64(1),
+		MaxGasAmount:            uint64(8000),
+		GasUnitPrice:            uint64(100),
 		ExpirationTimestampSecs: uint64(time.Now().Unix() + 600), // now + 10 minutes
 		Payload:                 payload,
 	}

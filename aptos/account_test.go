@@ -4,11 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/motoko9/aptos-go/rpc"
 	"testing"
 )
 
 func TestClient_AccountBalance(t *testing.T) {
-	client := New(DevNet_RPC)
+	client := New(rpc.TestNet_RPC)
 	ledger, err := client.Ledger(context.Background())
 	if err != nil {
 		panic(err)
@@ -49,7 +50,7 @@ func TestClient_AccountBalance(t *testing.T) {
 }
 
 func TestClient_AccountResources_Latest(t *testing.T) {
-	client := New(DevNet_RPC)
+	client := New(rpc.TestNet_RPC)
 	accountResources, err := client.AccountResources(context.Background(),
 		"0x697c173eeb917c95a382b60f546eb73a4c6a2a7b2d79e6c56c87104f9c04345f", 0)
 	if err != nil {
@@ -59,3 +60,4 @@ func TestClient_AccountResources_Latest(t *testing.T) {
 	accountResourcesJson, _ := json.MarshalIndent(accountResources, "", "    ")
 	fmt.Printf(string(accountResourcesJson))
 }
+

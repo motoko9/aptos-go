@@ -21,5 +21,5 @@ $ go get github.com/motoko9/aptos-go
 ### coin module example
 * [Coin Module example on Aptos case 1](token-example/README.md)
 * [Coin Module with native example](token-in-native-example/README.md)
-* [Coin Module example on Aptos case 2](examples/coin/README.md)
+* [Coin Module example on Aptos case 2](examples/token/README.md)
 
