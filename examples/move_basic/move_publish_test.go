@@ -19,7 +19,7 @@ func TestNewModuleAccount(t *testing.T) {
 	fmt.Printf("move address: %s\n", moveAddress)
 
 	// new rpc
-	client := aptos.New(rpc.TestNet_RPC)
+	client := aptos.New(rpc.TestNet_RPC, false)
 
 	//
 	faultWallet, err := wallet.NewFromKeygenFile("./../account_fault")
@@ -77,7 +77,7 @@ func TestReadModuleAccount(t *testing.T) {
 	fmt.Printf("private key: %s\n", wallet.PrivateKey.String())
 
 	// new rpc
-	client := aptos.New(rpc.TestNet_RPC)
+	client := aptos.New(rpc.TestNet_RPC, false)
 
 	// latest ledger
 	ledger, aptosErr := client.Ledger(context.Background())
@@ -104,7 +104,7 @@ func TestMovePublish(t *testing.T) {
 	fmt.Printf("account move publish address: %s\n", wallet.Address())
 
 	// new rpc
-	client := aptos.New(rpc.TestNet_RPC)
+	client := aptos.New(rpc.TestNet_RPC, false)
 
 	// read move byte code
 	content, err := ioutil.ReadFile("./example.mv")

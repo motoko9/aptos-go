@@ -29,7 +29,7 @@ func TestNewMintAccount(t *testing.T) {
 	fmt.Printf("fault private key: %s\n", faultWallet.PrivateKey.String())
 
 	// new rpc
-	client := aptos.New(rpc.TestNet_RPC)
+	client := aptos.New(rpc.TestNet_RPC, false)
 
 	// create account on aptos
 	txHash, aptosErr := client.CreateAccount(context.Background(), faultAddress, mintAddress, faultWallet)
@@ -74,7 +74,7 @@ func TestReadMintAccount(t *testing.T) {
 	fmt.Printf("private key: %s\n", wallet.PrivateKey.String())
 
 	// new rpc
-	client := aptos.New(rpc.TestNet_RPC)
+	client := aptos.New(rpc.TestNet_RPC, false)
 
 	// latest ledger
 	ledger, aptosErr := client.Ledger(context.Background())
@@ -115,7 +115,7 @@ func TestMint(t *testing.T) {
 	fmt.Printf("recipient address: %s\n", address)
 
 	// new rpc
-	client := aptos.New(rpc.TestNet_RPC)
+	client := aptos.New(rpc.TestNet_RPC, false)
 
 	// token account
 	coinAccount, aptosErr := client.Account(context.Background(), coinAddress, 0)

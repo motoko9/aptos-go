@@ -19,7 +19,7 @@ func TestNewUsdtAccount(t *testing.T) {
 	fmt.Printf("new usdt address: %s\n", usdtAddress)
 
 	// new rpc
-	client := aptos.New(rpc.TestNet_RPC)
+	client := aptos.New(rpc.TestNet_RPC, false)
 
 	//
 	faultWallet, err := wallet.NewFromKeygenFile("./../account_fault")
@@ -75,7 +75,7 @@ func TestReadUsdtAccount(t *testing.T) {
 	fmt.Printf("private key: %s\n", wallet.PrivateKey.String())
 
 	// new rpc
-	client := aptos.New(rpc.TestNet_RPC)
+	client := aptos.New(rpc.TestNet_RPC, false)
 
 	// latest ledger
 	ledger, aptosErr := client.Ledger(context.Background())
@@ -101,7 +101,7 @@ func TestModulePublish(t *testing.T) {
 	fmt.Printf("usdt token publish address: %s\n", wallet.Address())
 
 	// new rpc
-	client := aptos.New(rpc.TestNet_RPC)
+	client := aptos.New(rpc.TestNet_RPC, false)
 
 	// read move byte code
 	content, err := ioutil.ReadFile("./usdt.mv")

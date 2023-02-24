@@ -29,7 +29,7 @@ func TestMoveWrite(t *testing.T) {
 	fmt.Printf("user address: %s\n", userAddress)
 
 	// new rpc
-	client := aptos.New(rpc.TestNet_RPC)
+	client := aptos.New(rpc.TestNet_RPC, false)
 
 	// from account
 	userAccount, aptosErr := client.Account(context.Background(), userAddress, 0)

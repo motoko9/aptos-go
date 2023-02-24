@@ -12,17 +12,12 @@ const (
 	AptosCoin = "APT"
 	BTCCoin   = "BTC"
 	USDTCoin  = "USDT"
+	ETHCoin   = "ETH"
+	USDCCoin  = "USDC"
 	MOONCoin  = "MOON"
 )
 
-// mainnet is diffierent
-// todo
-var CoinType = map[string]string{
-	"APT":  "0x1::aptos_coin::AptosCoin",
-	"BTC":  "0x43417434fd869edee76cca2a4d2301e528a1551b1d719b75c350c3c97d15b8b9::coins::BTC",
-	"USDT": "0xbeca0b2fd5f778302e405182e5c250e1f6648492d53e48f5b29446f61dbcc848::usdt::USDT",
-	"MOON": "0xbb04c2079bc5611345689582eabab626732411b909045f8326d2b4980eac9b07::moon_coin::MoonCoin",
-}
+var CoinType = map[string]string{}
 
 func (cl *Client) CoinInfo(ctx context.Context, coin string, version uint64) (*aptosmodule.CoinInfo, *rpcmodule.AptosError) {
 	coinType, ok := CoinType[coin]

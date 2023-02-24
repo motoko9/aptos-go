@@ -22,7 +22,7 @@ func TestCoinInitialize(t *testing.T) {
 	fmt.Printf("usdt address: %s\n", usdtAddress)
 
 	// new rpc
-	client := aptos.New(rpc.TestNet_RPC)
+	client := aptos.New(rpc.TestNet_RPC, false)
 
 	// from account
 	usdtAccount, aptosErr := client.Account(ctx, usdtAddress, 0)

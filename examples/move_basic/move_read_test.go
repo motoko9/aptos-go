@@ -20,7 +20,7 @@ func TestNewUserAccount(t *testing.T) {
 	fmt.Printf("user address: %s\n", userAddress)
 
 	// new rpc
-	client := aptos.New(rpc.TestNet_RPC)
+	client := aptos.New(rpc.TestNet_RPC, false)
 
 	//
 	faultWallet, err := wallet.NewFromKeygenFile("./../account_fault")
@@ -81,7 +81,7 @@ func TestReadUserAccount(t *testing.T) {
 	time.Sleep(time.Second * 5)
 
 	// new rpc
-	client := aptos.New(rpc.TestNet_RPC)
+	client := aptos.New(rpc.TestNet_RPC, false)
 
 	// latest ledger
 	ledger, aptosErr := client.Ledger(context.Background())
@@ -115,7 +115,7 @@ func TestMoveRead(t *testing.T) {
 	fmt.Printf("user address: %s\n", address)
 
 	// new rpc
-	client := rpc.New(rpc.TestNet_RPC)
+	client := aptos.New(rpc.TestNet_RPC, false)
 
 	// todo,
 	// can not ready resource type Message::MessageHolder
@@ -149,7 +149,7 @@ func TestMoveView(t *testing.T) {
 	fmt.Printf("user address: %s\n", userAddress)
 
 	// new rpc
-	client := rpc.New(rpc.TestNet_RPC)
+	client := aptos.New(rpc.TestNet_RPC, false)
 
 	function := fmt.Sprintf("%s::helloworld::get_message", moduleAddress)
 	raw, aptosErr := client.View(context.Background(), &rpcmodule.ViewRequest{

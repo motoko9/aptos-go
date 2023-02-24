@@ -18,7 +18,7 @@ func TestNewReceiptAccount(t *testing.T) {
 	fmt.Printf("receipt address: %s\n", receiptAddress)
 
 	// new rpc
-	client := aptos.New(rpc.TestNet_RPC)
+	client := aptos.New(rpc.TestNet_RPC, false)
 
 	//
 	faultWallet, err := wallet.NewFromKeygenFile("./../account_fault")
@@ -81,7 +81,7 @@ func TestReadToAccount(t *testing.T) {
 	fmt.Printf("address: %s\n", address)
 
 	// new rpc
-	client := aptos.New(rpc.TestNet_RPC)
+	client := aptos.New(rpc.TestNet_RPC, false)
 
 	// latest ledger
 	ledger, aptosErr := client.Ledger(context.Background())
@@ -132,7 +132,7 @@ func TestTransfer(t *testing.T) {
 	fmt.Printf("to address: %s\n", toAddress)
 
 	// new rpc
-	client := aptos.New(rpc.TestNet_RPC)
+	client := aptos.New(rpc.TestNet_RPC, false)
 	transferAmount := uint64(50000000)
 	txHash, aptosErr := client.TransferCoin(ctx, fromAddress, aptos.USDTCoin, transferAmount, toAddress, fromWallet)
 	if aptosErr != nil {

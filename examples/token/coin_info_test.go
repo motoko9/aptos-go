@@ -20,7 +20,7 @@ func TestCoinInfo(t *testing.T) {
 	fmt.Printf("coin address: %s\n", coinAddress)
 
 	// new rpc
-	client := aptos.New(rpc.TestNet_RPC)
+	client := aptos.New(rpc.TestNet_RPC, false)
 
 	//
 	coinInfo, aptosErr := client.CoinInfo(context.Background(), aptos.USDTCoin, 0)
@@ -49,7 +49,7 @@ func TestCoinInfo1(t *testing.T) {
 	fmt.Printf("recipient address: %s\n", userAddress)
 
 	// new rpc
-	client := aptos.New(rpc.TestNet_RPC)
+	client := aptos.New(rpc.TestNet_RPC, false)
 
 	//
 	raw, aptosErr := client.View(context.Background(), &rpcmodule.ViewRequest{

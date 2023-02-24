@@ -18,7 +18,7 @@ func TestNewExampleAccount(t *testing.T) {
 	fmt.Printf("example address: %s\n", exampleAddress)
 
 	// new rpc
-	client := aptos.New(rpc.TestNet_RPC)
+	client := aptos.New(rpc.TestNet_RPC, false)
 
 	//
 	faultWallet, err := wallet.NewFromKeygenFile("./../account_fault")
@@ -74,7 +74,7 @@ func TestReadExampleAccount(t *testing.T) {
 	fmt.Printf("example address: %s\n", exampleAddress)
 
 	// new rpc
-	client := aptos.New(rpc.TestNet_RPC)
+	client := aptos.New(rpc.TestNet_RPC, false)
 
 	// latest ledger
 	ledger, aptosErr := client.Ledger(context.Background())

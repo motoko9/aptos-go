@@ -8,7 +8,7 @@ import (
 )
 
 func TestClient_CoinInfo(t *testing.T) {
-	client := New(rpc.TestNet_RPC)
+	client := New(rpc.TestNet_RPC, false)
 	{
 		aptosCoinInfo, err := client.CoinInfo(context.Background(), AptosCoin, 0)
 		if err != nil {
