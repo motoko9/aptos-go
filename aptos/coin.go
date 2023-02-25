@@ -19,11 +19,26 @@ const (
 
 var CoinType = map[string]string{}
 
-func (cl *Client) CoinInfo(ctx context.Context, coin string, version uint64) (*aptosmodule.CoinInfo, *rpcmodule.AptosError) {
+func TryParseCoinType(coin string) string {
+	if rpcmodule.IsCoinType(coin) {
+		return coin
+	}
 	coinType, ok := CoinType[coin]
 	if !ok {
+		return ""
+	}
+	return coinType
+}
+
+func (cl *Client) CustomizeCoin(name string, t string) {
+	CoinType[name] = t
+}
+
+func (cl *Client) CoinInfo(ctx context.Context, coin string, version uint64) (*aptosmodule.CoinInfo, *rpcmodule.AptosError) {
+	coinType := TryParseCoinType(coin)
+	if coinType == "" {
 		return nil, &rpcmodule.AptosError{
-			Message:     fmt.Sprintf("token %s resouce is not supported", coin),
+			Message:     fmt.Sprintf("coin %s resouce is not supported", coin),
 			ErrorCode:   "400",
 			VmErrorCode: 0,
 		}
@@ -97,10 +112,10 @@ func (cl *Client) MintCoin(ctx context.Context, addr string, coinType string, re
 
 func RegisterRecipientPayload(coin string) (*rpcmodule.TransactionPayload, *rpcmodule.AptosError) {
 	// transfer
-	coin, ok := CoinType[coin]
-	if !ok {
+	coinType := TryParseCoinType(coin)
+	if coinType == "" {
 		return nil, &rpcmodule.AptosError{
-			Message:     fmt.Sprintf("token %s resouce is not supported", coin),
+			Message:     fmt.Sprintf("coin %s resouce is not supported", coin),
 			ErrorCode:   "400",
 			VmErrorCode: 0,
 		}
@@ -133,10 +148,10 @@ func (cl *Client) RegisterRecipient(ctx context.Context, addr string, coin strin
 
 func TransferCoinPayload(coin string, amount uint64, receipt string) (*rpcmodule.TransactionPayload, *rpcmodule.AptosError) {
 	// transfer
-	coin, ok := CoinType[coin]
-	if !ok {
+	coinType := TryParseCoinType(coin)
+	if coinType == "" {
 		return nil, &rpcmodule.AptosError{
-			Message:     fmt.Sprintf("token %s resouce is invalid", coin),
+			Message:     fmt.Sprintf("coin %s resouce is not supported", coin),
 			ErrorCode:   "400",
 			VmErrorCode: 0,
 		}

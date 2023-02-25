@@ -5,6 +5,14 @@ import (
 	"strings"
 )
 
+func IsCoinType(t string) bool {
+	_, err := ExtractAddressFromType(t)
+	if err != nil {
+		return false
+	}
+	return true
+}
+
 func ExtractAddressFromType(t string) (string, *AptosError) {
 	items := strings.Split(t, "::")
 	if len(items) != 3 {
