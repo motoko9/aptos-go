@@ -39,7 +39,7 @@ func TestNewUsdtAccount(t *testing.T) {
 	fmt.Printf("create ussdt account transacion: %s\n", txHash)
 
 	// fund
-	txHash, aptosErr = client.TransferCoin(context.Background(), faultAddress, aptos.AptosCoin, 100000000, usdtAddress, faultWallet)
+	txHash, aptosErr = client.TransferCoin(context.Background(), faultAddress, aptos.CoinAlias("APT", "aptos"), 100000000, usdtAddress, faultWallet)
 	if aptosErr != nil {
 		panic(err)
 	}
@@ -48,7 +48,6 @@ func TestNewUsdtAccount(t *testing.T) {
 	//
 	time.Sleep(time.Second * 5)
 
-
 	// latest ledger
 	ledger, aptosErr := client.Ledger(context.Background())
 	if aptosErr != nil {
@@ -56,7 +55,7 @@ func TestNewUsdtAccount(t *testing.T) {
 	}
 
 	// check account
-	balance, aptosErr := client.AccountBalance(context.Background(), usdtAddress, aptos.AptosCoin, ledger.LedgerVersion)
+	balance, aptosErr := client.AccountBalance(context.Background(), usdtAddress, aptos.CoinAlias("APT", "aptos"), ledger.LedgerVersion)
 	if aptosErr != nil {
 		panic(aptosErr)
 	}
@@ -84,7 +83,7 @@ func TestReadUsdtAccount(t *testing.T) {
 	}
 
 	// check account
-	balance, aptosErr := client.AccountBalance(context.Background(), address, aptos.AptosCoin, ledger.LedgerVersion)
+	balance, aptosErr := client.AccountBalance(context.Background(), address, aptos.CoinAlias("APT", "aptos"), ledger.LedgerVersion)
 	if aptosErr != nil {
 		panic(aptosErr)
 	}

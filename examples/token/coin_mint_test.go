@@ -39,7 +39,7 @@ func TestNewMintAccount(t *testing.T) {
 	fmt.Printf("create mint account transacion: %s\n", txHash)
 
 	// fund
-	txHash, aptosErr = client.TransferCoin(context.Background(), faultAddress, aptos.AptosCoin, 100000000, mintAddress, faultWallet)
+	txHash, aptosErr = client.TransferCoin(context.Background(), faultAddress, aptos.CoinAlias("APT", "aptos"), 100000000, mintAddress, faultWallet)
 	if aptosErr != nil {
 		panic(err)
 	}
@@ -55,7 +55,7 @@ func TestNewMintAccount(t *testing.T) {
 	}
 
 	// check account
-	balance, aptosErr := client.AccountBalance(context.Background(), mintAddress, aptos.AptosCoin, ledger.LedgerVersion)
+	balance, aptosErr := client.AccountBalance(context.Background(), mintAddress, aptos.CoinAlias("APT", "aptos"), ledger.LedgerVersion)
 	if aptosErr != nil {
 		panic(aptosErr)
 	}
@@ -83,14 +83,14 @@ func TestReadMintAccount(t *testing.T) {
 	}
 
 	// check account
-	balance, aptosErr := client.AccountBalance(context.Background(), address, aptos.AptosCoin, ledger.LedgerVersion)
+	balance, aptosErr := client.AccountBalance(context.Background(), address, aptos.CoinAlias("APT", "aptos"), ledger.LedgerVersion)
 	if aptosErr != nil {
 		panic(aptosErr)
 	}
 	fmt.Printf("account apt balance: %d\n", balance)
 
 	// check account
-	balance, aptosErr = client.AccountBalance(context.Background(), address, aptos.USDTCoin, ledger.LedgerVersion)
+	balance, aptosErr = client.AccountBalance(context.Background(), address, aptos.CoinAlias("USDT", "wormhole"), ledger.LedgerVersion)
 	if aptosErr != nil {
 		panic(aptosErr)
 	}

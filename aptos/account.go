@@ -9,16 +9,16 @@ import (
 )
 
 func (cl *Client) AccountBalance(ctx context.Context, address string, coin string, version uint64) (uint64, *rpcmodule.AptosError) {
-	coin, ok := CoinType[coin]
-	if !ok {
+	coinType := cl.TryParseCoinType(coin)
+	if coinType == "" {
 		return 0, &rpcmodule.AptosError{
-			Message:     fmt.Sprintf("token %s is not supported", coin),
+			Message:     fmt.Sprintf("coin %s is not supported", coin),
 			ErrorCode:   "400",
 			VmErrorCode: 0,
 		}
 	}
 
-	resourceType := fmt.Sprintf("0x1::coin::CoinStore<%s>", coin)
+	resourceType := fmt.Sprintf("0x1::coin::CoinStore<%s>", coinType)
 	resource, err := cl.AccountResourceByAddressAndType(ctx, address, resourceType, version)
 	if err != nil {
 		// resource not found, so balance is zero
@@ -43,7 +43,7 @@ func CreateAccountPayload(newAccount string) (*rpcmodule.TransactionPayload, *rp
 		Type:          rpcmodule.EntryFunctionPayload,
 		Function:      "0x1::aptos_account::create_account",
 		TypeArguments: []string{},
-		Arguments: []interface{}{newAccount},
+		Arguments:     []interface{}{newAccount},
 	}
 	return &rpcmodule.TransactionPayload{
 		Type:   rpcmodule.EntryFunctionPayload,

@@ -42,7 +42,7 @@ func TestNewModuleAccount(t *testing.T) {
 	time.Sleep(time.Second * 10)
 
 	// fund
-	txHash, aptosErr = client.TransferCoin(context.Background(), faultAddress, aptos.AptosCoin, 100000000, moveAddress, faultWallet)
+	txHash, aptosErr = client.TransferCoin(context.Background(), faultAddress, aptos.CoinAlias("APT", "aptos"), 100000000, moveAddress, faultWallet)
 	if aptosErr != nil {
 		panic(err)
 	}
@@ -58,7 +58,7 @@ func TestNewModuleAccount(t *testing.T) {
 	}
 
 	// check account
-	balance, aptosErr := client.AccountBalance(context.Background(), moveAddress, aptos.AptosCoin, ledger.LedgerVersion)
+	balance, aptosErr := client.AccountBalance(context.Background(), moveAddress, aptos.CoinAlias("APT", "aptos"), ledger.LedgerVersion)
 	if aptosErr != nil {
 		panic(aptosErr)
 	}
@@ -86,7 +86,7 @@ func TestReadModuleAccount(t *testing.T) {
 	}
 
 	// check account
-	balance, aptosErr := client.AccountBalance(context.Background(), address, aptos.AptosCoin, ledger.LedgerVersion)
+	balance, aptosErr := client.AccountBalance(context.Background(), address, aptos.CoinAlias("APT", "aptos"), ledger.LedgerVersion)
 	if aptosErr != nil {
 		panic(aptosErr)
 	}

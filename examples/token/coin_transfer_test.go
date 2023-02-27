@@ -35,14 +35,14 @@ func TestNewReceiptAccount(t *testing.T) {
 	fmt.Printf("create receipt account transaction: %s\n", hash)
 
 	// fund
-	txHash, aptosErr := client.TransferCoin(context.Background(), faultAddress, aptos.AptosCoin, 100000000, receiptAddress, faultWallet)
+	txHash, aptosErr := client.TransferCoin(context.Background(), faultAddress, aptos.CoinAlias("APT", "aptos"), 100000000, receiptAddress, faultWallet)
 	if aptosErr != nil {
 		panic(err)
 	}
 	fmt.Printf("fund receipt account transacion: %s\n", txHash)
 
 	// register
-	_, aptosErr = client.RegisterRecipient(context.Background(), receiptAddress, aptos.USDTCoin, receiptWallet)
+	_, aptosErr = client.RegisterRecipient(context.Background(), receiptAddress, aptos.CoinAlias("USDT", "wormhole"), receiptWallet)
 	if aptosErr != nil {
 		panic(aptosErr)
 	}
@@ -57,14 +57,14 @@ func TestNewReceiptAccount(t *testing.T) {
 	}
 
 	// check account
-	balance, aptosErr := client.AccountBalance(context.Background(), receiptAddress, aptos.AptosCoin, ledger.LedgerVersion)
+	balance, aptosErr := client.AccountBalance(context.Background(), receiptAddress, aptos.CoinAlias("APT", "aptos"), ledger.LedgerVersion)
 	if aptosErr != nil {
 		panic(aptosErr)
 	}
 	fmt.Printf("account balance: %d\n", balance)
 
 	// check account
-	balance, aptosErr = client.AccountBalance(context.Background(), receiptAddress, aptos.USDTCoin, ledger.LedgerVersion)
+	balance, aptosErr = client.AccountBalance(context.Background(), receiptAddress, aptos.CoinAlias("USDT", "wormhole"), ledger.LedgerVersion)
 	if aptosErr != nil {
 		panic(aptosErr)
 	}
@@ -90,14 +90,14 @@ func TestReadToAccount(t *testing.T) {
 	}
 
 	// check account
-	balance, aptosErr := client.AccountBalance(context.Background(), address, aptos.AptosCoin, ledger.LedgerVersion)
+	balance, aptosErr := client.AccountBalance(context.Background(), address, aptos.CoinAlias("APT", "aptos"), ledger.LedgerVersion)
 	if aptosErr != nil {
 		panic(aptosErr)
 	}
 	fmt.Printf("account balance: %d\n", balance)
 
 	// check account
-	balance, aptosErr = client.AccountBalance(context.Background(), address, aptos.USDTCoin, ledger.LedgerVersion)
+	balance, aptosErr = client.AccountBalance(context.Background(), address, aptos.CoinAlias("USDT", "wormhole"), ledger.LedgerVersion)
 	if err != nil {
 		panic(aptosErr)
 	}
@@ -134,7 +134,7 @@ func TestTransfer(t *testing.T) {
 	// new rpc
 	client := aptos.New(rpc.TestNet_RPC, false)
 	transferAmount := uint64(50000000)
-	txHash, aptosErr := client.TransferCoin(ctx, fromAddress, aptos.USDTCoin, transferAmount, toAddress, fromWallet)
+	txHash, aptosErr := client.TransferCoin(ctx, fromAddress, aptos.CoinAlias("USDT", "wormhole"), transferAmount, toAddress, fromWallet)
 	if aptosErr != nil {
 		panic(aptosErr)
 	}

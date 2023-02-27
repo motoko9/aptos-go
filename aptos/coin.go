@@ -9,46 +9,86 @@ import (
 	"github.com/motoko9/aptos-go/utils"
 )
 
-const (
-	AptosCoin = "APT"
-	WBTCCoin   = "WBTC"
-	USDTCoin  = "USDT"
-	WUSDTCoin  = "WUSDT"
-	WETHCoin   = "WETHCoin"
-	USDCCoin  = "USDC"
-	WUSDCCoin  = "WUSDC"
-	WSOLCoin  = "WSOL"
-	MOONCoin  = "MOON"
-)
+type CoinInfo struct {
+	Source   string `json:"source"`
+	ChainId  int    `json:"chainId"`
+	Name     string `json:"name"`
+	Decimals int    `json:"decimals"`
+	Symbol   string `json:"symbol"`
+	T        string `json:"type"`
+}
 
-var CoinType = map[string]string{}
+func CoinAlias(symbol string, source string) string {
+	return fmt.Sprintf("%s(%s)", symbol, source)
+}
 
-func TryParseCoinType(coin string) string {
+func CoinSymbolSource(alias string) (string, string) {
+	symbol, source := "", ""
+	fmt.Sscanf(alias, "%s(%s)", &symbol, &source)
+	return symbol, source
+}
+
+func (cl *Client) FindCoinBySymbolSource(symbol string, source string) *CoinInfo {
+	for _, item := range cl.coinType {
+		if item.Symbol == symbol && item.Source == source {
+			return item
+		}
+	}
+	return nil
+}
+
+func (cl *Client) FindCoinByType(t string) *CoinInfo {
+	for _, item := range cl.coinType {
+		if item.T == t {
+			return item
+		}
+	}
+	return nil
+}
+
+func (cl *Client) TryParseCoinType(coin string) string {
 	if utils.IsCoinType(coin) {
 		return coin
 	}
-	coinType, ok := CoinType[coin]
-	if !ok {
+	symbol, source := CoinSymbolSource(coin)
+	coinInfo := cl.FindCoinBySymbolSource(symbol, source)
+	if coinInfo == nil {
 		return ""
 	}
-	return coinType
+	return coinInfo.T
 }
 
-func (cl *Client) GetCoinName(t string) (string, bool) {
-	for k, v := range CoinType {
-		if v == t {
-			return k, true
-		}
+func (cl *Client) GetCoinName(t string) string {
+	if !utils.IsCoinType(t) {
+		return ""
 	}
-	return "", false
+	coinInfo := cl.FindCoinByType(t)
+	if coinInfo == nil {
+		return ""
+	}
+	return CoinAlias(coinInfo.Symbol, coinInfo.Source)
 }
 
-func (cl *Client) CustomizeCoin(name string, t string) {
-	CoinType[name] = t
+func (cl *Client) CustomizeCoin(source string, name string, decimals int, symbol string, t string) {
+	cl.coinType[t] = &CoinInfo{
+		Source:   source,
+		Name:     name,
+		Decimals: decimals,
+		Symbol:   symbol,
+		T:        t,
+	}
+}
+
+func (cl *Client) AllCoins() []*CoinInfo {
+	coins := make([]*CoinInfo, 0)
+	for _, item := range cl.coinType {
+		coins = append(coins, item)
+	}
+	return coins
 }
 
 func (cl *Client) CoinInfo(ctx context.Context, coin string, version uint64) (*aptosmodule.CoinInfo, *rpcmodule.AptosError) {
-	coinType := TryParseCoinType(coin)
+	coinType := cl.TryParseCoinType(coin)
 	if coinType == "" {
 		return nil, &rpcmodule.AptosError{
 			Message:     fmt.Sprintf("coin %s resouce is not supported", coin),
@@ -124,15 +164,7 @@ func (cl *Client) MintCoin(ctx context.Context, addr string, coinType string, re
 }
 
 func RegisterRecipientPayload(coin string) (*rpcmodule.TransactionPayload, *rpcmodule.AptosError) {
-	// transfer
-	coinType := TryParseCoinType(coin)
-	if coinType == "" {
-		return nil, &rpcmodule.AptosError{
-			Message:     fmt.Sprintf("coin %s resouce is not supported", coin),
-			ErrorCode:   "400",
-			VmErrorCode: 0,
-		}
-	}
+	//
 	transferPayload := rpcmodule.TransactionPayloadEntryFunctionPayload{
 		Type:          rpcmodule.EntryFunctionPayload,
 		Function:      "0x1::managed_coin::register",
@@ -152,7 +184,16 @@ func (cl *Client) RegisterRecipient(ctx context.Context, addr string, coin strin
 		return "", err
 	}
 
-	payload, err := RegisterRecipientPayload(coin)
+	coinType := cl.TryParseCoinType(coin)
+	if coinType == "" {
+		return "", &rpcmodule.AptosError{
+			Message:     fmt.Sprintf("coin %s resouce is not supported", coin),
+			ErrorCode:   "400",
+			VmErrorCode: 0,
+		}
+	}
+
+	payload, err := RegisterRecipientPayload(coinType)
 	if err != nil {
 		return "", err
 	}
@@ -160,15 +201,6 @@ func (cl *Client) RegisterRecipient(ctx context.Context, addr string, coin strin
 }
 
 func TransferCoinPayload(coin string, amount uint64, receipt string) (*rpcmodule.TransactionPayload, *rpcmodule.AptosError) {
-	// transfer
-	coinType := TryParseCoinType(coin)
-	if coinType == "" {
-		return nil, &rpcmodule.AptosError{
-			Message:     fmt.Sprintf("coin %s resouce is not supported", coin),
-			ErrorCode:   "400",
-			VmErrorCode: 0,
-		}
-	}
 	transferPayload := rpcmodule.TransactionPayloadEntryFunctionPayload{
 		Type:          rpcmodule.EntryFunctionPayload,
 		Function:      "0x1::coin::transfer",
@@ -185,6 +217,15 @@ func (cl *Client) TransferCoin(ctx context.Context, from string, coin string, am
 	accountFrom, err := cl.Account(ctx, from, 0)
 	if err != nil {
 		return "", err
+	}
+
+	coinType := cl.TryParseCoinType(coin)
+	if coinType == "" {
+		return "", &rpcmodule.AptosError{
+			Message:     fmt.Sprintf("coin %s resouce is not supported", coin),
+			ErrorCode:   "400",
+			VmErrorCode: 0,
+		}
 	}
 
 	payload, err := TransferCoinPayload(coin, amount, receipt)

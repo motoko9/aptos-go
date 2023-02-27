@@ -23,7 +23,7 @@ func TestCoinInfo(t *testing.T) {
 	client := aptos.New(rpc.TestNet_RPC, false)
 
 	//
-	coinInfo, aptosErr := client.CoinInfo(context.Background(), aptos.USDTCoin, 0)
+	coinInfo, aptosErr := client.CoinInfo(context.Background(), aptos.CoinAlias("USDT", "wormhole"), 0)
 	if aptosErr != nil {
 		panic(aptosErr)
 	}
@@ -54,7 +54,7 @@ func TestCoinInfo1(t *testing.T) {
 	//
 	raw, aptosErr := client.View(context.Background(), &rpcmodule.ViewRequest{
 		Function:      "0x1::coin::balance",
-		TypeArguments: []string{aptos.CoinType[aptos.USDTCoin]},
+		TypeArguments: []string{client.FindCoinBySymbolSource("USDT", "wormhole").T},
 		Arguments:     []interface{}{userAddress},
 	})
 	if aptosErr != nil {
@@ -65,7 +65,7 @@ func TestCoinInfo1(t *testing.T) {
 	//
 	raw, aptosErr = client.View(context.Background(), &rpcmodule.ViewRequest{
 		Function:      "0x1::coin::name",
-		TypeArguments: []string{aptos.CoinType[aptos.USDTCoin]},
+		TypeArguments: []string{client.FindCoinBySymbolSource("USDT", "wormhole").T},
 		Arguments:     []interface{}{},
 	})
 	if aptosErr != nil {
@@ -76,7 +76,7 @@ func TestCoinInfo1(t *testing.T) {
 	//
 	raw, aptosErr = client.View(context.Background(), &rpcmodule.ViewRequest{
 		Function:      "0x1::coin::symbol",
-		TypeArguments: []string{aptos.CoinType[aptos.USDTCoin]},
+		TypeArguments: []string{client.FindCoinBySymbolSource("USDT", "wormhole").T},
 		Arguments:     []interface{}{},
 	})
 	if aptosErr != nil {
