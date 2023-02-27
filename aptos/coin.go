@@ -31,6 +31,15 @@ func TryParseCoinType(coin string) string {
 	return coinType
 }
 
+func (cl *Client) GetCoinName(t string) (string, bool) {
+	for k, v := range CoinType {
+		if v == t {
+			return k, true
+		}
+	}
+	return "", false
+}
+
 func (cl *Client) CustomizeCoin(name string, t string) {
 	CoinType[name] = t
 }
