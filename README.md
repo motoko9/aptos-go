@@ -81,7 +81,7 @@ func TestResource(t *testing.T) {
 ```
 ## Example
 
-*[account](./examples/account)
-*[move basic](./examples/move_basic)
-*[token basic](./examples/token)
+* [account](./examples/account)
+* [move basic](./examples/move_basic)
+* [token basic](./examples/token)
 
