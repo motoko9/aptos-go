@@ -25,7 +25,7 @@ func ExtractAddressFromType(t string) (string, error) {
 func ExtractFromResource(r string) (string, []string, error) {
 	indexStart := strings.IndexByte(r, '<')
 	if indexStart == -1 {
-		return "", []string{}, fmt.Errorf("resource type is invalid")
+		return r, []string{}, nil
 	}
 	indexEnd := strings.LastIndexByte(r, '>')
 	if indexEnd == -1 {
