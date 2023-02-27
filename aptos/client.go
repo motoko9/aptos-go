@@ -1,7 +1,11 @@
 package aptos
 
 import (
+	"encoding/json"
+	"fmt"
 	"github.com/motoko9/aptos-go/rpc"
+	"io/ioutil"
+	"net/http"
 )
 
 type Client struct {
@@ -19,6 +23,8 @@ func New(endpoint string, mainNet bool) *Client {
 		CoinType[USDCCoin] = "0xf22bede237a07e121b56d91a491eb7bcdfd1f5907926a9e58338f964a01b17fa::asset::USDC"
 		CoinType[WUSDCCoin] = "0x5e156f1207d0ebfa19a9eeff00d62a282278fb8719f4fab3a586a0a2c0fffbea::coin::T"
 		CoinType[WSOLCoin] = "0xdd89c0e695df0692205912fb69fc290418bed0dbe6e4573d744a6d5e6bab6c13::coin::T"
+		readCoinFile()
+		//
 	} else { // for testnet
 		CoinType[AptosCoin] = "0x1::aptos_coin::AptosCoin"
 		CoinType[USDTCoin] = "0xbeca0b2fd5f778302e405182e5c250e1f6648492d53e48f5b29446f61dbcc848::usdt::USDT"
@@ -26,4 +32,36 @@ func New(endpoint string, mainNet bool) *Client {
 	return &Client{
 		client,
 	}
+}
+
+func readCoinFile() error {
+	type CoinInfo struct {
+		Source string `json:"source"`
+		Name   string `json:"name"`
+		Symbol string `json:"symbol"`
+		T      string `json:"type"`
+	}
+	//
+	url := "https://raw.githubusercontent.com/pontem-network/coins-registry/main/src/coins.json"
+	rsp, err := http.Get(url)
+	if err != nil {
+		return err
+	}
+	defer rsp.Body.Close()
+
+	data, err := ioutil.ReadAll(rsp.Body)
+	if err != nil {
+		return err
+	}
+	//
+	coins := make([]*CoinInfo, 0)
+	err = json.Unmarshal(data, &coins)
+	if err != nil {
+		return err
+	}
+	//
+	for _, coin := range coins {
+		CoinType[fmt.Sprintf("%s(%s)", coin.Symbol, coin.Source)] = coin.T
+	}
+	return nil
 }

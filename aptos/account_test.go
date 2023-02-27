@@ -9,7 +9,7 @@ import (
 )
 
 func TestClient_AccountBalance(t *testing.T) {
-	client := New(rpc.TestNet_RPC, false)
+	client := New(rpc.TestNet_RPC, true)
 	ledger, err := client.Ledger(context.Background())
 	if err != nil {
 		panic(err)
@@ -40,7 +40,7 @@ func TestClient_AccountBalance(t *testing.T) {
 		balance, err := client.AccountBalance(
 			context.Background(),
 			"0x697c173eeb917c95a382b60f546eb73a4c6a2a7b2d79e6c56c87104f9c04345f",
-			BTCCoin,
+			WBTCCoin,
 			ledger.LedgerVersion)
 		if err != nil {
 			panic(err)
