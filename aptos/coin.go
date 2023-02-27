@@ -6,6 +6,7 @@ import (
 	"github.com/motoko9/aptos-go/aptosmodule"
 	"github.com/motoko9/aptos-go/crypto"
 	"github.com/motoko9/aptos-go/rpcmodule"
+	"github.com/motoko9/aptos-go/utils"
 )
 
 const (
@@ -20,7 +21,7 @@ const (
 var CoinType = map[string]string{}
 
 func TryParseCoinType(coin string) string {
-	if rpcmodule.IsCoinType(coin) {
+	if utils.IsCoinType(coin) {
 		return coin
 	}
 	coinType, ok := CoinType[coin]
@@ -44,14 +45,14 @@ func (cl *Client) CoinInfo(ctx context.Context, coin string, version uint64) (*a
 		}
 	}
 	//
-	coinAddress, err := rpcmodule.ExtractAddressFromType(coinType)
+	coinAddress, err := utils.ExtractAddressFromType(coinType)
 	if err != nil {
-		return nil, err
+		return nil, rpcmodule.AptosErrorFromError(err)
 	}
 	coinInfoResourceType := fmt.Sprintf("0x1::coin::CoinInfo<%s>", coinType)
-	accountResource, err := cl.AccountResourceByAddressAndType(ctx, coinAddress, coinInfoResourceType, version)
-	if err != nil {
-		return nil, err
+	accountResource, aptosErr := cl.AccountResourceByAddressAndType(ctx, coinAddress, coinInfoResourceType, version)
+	if aptosErr != nil {
+		return nil, aptosErr
 	}
 	coinInfo, ok := accountResource.Object.(*aptosmodule.CoinInfo)
 	if !ok {

@@ -1,5 +1,7 @@
 package rpcmodule
 
+import "github.com/motoko9/aptos-go/utils"
+
 type Creator func() interface{}
 
 // TransactionCreators
@@ -81,7 +83,7 @@ func RegisterResourceObjectCreator(t string, creator Creator) {
 
 func createResourceObject(t string) interface{} {
 	// remove type
-	m, _, err := ExtractFromResource(t)
+	m, _, err := utils.ExtractFromResource(t)
 	if err != nil {
 		return nil
 	}
