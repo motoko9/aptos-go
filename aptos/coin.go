@@ -11,10 +11,13 @@ import (
 
 const (
 	AptosCoin = "APT"
-	BTCCoin   = "BTC"
+	WBTCCoin   = "WBTC"
 	USDTCoin  = "USDT"
-	ETHCoin   = "ETH"
+	WUSDTCoin  = "WUSDT"
+	WETHCoin   = "WETHCoin"
 	USDCCoin  = "USDC"
+	WUSDCCoin  = "WUSDC"
+	WSOLCoin  = "WSOL"
 	MOONCoin  = "MOON"
 )
 
