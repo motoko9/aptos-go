@@ -48,7 +48,7 @@ func ExtractFromResource(r string) (string, []string, error) {
 		}
 		if t[tEnd] == ',' && tDepth == 0 {
 			types = append(types, t[tStart:tEnd])
-			tStart = tEnd + 1
+			tStart = tEnd + 2 //
 		}
 		tEnd++
 	}
