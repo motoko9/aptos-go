@@ -41,6 +41,15 @@ func TestUtils_ExtractFromResource(t *testing.T) {
         }
         fmt.Printf("%s %v\n", t1, t2)
     }
+
+    {
+        r1 := "0x1::account::Account"
+        t1, t2, err := ExtractFromResource(r1)
+        if err != nil {
+            panic(err)
+        }
+        fmt.Printf("%s %v\n", t1, t2)
+    }
 }
 
 func TestUtils_ExtractAddressFromType(t *testing.T) {
