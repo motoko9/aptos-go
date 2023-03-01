@@ -15,3 +15,7 @@ func New(endpoint string) *Client {
 		fetchClient: fetchclient.NewClientWithEndpoint(endpoint),
 	}
 }
+
+func (cl *Client) General() *rpcmodule.General {
+	return &cl.rsp
+}
