@@ -21,10 +21,16 @@ func (cl *Client) Account(ctx context.Context, address string, version uint64) (
 	return &account, nil
 }
 
-func (cl *Client) AccountResources(ctx context.Context, address string, version uint64) (*rpcmodule.MoveResources, *rpcmodule.AptosError) {
+func (cl *Client) AccountResources(ctx context.Context, address string, cursor string, limit uint64, version uint64) (*rpcmodule.MoveResources, *rpcmodule.AptosError) {
 	params := make(map[string]string)
 	if version != 0 {
 		params["version"] = fmt.Sprintf("%d", version)
+	}
+	if limit != 0 {
+		params["limit"] = fmt.Sprintf("%d", limit)
+	}
+	if cursor != "" {
+		params["start"] = cursor
 	}
 	url := fmt.Sprintf("/accounts/%s/resources", address)
 	var moveResources rpcmodule.MoveResources
