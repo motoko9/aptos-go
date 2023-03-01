@@ -77,7 +77,23 @@ func (r *Request) WithContext(ctx context.Context) *Request {
 	return r
 }
 
-func (r *Request) Execute(rsp interface{}, err FetchError) {
+func (r *Request) Execute(rsp interface{}, general interface{}, err FetchError) {
+	//
+	type rspHeader struct {
+		ChainId             string `json:"chain_id"`
+		Epoch               string `json:"epoch"`
+		LedgerVersion       string `json:"ledger_version"`
+		OldestLedgerVersion string `json:"oldest_ledger_version"`
+		BlockHeight         string `json:"block_height"`
+		OldestBlockHeight   string `json:"oldest_block_height"`
+		LedgerTimestamp     string `json:"ledger_timestamp"`
+		Cursor              string `json:"cursor"`
+	}
+	var header rspHeader
+	headerJson, _ := json.Marshal(header)
+	json.Unmarshal(headerJson, general)
+
+	// request
 	httpRsp, internalErr := r.client.execute(r)
 	// handle error
 	if internalErr != nil {
@@ -101,6 +117,18 @@ func (r *Request) Execute(rsp interface{}, err FetchError) {
 		}
 		return
 	}
+
+	// response header
+	header.BlockHeight = httpRsp.Header().Get("X-APTOS-BLOCK-HEIGHT")
+	header.ChainId = httpRsp.Header().Get("X-APTOS-CHAIN-ID")
+	header.Epoch = httpRsp.Header().Get("X-APTOS-EPOCH")
+	header.OldestLedgerVersion = httpRsp.Header().Get("X-APTOS-LEDGER-OLDEST-VERSION")
+	header.LedgerTimestamp = httpRsp.Header().Get("X-APTOS-LEDGER-TIMESTAMPUSEC")
+	header.LedgerVersion = httpRsp.Header().Get("X-APTOS-LEDGER-VERSION")
+	header.OldestBlockHeight = httpRsp.Header().Get("X-APTOS-OLDEST-BLOCK-HEIGHT")
+	header.Cursor = httpRsp.Header().Get("X-APTOS-CURSOR")
+	headerJson, _ = json.Marshal(header)
+	json.Unmarshal(headerJson, general)
 
 	// http response
 	if internalErr = json.Unmarshal(httpRsp.bodyBytes, rsp); internalErr != nil {

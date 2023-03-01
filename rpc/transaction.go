@@ -17,7 +17,7 @@ func (cl *Client) Transactions(ctx context.Context, start int64, limit int16) (*
 	url := fmt.Sprintf("transactions")
 	var transactions rpcmodule.Transactions
 	var aptosError rpcmodule.AptosError
-	cl.fetchClient.Get(url).SetQueryParams(params).Execute(&transactions, &aptosError)
+	cl.fetchClient.Get(url).SetQueryParams(params).Execute(&transactions, &cl.rsp, &aptosError)
 	if aptosError.IsError() {
 		return nil, &aptosError
 	}
@@ -28,7 +28,7 @@ func (cl *Client) TransactionByHash(ctx context.Context, hash string) (*rpcmodul
 	url := fmt.Sprintf("/transactions/by_hash/%s", hash)
 	var transaction rpcmodule.Transaction
 	var aptosError rpcmodule.AptosError
-	cl.fetchClient.Get(url).Execute(&transaction, &aptosError)
+	cl.fetchClient.Get(url).Execute(&transaction, &cl.rsp, &aptosError)
 	if aptosError.IsError() {
 		return nil, &aptosError
 	}
@@ -39,7 +39,7 @@ func (cl *Client) TransactionByVersion(ctx context.Context, version uint64) (*rp
 	url := fmt.Sprintf("/transactions/by_version/%d", version)
 	var transaction rpcmodule.Transaction
 	var aptosError rpcmodule.AptosError
-	cl.fetchClient.Get(url).Execute(&transaction, &aptosError)
+	cl.fetchClient.Get(url).Execute(&transaction, &cl.rsp, &aptosError)
 	if aptosError.IsError() {
 		return nil, &aptosError
 	}
@@ -56,7 +56,7 @@ func (cl *Client) TransactionsByAccount(ctx context.Context, address string, sta
 	url := fmt.Sprintf("accounts/%s/transactions", address)
 	var transactions rpcmodule.Transactions
 	var aptosError rpcmodule.AptosError
-	cl.fetchClient.Get(url).SetQueryParams(params).Execute(&transactions, &aptosError)
+	cl.fetchClient.Get(url).SetQueryParams(params).Execute(&transactions, &cl.rsp, &aptosError)
 	if aptosError.IsError() {
 		return nil, &aptosError
 	}
@@ -67,7 +67,7 @@ func (cl *Client) EncodeSubmission(ctx context.Context, tx *rpcmodule.EncodeSubm
 	url := fmt.Sprintf("/transactions/encode_submission")
 	var raw string
 	var aptosError rpcmodule.AptosError
-	cl.fetchClient.Post(url).SetJSONBody(tx).Execute(&raw, &aptosError)
+	cl.fetchClient.Post(url).SetJSONBody(tx).Execute(&raw, &cl.rsp, &aptosError)
 	if aptosError.IsError() {
 		return nil, &aptosError
 	}
@@ -83,7 +83,7 @@ func (cl *Client) SubmitTransaction(ctx context.Context, tx *rpcmodule.SubmitTra
 	url := fmt.Sprintf("/transactions")
 	var transaction rpcmodule.PendingTransactionRsp
 	var aptosError rpcmodule.AptosError
-	cl.fetchClient.Post(url).SetJSONBody(tx).Execute(&transaction, &aptosError)
+	cl.fetchClient.Post(url).SetJSONBody(tx).Execute(&transaction, &cl.rsp, &aptosError)
 	if aptosError.IsError() {
 		return "", &aptosError
 	}
@@ -94,7 +94,7 @@ func (cl *Client) SimulateTransaction(ctx context.Context, tx *rpcmodule.SubmitT
 	url := fmt.Sprintf("/transactions/simulate")
 	var transaction rpcmodule.UserTransactionRsp
 	var aptosError rpcmodule.AptosError
-	cl.fetchClient.Post(url).SetJSONBody(tx).Execute(&transaction, &aptosError)
+	cl.fetchClient.Post(url).SetJSONBody(tx).Execute(&transaction, &cl.rsp, &aptosError)
 	if aptosError.IsError() {
 		return "", &aptosError
 	}
@@ -105,7 +105,7 @@ func (cl *Client) EstimateGasPrice(ctx context.Context) (uint64, *rpcmodule.Apto
 	url := fmt.Sprintf("/estimate_gas_price")
 	var gasEstimate rpcmodule.GasEstimate
 	var aptosError rpcmodule.AptosError
-	cl.fetchClient.Get(url).Execute(&gasEstimate, &aptosError)
+	cl.fetchClient.Get(url).Execute(&gasEstimate, &cl.rsp, &aptosError)
 	if aptosError.IsError() {
 		return 0, &aptosError
 	}

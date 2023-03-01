@@ -14,7 +14,7 @@ func (cl *Client) Account(ctx context.Context, address string, version uint64) (
 	url := fmt.Sprintf("/accounts/%s", address)
 	var account rpcmodule.AccountData
 	var aptosError rpcmodule.AptosError
-	cl.fetchClient.Get(url).SetQueryParams(params).Execute(&account, &aptosError)
+	cl.fetchClient.Get(url).SetQueryParams(params).Execute(&account, &cl.rsp, &aptosError)
 	if aptosError.IsError() {
 		return nil, &aptosError
 	}
@@ -29,7 +29,7 @@ func (cl *Client) AccountResources(ctx context.Context, address string, version 
 	url := fmt.Sprintf("/accounts/%s/resources", address)
 	var moveResources rpcmodule.MoveResources
 	var aptosError rpcmodule.AptosError
-	cl.fetchClient.Get(url).SetQueryParams(params).Execute(&moveResources, &aptosError)
+	cl.fetchClient.Get(url).SetQueryParams(params).Execute(&moveResources, &cl.rsp, &aptosError)
 	if aptosError.IsError() {
 		return nil, &aptosError
 	}
@@ -45,7 +45,7 @@ func (cl *Client) AccountResourceByAddressAndType(ctx context.Context,
 	url := fmt.Sprintf("/accounts/%v/resource/%v", address, resourceType)
 	var moveResource rpcmodule.MoveResource
 	var aptosError rpcmodule.AptosError
-	cl.fetchClient.Get(url).SetQueryParams(params).Execute(&moveResource, &aptosError)
+	cl.fetchClient.Get(url).SetQueryParams(params).Execute(&moveResource, &cl.rsp, &aptosError)
 	if aptosError.IsError() {
 		return nil, &aptosError
 	}
@@ -61,7 +61,7 @@ func (cl *Client) AccountModules(ctx context.Context, address string, version ui
 	url := fmt.Sprintf("/accounts/%s/modules", address)
 	var moveModules rpcmodule.MoveModules
 	var aptosError rpcmodule.AptosError
-	cl.fetchClient.Get(url).SetQueryParams(params).Execute(&moveModules, &aptosError)
+	cl.fetchClient.Get(url).SetQueryParams(params).Execute(&moveModules, &cl.rsp, &aptosError)
 	if aptosError.IsError() {
 		return nil, &aptosError
 	}
@@ -77,7 +77,7 @@ func (cl *Client) AccountModuleByAddressAndName(ctx context.Context, address str
 	url := fmt.Sprintf("/accounts/%s/module/%s", address, name)
 	var moveModule rpcmodule.MoveModule
 	var aptosError rpcmodule.AptosError
-	cl.fetchClient.Get(url).SetQueryParams(params).Execute(&moveModule, &aptosError)
+	cl.fetchClient.Get(url).SetQueryParams(params).Execute(&moveModule, &cl.rsp, &aptosError)
 	if aptosError.IsError() {
 		return nil, &aptosError
 	}

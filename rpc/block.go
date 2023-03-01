@@ -15,7 +15,7 @@ func (cl *Client) BlockByHeight(ctx context.Context, height uint64, withTransact
 	url := fmt.Sprintf("/blocks/by_height/%d", height)
 	var block rpcmodule.Block
 	var aptosError rpcmodule.AptosError
-	cl.fetchClient.Get(url).SetQueryParams(params).Execute(&block, &aptosError)
+	cl.fetchClient.Get(url).SetQueryParams(params).Execute(&block, &cl.rsp, &aptosError)
 	if aptosError.IsError() {
 		return nil, &aptosError
 	}
@@ -31,7 +31,7 @@ func (cl *Client) BlockByVersion(ctx context.Context, version uint64, withTransa
 	url := fmt.Sprintf("/blocks/by_version/%d", version)
 	var block rpcmodule.Block
 	var aptosError rpcmodule.AptosError
-	cl.fetchClient.Get(url).SetQueryParams(params).Execute(&block, &aptosError)
+	cl.fetchClient.Get(url).SetQueryParams(params).Execute(&block, &cl.rsp, &aptosError)
 	if aptosError.IsError() {
 		return nil, &aptosError
 	}

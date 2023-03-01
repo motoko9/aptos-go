@@ -10,7 +10,7 @@ func (cl *Client) EventsByHandle(ctx context.Context, address string, handle str
 	url := fmt.Sprintf("/accounts/%s/events/%s/%s", address, handle, field)
 	var events rpcmodule.Events
 	var aptosError rpcmodule.AptosError
-	cl.fetchClient.Get(url).Execute(&events, &aptosError)
+	cl.fetchClient.Get(url).Execute(&events, &cl.rsp, &aptosError)
 	if aptosError.IsError() {
 		return nil, &aptosError
 	}
@@ -21,7 +21,7 @@ func (cl *Client) EventsByCreationNumber(ctx context.Context, address string, cr
 	url := fmt.Sprintf("/accounts/%s/events/%d", address, creationNumber)
 	var events rpcmodule.Events
 	var aptosError rpcmodule.AptosError
-	cl.fetchClient.Get(url).Execute(&events, &aptosError)
+	cl.fetchClient.Get(url).Execute(&events, &cl.rsp, &aptosError)
 	if aptosError.IsError() {
 		return nil, &aptosError
 	}

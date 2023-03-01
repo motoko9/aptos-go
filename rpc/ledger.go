@@ -9,7 +9,7 @@ func (cl *Client) Ledger(ctx context.Context) (*rpcmodule.Ledger, *rpcmodule.Apt
 	url := ""
 	var ledger rpcmodule.Ledger
 	var aptosError rpcmodule.AptosError
-	cl.fetchClient.Get(url).Execute(&ledger, &aptosError)
+	cl.fetchClient.Get(url).Execute(&ledger, &cl.rsp, &aptosError)
 	if aptosError.IsError() {
 		return nil, &aptosError
 	}

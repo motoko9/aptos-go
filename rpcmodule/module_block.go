@@ -20,3 +20,14 @@ type Ledger struct {
 	NodeRole            string `json:"node_role"`
 	GitHash             string `json:"git_hash"`
 }
+
+type General struct {
+	ChainId             uint64 `json:"chain_id,string"`
+	Epoch               uint64 `json:"epoch,string"`
+	LedgerVersion       uint64 `json:"ledger_version,string"`
+	OldestLedgerVersion uint64 `json:"oldest_ledger_version,string"`
+	BlockHeight         uint64 `json:"block_height,string"`
+	OldestBlockHeight   uint64 `json:"oldest_block_height,string"`
+	LedgerTimestamp     uint64 `json:"ledger_timestamp,string"`
+	Cursor              string `json:"cursor"`
+}
