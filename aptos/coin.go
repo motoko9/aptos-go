@@ -2,11 +2,15 @@ package aptos
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/motoko9/aptos-go/aptosmodule"
 	"github.com/motoko9/aptos-go/crypto"
 	"github.com/motoko9/aptos-go/rpcmodule"
 	"github.com/motoko9/aptos-go/utils"
+	"io/ioutil"
+	"net/http"
+	"strings"
 )
 
 type CoinInfo struct {
@@ -18,13 +22,101 @@ type CoinInfo struct {
 	T        string `json:"type"`
 }
 
+//
+func readCoinFromPontemNetwork() ([]*CoinInfo, error) {
+	url := "https://raw.githubusercontent.com/pontem-network/coins-registry/main/src/coins.json"
+	rsp, err := http.Get(url)
+	if err != nil {
+		return nil, err
+	}
+	defer rsp.Body.Close()
+
+	data, err := ioutil.ReadAll(rsp.Body)
+	if err != nil {
+		return nil, err
+	}
+	//
+	type PontemNetworkCoinInfo struct {
+		Source   string `json:"source"`
+		ChainId  int    `json:"chainId"`
+		Name     string `json:"name"`
+		Decimals int    `json:"decimals"`
+		Symbol   string `json:"symbol"`
+		T        string `json:"type"`
+	}
+
+	pontemNetworkCoins := make([]*PontemNetworkCoinInfo, 0)
+	err = json.Unmarshal(data, &pontemNetworkCoins)
+	if err != nil {
+		return nil, err
+	}
+	coins := make([]*CoinInfo, 0)
+	for _, pontemNetworkCoin := range pontemNetworkCoins {
+		coins = append(coins, &CoinInfo{
+			Source:   pontemNetworkCoin.Source,
+			ChainId:  pontemNetworkCoin.ChainId,
+			Name:     pontemNetworkCoin.Name,
+			Decimals: pontemNetworkCoin.Decimals,
+			Symbol:   pontemNetworkCoin.Symbol,
+			T:        pontemNetworkCoin.T,
+		})
+	}
+	return coins, nil
+}
+
+func readCoinFromPancakeSwap() ([]*CoinInfo, error) {
+	url := "https://raw.githubusercontent.com/pancakeswap/token-list/main/src/tokens/pancakeswap-aptos.json"
+	rsp, err := http.Get(url)
+	if err != nil {
+		return nil, err
+	}
+	defer rsp.Body.Close()
+
+	data, err := ioutil.ReadAll(rsp.Body)
+	if err != nil {
+		return nil, err
+	}
+	//
+	type PancakeSwapCoinInfo struct {
+		ChainId  int    `json:"chainId"`
+		Name     string `json:"name"`
+		Decimals int    `json:"decimals"`
+		Symbol   string `json:"symbol"`
+		Address  string `json:"address"`
+	}
+
+	pancakeSwapCoins := make([]*PancakeSwapCoinInfo, 0)
+	err = json.Unmarshal(data, &pancakeSwapCoins)
+	if err != nil {
+		return nil, err
+	}
+	coins := make([]*CoinInfo, 0)
+	for _, pancakeSwapCoin := range pancakeSwapCoins {
+		coins = append(coins, &CoinInfo{
+			Source:   "pancake",
+			ChainId:  pancakeSwapCoin.ChainId,
+			Name:     pancakeSwapCoin.Name,
+			Decimals: pancakeSwapCoin.Decimals,
+			Symbol:   pancakeSwapCoin.Symbol,
+			T:        pancakeSwapCoin.Address,
+		})
+	}
+	return coins, nil
+}
+
 func CoinAlias(symbol string, source string) string {
 	return fmt.Sprintf("%s(%s)", symbol, source)
 }
 
 func CoinSymbolSource(alias string) (string, string) {
 	symbol, source := "", ""
-	fmt.Sscanf(alias, "%s(%s)", &symbol, &source)
+	index1 := strings.IndexByte(alias, '(')
+	index2 := strings.IndexByte(alias, ')')
+	if index1 == -1 || index2 == -1 {
+		return symbol, source
+	}
+	symbol = alias[0:index1]
+	source = alias[index1+1:index2]
 	return symbol, source
 }
 
@@ -58,7 +150,7 @@ func (cl *Client) TryParseCoinType(coin string) string {
 	return coinInfo.T
 }
 
-func (cl *Client) GetCoinName(t string) string {
+func (cl *Client) GetCoinNameByType(t string) string {
 	if !utils.IsCoinType(t) {
 		return ""
 	}

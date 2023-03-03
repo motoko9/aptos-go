@@ -22,7 +22,7 @@ func TestClient_AccountResources(t *testing.T) {
 		panic(err)
 	}
 	accountResources, err := client.AccountResources(context.Background(),
-		"0x74f3bbe39c7e2793a2e5445ee0336c9ac3191534762b41dcfc1054ad077ccc7c", ledger.LedgerVersion)
+		"0x74f3bbe39c7e2793a2e5445ee0336c9ac3191534762b41dcfc1054ad077ccc7c", "", 0, ledger.LedgerVersion)
 	if err != nil {
 		panic(err)
 	}
@@ -32,7 +32,7 @@ func TestClient_AccountResources(t *testing.T) {
 
 func TestClient_AccountResources_Latest(t *testing.T) {
 	accountResources, err := client.AccountResources(context.Background(),
-		"0x74f3bbe39c7e2793a2e5445ee0336c9ac3191534762b41dcfc1054ad077ccc7c", 0)
+		"0x74f3bbe39c7e2793a2e5445ee0336c9ac3191534762b41dcfc1054ad077ccc7c", "", 0, 0)
 	if err != nil {
 		panic(err)
 	}
