@@ -10,21 +10,30 @@ type Client struct {
 }
 
 func New(endpoint string, mainNet bool) *Client {
-	coinType := make(map[string]*CoinInfo)
-	pontemNetworkCoins, _ := readCoinFromPontemNetwork()
-	pancakeCoins, _ := readCoinFromPancakeSwap()
-	coins := make([]*CoinInfo, 0)
-	coins = append(coins, pontemNetworkCoins...)
-	coins = append(coins, pancakeCoins...)
-
 	chainId := 1
 	if !mainNet {
 		chainId = 2
 	}
-	for _, coin := range coins {
-		if coin.ChainId == chainId {
-			coinType[coin.T] = coin
+	coinType := make(map[string]*CoinInfo)
+	pontemNetworkCoins, _ := readCoinFromPontemNetwork()
+	pancakeCoins, _ := readCoinFromPancakeSwap()
+	for _, coin := range pontemNetworkCoins {
+		if coin.ChainId != chainId {
+			continue
 		}
+		if _, ok := coinType[coin.T]; ok {
+			continue
+		}
+		coinType[coin.T] = coin
+	}
+	for _, coin := range pancakeCoins {
+		if coin.ChainId != chainId {
+			continue
+		}
+		if _, ok := coinType[coin.T]; ok {
+			continue
+		}
+		coinType[coin.T] = coin
 	}
 
 	client := rpc.New(endpoint)
