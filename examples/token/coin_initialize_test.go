@@ -62,3 +62,57 @@ func TestCoinInitialize(t *testing.T) {
 	}
 	fmt.Printf("token initialize transaction confirmed: %v\n", confirmed)
 }
+
+
+func TestCoinInitialize1(t *testing.T) {
+	ctx := context.Background()
+	// token account
+	usdtWallet, err := wallet.NewFromKey("24d611db818810e9e33142dba401dff3b9aa8bdf954032c4b6b5528f67f877aa")
+	//usdtWallet, err := wallet.NewFromKeygenFile("account_usdt")
+	if err != nil {
+		panic(err)
+	}
+	usdtAddress := usdtWallet.Address()
+	fmt.Printf("usdt address: %s\n", usdtAddress)
+
+	// new rpc
+	client := aptos.New(rpc.TestNet_RPC, false)
+
+	// from account
+	usdtAccount, aptosErr := client.Account(ctx, usdtAddress, 0)
+	if aptosErr != nil {
+		panic(aptosErr)
+	}
+
+	//
+	payload := &rpcmodule.TransactionPayloadEntryFunctionPayload{
+		Type:          rpcmodule.EntryFunctionPayload,
+		Function:      "0x1::managed_coin::initialize",
+		TypeArguments: []string{fmt.Sprintf("%s::asset::WETH", usdtAddress)},
+		Arguments: []interface{}{
+			hex.EncodeToString([]byte("weth")),
+			hex.EncodeToString([]byte("WETH")),
+			6,
+			true,
+		},
+	}
+
+	payload1 := &rpcmodule.TransactionPayload{
+		Type:   rpcmodule.EntryFunctionPayload,
+		Object: payload,
+	}
+
+	txHash, aptosErr := client.SignAndSubmitTransaction(ctx, usdtAddress, usdtAccount.SequenceNumber, payload1, usdtWallet)
+	if aptosErr != nil {
+		panic(aptosErr)
+	}
+	//
+	fmt.Printf("token initialize transaction hash: %s\n", txHash)
+
+	//
+	confirmed, aptosErr := client.ConfirmTransaction(ctx, txHash)
+	if aptosErr != nil {
+		panic(aptosErr)
+	}
+	fmt.Printf("token initialize transaction confirmed: %v\n", confirmed)
+}

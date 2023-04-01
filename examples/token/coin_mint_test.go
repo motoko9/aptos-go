@@ -154,3 +154,74 @@ func TestMint(t *testing.T) {
 	}
 	fmt.Printf("token mint transaction confirmed: %v\n", confirmed)
 }
+
+
+func TestMint1(t *testing.T) {
+	// token account
+	coinWallet, err := wallet.NewFromKey("24d611db818810e9e33142dba401dff3b9aa8bdf954032c4b6b5528f67f877aa")
+	//coinWallet, err := wallet.NewFromKeygenFile("account_usdt")
+	if err != nil {
+		panic(err)
+	}
+	coinAddress := coinWallet.Address()
+	fmt.Printf("token address: %s\n", coinAddress)
+
+	// recipient account
+	userWallet, err := wallet.NewFromKey("f476ba25a9df047f8d4c024896a171c60f32eb31b89bccbbbf1462b46e0475e3")
+	if err != nil {
+		panic(err)
+	}
+	userAddress := userWallet.Address()
+	fmt.Printf("recipient address: %s\n", userAddress)
+
+	// new rpc
+	client := aptos.New(rpc.TestNet_RPC, false)
+
+	// token account
+	coinAccount, aptosErr := client.Account(context.Background(), coinAddress, 0)
+	if aptosErr != nil {
+		panic(aptosErr)
+	}
+
+	// register
+	txHash, aptosErr := client.RegisterRecipient(context.Background(), userAddress, "0x2f88a12a17f01228f4ba72ec6214127abb930512dcb3d6205909ca510aca7b29::asset::WETH", userWallet)
+	if aptosErr != nil {
+		panic(aptosErr)
+	}
+
+
+	fmt.Printf("register token transaction: %v\n", txHash)
+
+	time.Sleep(time.Second * 10)
+
+	//
+	mintAmount := uint64(100000000000000)
+	payload := rpcmodule.TransactionPayloadEntryFunctionPayload{
+		Type:          rpcmodule.EntryFunctionPayload,
+		Function:      "0x1::managed_coin::mint",
+		TypeArguments: []string{fmt.Sprintf("%s::asset::WETH", coinAddress)},
+		Arguments: []interface{}{
+			userAddress,
+			fmt.Sprintf("%d", mintAmount),
+		},
+	}
+
+	payload1 := &rpcmodule.TransactionPayload{
+		Type:   rpcmodule.EntryFunctionPayload,
+		Object: payload,
+	}
+
+	txHash, aptosErr = client.SignAndSubmitTransaction(context.Background(), coinAddress, coinAccount.SequenceNumber, payload1, coinWallet)
+	if aptosErr != nil {
+		panic(aptosErr)
+	}
+	//
+	fmt.Printf("token mint transaction hash: %s\n", txHash)
+
+	//
+	confirmed, aptosErr := client.ConfirmTransaction(context.Background(), txHash)
+	if aptosErr != nil {
+		panic(aptosErr)
+	}
+	fmt.Printf("token mint transaction confirmed: %v\n", confirmed)
+}

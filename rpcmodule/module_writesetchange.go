@@ -40,6 +40,7 @@ type WriteSetChangeDeleteTableItem struct {
 	Handle       string `json:"handle"`
 	Key          string `json:"key"`
 	// todo
+	Raw json.RawMessage `json:"data"`
 }
 
 type WriteSetChangeWriteModule struct {
@@ -47,6 +48,7 @@ type WriteSetChangeWriteModule struct {
 	Address      string `json:"address"`
 	StateKeyHash string `json:"state_key_hash"`
 	// todo
+	Raw json.RawMessage `json:"data"`
 }
 
 type WriteSetChangeWriteResource struct {
@@ -54,6 +56,8 @@ type WriteSetChangeWriteResource struct {
 	Address      string `json:"address"`
 	StateKeyHash string `json:"state_key_hash"`
 	// todo
+	//Raw      json.RawMessage `json:"data"`
+	Resource MoveResource `json:"data"`
 }
 
 type WriteSetChangeWriteTableItem struct {
@@ -63,6 +67,7 @@ type WriteSetChangeWriteTableItem struct {
 	Key          string `json:"key"`
 	Value        string `json:"value"`
 	// todo
+	Raw json.RawMessage `json:"data"`
 }
 
 func (j WriteSetChange) MarshalJSON() ([]byte, error) {
@@ -75,6 +80,7 @@ func (j *WriteSetChange) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, aux); err != nil {
 		return err
 	}
+	j.Raw = data
 	switch j.Type {
 	case DeleteModule:
 		var change WriteSetChangeDeleteModule
