@@ -90,15 +90,15 @@ func (cl *Client) SubmitTransaction(ctx context.Context, tx *rpcmodule.SubmitTra
 	return transaction.Hash, nil
 }
 
-func (cl *Client) SimulateTransaction(ctx context.Context, tx *rpcmodule.SubmitTransactionRequest) (string, *rpcmodule.AptosError) {
+func (cl *Client) SimulateTransaction(ctx context.Context, tx *rpcmodule.SubmitTransactionRequest) (rpcmodule.SimulateTransactionRsp, *rpcmodule.AptosError) {
 	url := fmt.Sprintf("/transactions/simulate")
-	var transaction rpcmodule.UserTransactionRsp
+	var transaction rpcmodule.SimulateTransactionRsp
 	var aptosError rpcmodule.AptosError
 	cl.fetchClient.Post(url).SetJSONBody(tx).Execute(&transaction, &cl.rsp, &aptosError)
 	if aptosError.IsError() {
-		return "", &aptosError
+		return nil, &aptosError
 	}
-	return transaction.Hash, nil
+	return transaction, nil
 }
 
 func (cl *Client) EstimateGasPrice(ctx context.Context) (uint64, *rpcmodule.AptosError) {

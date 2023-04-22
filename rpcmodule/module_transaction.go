@@ -244,7 +244,7 @@ func EncodeSubmissionReq(sender string, sequence uint64, payload *TransactionPay
 	req := EncodeSubmissionRequest{
 		Sender:                  sender,
 		SequenceNumber:          sequence,
-		MaxGasAmount:            uint64(8000),
+		MaxGasAmount:            uint64(80000),
 		GasUnitPrice:            uint64(100),
 		ExpirationTimestampSecs: uint64(time.Now().Unix() + 600), // now + 10 minutes
 		Payload:                 payload,
@@ -256,7 +256,7 @@ func EncodeSubmissionWithSecondarySignersReq(sender string, sequence uint64, pay
 	return &EncodeSubmissionRequest{
 		Sender:                  sender,
 		SequenceNumber:          sequence,
-		MaxGasAmount:            uint64(2000),
+		MaxGasAmount:            uint64(80000),
 		GasUnitPrice:            uint64(1),
 		ExpirationTimestampSecs: uint64(time.Now().Unix() + 600), // now + 10 minutes
 		Payload:                 payload,
@@ -322,3 +322,5 @@ type UserTransactionRsp struct {
 	Events                  []Event            `json:"events"`
 	Timestamp               uint64             `json:"timestamp,string"`
 }
+
+type SimulateTransactionRsp []UserTransactionRsp

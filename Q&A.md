@@ -30,4 +30,19 @@ Move module should add dependencies AptosFramework
 AptosFramework = { git = "https://github.com/aptos-labs/aptos-core.git", subdir = "aptos-move/framework/aptos-framework", rev = "devnet" }
 ```
 
+7. publish move module with error
+```
+   tangaoyuan@ip-172-26-1-15 contracts % aptos move publish --profile arbitrage
+   Compiling, may take a little while to download git dependencies...
+   UPDATING GIT DEPENDENCY https://github.com/blockchain-develop/v1-core.git
+   UPDATING GIT DEPENDENCY https://github.com/aptos-labs/aptos-core.git
+   UPDATING GIT DEPENDENCY https://github.com/pontem-network/liquidswap.git
+   UPDATING GIT DEPENDENCY https://github.com/aptos-labs/aptos-core.git
+   UPDATING GIT DEPENDENCY https://github.com/aptos-labs/aptos-core.git
+   {
+   "Error": "Unexpected error: Unable to resolve packages for package 'arbitragev1'"
+   }
+```
+module's dependency are conflict
+
 
