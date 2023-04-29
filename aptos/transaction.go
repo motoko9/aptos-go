@@ -65,6 +65,33 @@ func (cl *Client) SignAndSubmitTransaction(ctx context.Context, sender string, s
 	return cl.SubmitTransaction(ctx, submitReq)
 }
 
+func (cl *Client) SignTransaction(ctx context.Context, sender string, sequence uint64, payload *rpcmodule.TransactionPayload, signer crypto.Signer) (*rpcmodule.SubmitTransactionRequest, *rpcmodule.AptosError) {
+	encodeSubmissionReq := rpcmodule.EncodeSubmissionReq(sender, sequence, payload)
+
+	// sign message
+	signData, err := cl.EncodeSubmission(ctx, encodeSubmissionReq)
+	if err != nil {
+		return nil, err
+	}
+
+	// sign
+	signature, err1 := signer.Sign(signData)
+	if err1 != nil {
+		return nil, rpcmodule.AptosErrorFromError(err1)
+	}
+
+	// add signature
+	submitReq := rpcmodule.SubmitTransactionReq(encodeSubmissionReq, rpcmodule.Signature{
+		Type: rpcmodule.Ed25519Signature,
+		Object: rpcmodule.SignatureEd25519Signature{
+			Type:      rpcmodule.Ed25519Signature,
+			PublicKey: "0x" + signer.PublicKey().String(),
+			Signature: "0x" + hex.EncodeToString(signature),
+		},
+	})
+	return submitReq, nil
+}
+
 func (cl *Client) ExeSimulateTransaction(ctx context.Context, sender string, sequence uint64, payload *rpcmodule.TransactionPayload) (rpcmodule.SimulateTransactionRsp, *rpcmodule.AptosError) {
 	tx := &rpcmodule.SubmitTransactionRequest{
 		Sender:                  sender,
