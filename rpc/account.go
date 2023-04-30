@@ -45,6 +45,24 @@ func (cl *Client) AccountResources(ctx context.Context, address string, cursor s
 	return &moveResources, nil
 }
 
+func (cl *Client) AccountResourcesAll(ctx context.Context, address string) (rpcmodule.MoveResources, *rpcmodule.AptosError) {
+	moveResources := make([]rpcmodule.MoveResource, 0)
+	cursor := ""
+	for true {
+		res, aptosErr := cl.AccountResources(ctx, address, cursor, 0, 0)
+		if aptosErr != nil {
+			return nil, aptosErr
+		}
+		moveResources = append(moveResources, *res...)
+		general := cl.General()
+		cursor = general.Cursor
+		if cursor == "" {
+			break
+		}
+	}
+	return moveResources, nil
+}
+
 func (cl *Client) AccountResourceByAddressAndType(ctx context.Context,
 	address string, resourceType string, version uint64) (*rpcmodule.MoveResource, *rpcmodule.AptosError) {
 	params := make(map[string]string)
