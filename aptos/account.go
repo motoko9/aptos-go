@@ -6,6 +6,7 @@ import (
 	"github.com/motoko9/aptos-go/aptosmodule"
 	"github.com/motoko9/aptos-go/crypto"
 	"github.com/motoko9/aptos-go/rpcmodule"
+	"github.com/motoko9/aptos-go/utils"
 )
 
 func (cl *Client) AccountBalance(ctx context.Context, address string, coin string, version uint64) (uint64, *rpcmodule.AptosError) {
@@ -64,4 +65,45 @@ func (cl *Client) CreateAccount(ctx context.Context, addr string, newAccount str
 	}
 
 	return cl.SignAndSubmitTransaction(ctx, addr, account.SequenceNumber, payload, signer)
+}
+
+func FilterCoinsFromWriteResource(address string, coins []string, wcs []rpcmodule.WriteSetChange) map[string]*aptosmodule.CoinStore {
+	coinStores := make(map[string]*aptosmodule.CoinStore)
+	for _, wc := range wcs {
+		if wc.Type != rpcmodule.WriteResource {
+			continue
+		}
+		wr := wc.Object.(rpcmodule.WriteSetChangeWriteResource)
+		if wr.Address != address {
+			continue
+		}
+		resource := wr.Resource
+		resourceType, types, err := utils.ExtractFromResource(resource.Type)
+		if err != nil {
+			continue
+		}
+		//
+		if resourceType != "0x1::coin::CoinStore" {
+			continue
+		}
+		if len(types) != 1 {
+			continue
+		}
+		valid := false
+		for _, coin := range coins {
+			if types[0] == coin {
+				valid = true
+				break
+			}
+		}
+		if !valid {
+			continue
+		}
+		if resource.Object == nil {
+			continue
+		}
+		coinStore := resource.Object.(*aptosmodule.CoinStore)
+		coinStores[types[0]] = coinStore
+	}
+	return coinStores
 }
