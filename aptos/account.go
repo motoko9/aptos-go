@@ -67,7 +67,7 @@ func (cl *Client) CreateAccount(ctx context.Context, addr string, newAccount str
 	return cl.SignAndSubmitTransaction(ctx, addr, account.SequenceNumber, payload, signer)
 }
 
-func FilterCoinsFromWriteResource(address string, coins []string, wcs []rpcmodule.WriteSetChange) map[string]*aptosmodule.CoinStore {
+func FilterCoinsFromWriteChanges(address string, coins []string, wcs []rpcmodule.WriteSetChange) map[string]*aptosmodule.CoinStore {
 	coinStores := make(map[string]*aptosmodule.CoinStore)
 	for _, wc := range wcs {
 		if wc.Type != rpcmodule.WriteResource {
@@ -78,6 +78,39 @@ func FilterCoinsFromWriteResource(address string, coins []string, wcs []rpcmodul
 			continue
 		}
 		resource := wr.Resource
+		resourceType, types, err := utils.ExtractFromResource(resource.Type)
+		if err != nil {
+			continue
+		}
+		//
+		if resourceType != "0x1::coin::CoinStore" {
+			continue
+		}
+		if len(types) != 1 {
+			continue
+		}
+		valid := false
+		for _, coin := range coins {
+			if types[0] == coin {
+				valid = true
+				break
+			}
+		}
+		if !valid {
+			continue
+		}
+		if resource.Object == nil {
+			continue
+		}
+		coinStore := resource.Object.(*aptosmodule.CoinStore)
+		coinStores[types[0]] = coinStore
+	}
+	return coinStores
+}
+
+func FilterCoinsFromMoveResources(coins []string, moveResources []rpcmodule.MoveResource) map[string]*aptosmodule.CoinStore {
+	coinStores := make(map[string]*aptosmodule.CoinStore)
+	for _, resource := range moveResources {
 		resourceType, types, err := utils.ExtractFromResource(resource.Type)
 		if err != nil {
 			continue
