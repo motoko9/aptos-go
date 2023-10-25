@@ -90,6 +90,20 @@ func (cl *Client) SubmitTransaction(ctx context.Context, tx *rpcmodule.SubmitTra
 	return transaction.Hash, nil
 }
 
+func (cl *Client) SubmitTransactionBin(ctx context.Context, signedTransactionBin []byte) (string, *rpcmodule.AptosError) {
+	url := fmt.Sprintf("/transactions")
+	newHeaders := make(map[string]string, 0)
+	newHeaders["Content-Type"] = "application/x.aptos.signed_transaction+bcs"
+	newHeaders["Accept"] = "application/json, application/x-bcs"
+	var transaction rpcmodule.PendingTransactionRsp
+	var aptosError rpcmodule.AptosError
+	cl.fetchClient.AddHeaders(newHeaders).Post(url).SetJSONBody(signedTransactionBin).Execute(&transaction, &cl.rsp, &aptosError)
+	if aptosError.IsError() {
+		return "", &aptosError
+	}
+	return transaction.Hash, nil
+}
+
 func (cl *Client) SimulateTransaction(ctx context.Context, tx *rpcmodule.SubmitTransactionRequest) (rpcmodule.SimulateTransactionRsp, *rpcmodule.AptosError) {
 	url := fmt.Sprintf("/transactions/simulate")
 	var transaction rpcmodule.SimulateTransactionRsp
