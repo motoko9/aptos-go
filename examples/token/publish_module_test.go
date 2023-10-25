@@ -2,6 +2,7 @@ package move_example
 
 import (
 	"context"
+	"encoding/hex"
 	"fmt"
 	"github.com/motoko9/aptos-go/aptos"
 	"github.com/motoko9/aptos-go/rpc"
@@ -38,10 +39,12 @@ func TestNewUsdtAccount(t *testing.T) {
 	}
 	fmt.Printf("create ussdt account transacion: %s\n", txHash)
 
+	time.Sleep(time.Second * 5)
+
 	// fund
-	txHash, aptosErr = client.TransferCoin(context.Background(), faultAddress, aptos.CoinAlias("APT", "aptos"), 100000000, usdtAddress, faultWallet)
+	txHash, aptosErr = client.TransferCoin(context.Background(), faultAddress, "0x1::aptos_coin::AptosCoin", 100000000, usdtAddress, faultWallet)
 	if aptosErr != nil {
-		panic(err)
+		panic(aptosErr)
 	}
 	fmt.Printf("fund usdt account transacion: %s\n", txHash)
 
@@ -103,7 +106,7 @@ func TestModulePublish(t *testing.T) {
 	client := aptos.New(rpc.TestNet_RPC, false)
 
 	// read move byte code
-	content, err := ioutil.ReadFile("./usdt.mv")
+	content, err := ioutil.ReadFile("./usdc.mv")
 	if err != nil {
 		panic(err)
 	}
@@ -127,4 +130,13 @@ func TestModulePublish(t *testing.T) {
 		panic(aptosErr)
 	}
 	fmt.Printf("publish move module transaction confirmed: %v\n", confirmed)
+}
+
+func TestModuleCode(t *testing.T) {
+	content, err := ioutil.ReadFile("./usdc.mv")
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Printf("%s", hex.EncodeToString(content))
 }

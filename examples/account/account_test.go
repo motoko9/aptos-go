@@ -41,7 +41,7 @@ func TestNewExampleAccount(t *testing.T) {
 	time.Sleep(time.Second * 5)
 
 	// fund
-	txHash, aptosErr = client.TransferCoin(context.Background(), faultAddress, aptos.CoinAlias("APT", "aptos"), 100000000, exampleAddress, faultWallet)
+	txHash, aptosErr = client.TransferCoin(context.Background(), faultAddress, "0x1::aptos_coin::AptosCoin", 100000000, exampleAddress, faultWallet)
 	if aptosErr != nil {
 		panic(err)
 	}

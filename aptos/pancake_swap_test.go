@@ -1,67 +1,71 @@
 package aptos
 
 import (
-    "context"
-    "fmt"
-    "github.com/motoko9/aptos-go/rpc"
-    "github.com/motoko9/aptos-go/wallet"
-    "testing"
+	"context"
+	"fmt"
+	"github.com/motoko9/aptos-go/rpc"
+	"github.com/motoko9/aptos-go/wallet"
+	"testing"
 )
 
-
 func TestPancakeSwap_CreatePair(t *testing.T) {
-    userWallet, err := wallet.NewFromKey("f476ba25a9df047f8d4c024896a171c60f32eb31b89bccbbbf1462b46e0475e3")
-    if err != nil {
-        panic(err)
-    }
-    fmt.Printf("user address: %s\n", userWallet.Address())
+	userWallet, err := wallet.NewFromKey("f476ba25a9df047f8d4c024896a171c60f32eb31b89bccbbbf1462b46e0475e3")
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("user address: %s\n", userWallet.Address())
 
-    client := New(rpc.TestNet_RPC, false)
-    txHash, aptosErr := client.CreatePair(context.Background(), userWallet.Address(),
-        "0x2f88a12a17f01228f4ba72ec6214127abb930512dcb3d6205909ca510aca7b29::asset::USDT",
-        "0x2f88a12a17f01228f4ba72ec6214127abb930512dcb3d6205909ca510aca7b29::asset::WETH",
-        userWallet)
-    if aptosErr != nil {
-        panic(aptosErr)
-    }
-    fmt.Printf("create pair tx hash: %s\n", txHash)
+	client := New(rpc.TestNet_RPC, false)
+	txHash, aptosErr := client.CreatePair(context.Background(), userWallet.Address(),
+		"0x2f88a12a17f01228f4ba72ec6214127abb930512dcb3d6205909ca510aca7b29::asset::USDT",
+		"0x2f88a12a17f01228f4ba72ec6214127abb930512dcb3d6205909ca510aca7b29::asset::WETH",
+		userWallet)
+	if aptosErr != nil {
+		panic(aptosErr)
+	}
+	fmt.Printf("create pair tx hash: %s\n", txHash)
 }
 
 func TestPancakeSwap_AddLiquidity(t *testing.T) {
-    userWallet, err := wallet.NewFromKey("f476ba25a9df047f8d4c024896a171c60f32eb31b89bccbbbf1462b46e0475e3")
-    if err != nil {
-        panic(err)
-    }
-    fmt.Printf("user address: %s\n", userWallet.Address())
+	userWallet, err := wallet.NewFromKey("f476ba25a9df047f8d4c024896a171c60f32eb31b89bccbbbf1462b46e0475e3")
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("user address: %s\n", userWallet.Address())
 
-    client := New(rpc.TestNet_RPC, false)
-    txHash, aptosErr := client.AddLiquidity(context.Background(), userWallet.Address(),
-        "0x2f88a12a17f01228f4ba72ec6214127abb930512dcb3d6205909ca510aca7b29::asset::USDT",
-        1000000000000,
-        "0x2f88a12a17f01228f4ba72ec6214127abb930512dcb3d6205909ca510aca7b29::asset::WETH",
-        1000000000,
-        userWallet)
-    if aptosErr != nil {
-        panic(aptosErr)
-    }
-    fmt.Printf("create pair tx hash: %s\n", txHash)
+	client := New(rpc.TestNet_RPC, false)
+	txHash, aptosErr := client.AddLiquidity(context.Background(), userWallet.Address(),
+		"0x2f88a12a17f01228f4ba72ec6214127abb930512dcb3d6205909ca510aca7b29::asset::USDT",
+		1000000000000,
+		"0x2f88a12a17f01228f4ba72ec6214127abb930512dcb3d6205909ca510aca7b29::asset::WETH",
+		1000000000,
+		userWallet)
+	if aptosErr != nil {
+		panic(aptosErr)
+	}
+	fmt.Printf("create pair tx hash: %s\n", txHash)
 }
 
 func TestPancakeSwap_SwapExactInput(t *testing.T) {
-    userWallet, err := wallet.NewFromKey("f476ba25a9df047f8d4c024896a171c60f32eb31b89bccbbbf1462b46e0475e3")
-    if err != nil {
-        panic(err)
-    }
-    fmt.Printf("user address: %s\n", userWallet.Address())
+	userWallet, err := wallet.NewFromKey("f476ba25a9df047f8d4c024896a171c60f32eb31b89bccbbbf1462b46e0475e3")
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("user address: %s\n", userWallet.Address())
 
-    client := New(rpc.TestNet_RPC, false)
-    txHash, aptosErr := client.SwapExactInput(context.Background(), userWallet.Address(),
-        "0x2f88a12a17f01228f4ba72ec6214127abb930512dcb3d6205909ca510aca7b29::asset::USDC",
-        "0x2f88a12a17f01228f4ba72ec6214127abb930512dcb3d6205909ca510aca7b29::asset::WETH",
-        1000000000,
-        userWallet)
-    if aptosErr != nil {
-        panic(aptosErr)
-    }
-    fmt.Printf("swap tx hash: %s\n", txHash)
+	client := New(rpc.TestNet_RPC, false)
+	txHash, aptosErr := client.SwapExactInput(context.Background(), userWallet.Address(),
+		"0x2f88a12a17f01228f4ba72ec6214127abb930512dcb3d6205909ca510aca7b29::asset::USDC",
+		"0x2f88a12a17f01228f4ba72ec6214127abb930512dcb3d6205909ca510aca7b29::asset::WETH",
+		1000000000,
+		userWallet)
+	if aptosErr != nil {
+		panic(aptosErr)
+	}
+	l, aptosErr := client.Ledger(context.Background())
+	if aptosErr != nil {
+		panic(aptosErr)
+	}
+	fmt.Printf("ledger version:%d time: %d\n", l.LedgerVersion, l.LedgerTimestamp)
+	fmt.Printf("swap tx hash: %s\n", txHash)
 }

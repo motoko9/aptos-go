@@ -88,7 +88,7 @@ func TestClient_AccountModuleByAddressAndName(t *testing.T) {
 }
 
 func TestClient_GetResourceAccountAddress(t *testing.T) {
-	addr, err := client.GetResourceAccountAddress("0xca843279e3427144cead5e4d5999a3d0", []byte{1})
+	addr, err := client.GetResourceAccountAddress("0xa7490a5cb71b53620587166480f70786b70740d83e9e6d2e6e2fbdc799535e83", []byte("thala_manager"))
 	if err != nil {
 		panic(err)
 	}

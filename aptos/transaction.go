@@ -3,6 +3,7 @@ package aptos
 import (
 	"context"
 	"encoding/hex"
+	"fmt"
 	"github.com/motoko9/aptos-go/crypto"
 	"github.com/motoko9/aptos-go/rpcmodule"
 	"time"
@@ -30,8 +31,9 @@ func (cl *Client) ConfirmTransaction(ctx context.Context, hash string) (bool, *r
 		if !pending {
 			return true, nil
 		}
+		fmt.Printf("pending tx: %s, tt: %d\n", hash, time.Now().UnixNano()/1000)
 		counter++
-		time.Sleep(time.Second * 1)
+		time.Sleep(time.Millisecond * 100)
 	}
 	return false, nil
 }
@@ -61,6 +63,7 @@ func (cl *Client) SignAndSubmitTransaction(ctx context.Context, sender string, s
 		},
 	})
 
+	fmt.Printf("submit transaction, tt:%d\n", time.Now().UnixNano()/1000)
 	// submit
 	return cl.SubmitTransaction(ctx, submitReq)
 }

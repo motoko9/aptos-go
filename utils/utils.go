@@ -22,6 +22,25 @@ func ExtractAddressFromType(t string) (string, error) {
 	return item, nil
 }
 
+func ExtractFromFunction(t string) (string, string, string, error) {
+	indexStart := strings.Index(t, "::")
+	if indexStart == -1 {
+		return "", "", "", fmt.Errorf("type is invalid")
+	}
+	address := t[0:indexStart]
+	//
+	t = t[indexStart+2:]
+	indexStart = strings.Index(t, "::")
+	if indexStart == -1 {
+		return "", "", "", fmt.Errorf("type is invalid")
+	}
+	module := t[0:indexStart]
+	//
+	indexStart += 2
+	function := t[indexStart:]
+	return address, module, function, nil
+}
+
 func ExtractFromResource(r string) (string, []string, error) {
 	indexStart := strings.IndexByte(r, '<')
 	if indexStart == -1 {
