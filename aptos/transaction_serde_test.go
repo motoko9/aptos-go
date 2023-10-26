@@ -53,7 +53,8 @@ func buildModuleAddress(address string) utils.AccountAddress {
 	if strings.Contains(address, "0x") {
 		address = address[2:]
 	}
-	fullAddress := []byte(EmptyAddress)
+	fullAddress := make([]byte, 64)
+	copy(fullAddress, EmptyAddress)
 	offset := len(fullAddress) - len(address)
 	for i := 0; i < len(address); i++ {
 		fullAddress[i+offset] = address[i]
@@ -160,7 +161,7 @@ func TestSerde_Coin_Transfer(t *testing.T) {
 }
 
 func TestSerde_Coin_Transfer1(t *testing.T) {
-	userWallet, err := wallet.NewFromKey("PrivateKey")
+	userWallet, err := wallet.NewFromKey("1745c2deea6b6756ca757ceac9a3cbc8e02737dad8e99ce6b4ffa52a521aacf5")
 	if err != nil {
 		panic(err)
 	}
@@ -168,7 +169,7 @@ func TestSerde_Coin_Transfer1(t *testing.T) {
 	userPubkey := userWallet.PublicKey()
 	fmt.Printf("user address: %s\n", userWallet.Address())
 	//
-	client := New(rpc.MainNet_RPC, true)
+	client := New(rpc.TestNet_RPC, true)
 	account, aptosErr := client.Account(context.Background(), userAddress, 0)
 	if aptosErr != nil {
 		panic(aptosErr)
@@ -178,8 +179,8 @@ func TestSerde_Coin_Transfer1(t *testing.T) {
 	moduleAddr := "0x1"
 	//moduleName := "coin"
 	//moduleFunc := "transfer"
-	toAddr := ""
-	amount := uint64(1)
+	toAddr := "0xa44ddb197329f6ea82e95116a2e8f55beeccfdf1ef7c9e367ddc0f05639f4607"
+	amount := uint64(10000000)
 	//
 	tyArgs := make([]utils.TypeTag, 0)
 	tyArgs = append(tyArgs, buildArgumentType(typeArg))
@@ -212,9 +213,9 @@ func TestSerde_Coin_Transfer1(t *testing.T) {
 		SequenceNumber:          account.SequenceNumber,
 		Payload:                 &payloadBCS,
 		MaxGasAmount:            uint64(80000),
-		GasUnitPrice:            uint64(1000000),
-		ExpirationTimestampSecs: uint64(time.Now().Unix() + 6),
-		ChainId:                 utils.ChainId(1),
+		GasUnitPrice:            uint64(100),
+		ExpirationTimestampSecs: uint64(time.Now().Unix() + 600),
+		ChainId:                 utils.ChainId(2), // 1 - mainnet
 	}
 	//
 	serializer := bcs.NewSerializer()
@@ -242,7 +243,7 @@ func TestSerde_Coin_Transfer1(t *testing.T) {
 	}
 	serializer1 := bcs.NewSerializer()
 	signedTransaction.Serialize(serializer1)
-	signedTransactionData := serializer.GetBytes()
+	signedTransactionData := serializer1.GetBytes()
 	//
 	txHash, aptosErr := client.SubmitTransactionBin(context.Background(), signedTransactionData)
 	if aptosErr != nil {

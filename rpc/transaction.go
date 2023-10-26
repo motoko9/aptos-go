@@ -1,6 +1,7 @@
 package rpc
 
 import (
+	"bytes"
 	"context"
 	"encoding/hex"
 	"fmt"
@@ -97,7 +98,8 @@ func (cl *Client) SubmitTransactionBin(ctx context.Context, signedTransactionBin
 	newHeaders["Accept"] = "application/json, application/x-bcs"
 	var transaction rpcmodule.PendingTransactionRsp
 	var aptosError rpcmodule.AptosError
-	cl.fetchClient.AddHeaders(newHeaders).Post(url).SetJSONBody(signedTransactionBin).Execute(&transaction, &cl.rsp, &aptosError)
+	//cl.fetchClient.AddHeaders(newHeaders).Post(url).SetBody(bytes.NewBuffer(signedTransactionBin)).Execute(&transaction, &cl.rsp, &aptosError)
+	cl.fetchClient.AddHeaders(newHeaders).Post(url).SetBody(bytes.NewReader(signedTransactionBin)).Execute(&transaction, &cl.rsp, &aptosError)
 	if aptosError.IsError() {
 		return "", &aptosError
 	}
