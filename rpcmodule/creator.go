@@ -111,4 +111,6 @@ func init() {
 	RegisterSignatureCreator(Ed25519Signature, Ed25519SignatureCreator)
 	RegisterSignatureCreator(MultiEd25519Signature, MultiEd25519SignatureCreator)
 	RegisterSignatureCreator(MultiAgentSignature, MultiAgentSignatureCreator)
+	RegisterSignatureCreator(FeePayerSignature, FeePayerSignatureCreator)
+	RegisterSignatureCreator(SingleSender, Ed25519SignatureCreator)
 }

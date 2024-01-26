@@ -14,6 +14,8 @@ const (
 	Ed25519Signature      = "ed25519_signature"
 	MultiEd25519Signature = "multi_ed25519_signature"
 	MultiAgentSignature   = "multi_agent_signature"
+	FeePayerSignature     = "fee_payer_signature"
+	SingleSender          = "single_sender"
 )
 
 func Ed25519SignatureCreator() interface{} {
@@ -26,6 +28,10 @@ func MultiEd25519SignatureCreator() interface{} {
 
 func MultiAgentSignatureCreator() interface{} {
 	return &SignatureMultiAgentSignature{}
+}
+
+func FeePayerSignatureCreator() interface{} {
+	return &SignatureFeePayerSignature{}
 }
 
 type Signature struct {
@@ -53,6 +59,15 @@ type SignatureMultiAgentSignature struct {
 	Sender                   Signature   `json:"sender"`
 	SecondarySignerAddresses []string    `json:"secondary_signer_addresses"`
 	SecondarySigners         []Signature `json:"secondary_signers"`
+}
+
+type SignatureFeePayerSignature struct {
+	Type                     string      `json:"type"`
+	Sender                   Signature   `json:"sender"`
+	SecondarySignerAddresses []string    `json:"secondary_signer_addresses"`
+	SecondarySigners         []Signature `json:"secondary_signers"`
+	FeePayerAddress          string      `json:"fee_payer_address"`
+	FeePayerSigner           Signature   `json:"fee_payer_signer"`
 }
 
 func (j Signature) MarshalJSON() ([]byte, error) {
